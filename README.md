@@ -30,3 +30,12 @@ Claude will read the docs and configure everything.
 | [`shift-enter.md`](shift-enter.md) | Shift+Enter newline in VSCode terminal and Windows Terminal |
 | [`claude-notify.md`](claude-notify.md) | Windows balloon tip notification via PowerShell |
 | [`settings.md`](settings.md) | Disable git attribution, skip trust dialog |
+
+## Custom agents and skills
+
+| Path | Contents |
+|------|----------|
+| [`agents/`](agents/) | `code-architect`, `code-simplifier` |
+| [`skills/`](skills/) | `commit-push-pr`, `dedupe`, `frontend-design`, `oncall-triage` |
+
+Copy to `~/.claude/agents/` and `~/.claude/skills/` respectively, or let Claude do it with **"set this up"**.
