@@ -60,9 +60,12 @@ watch() {
     (
         while true; do
             if wl-paste --list-types 2>/dev/null | grep -q "image/bmp"; then
-                wl-paste --mime image/bmp 2>/dev/null \
-                    | convert - png:- \
-                    | wl-copy --type image/png
+                tmp=$(mktemp)
+                wl-paste --type image/bmp 2>/dev/null | convert - png:- 2>/dev/null > "$tmp"
+                if [[ -s "$tmp" ]]; then
+                    wl-copy --type image/png < "$tmp"
+                fi
+                rm -f "$tmp"
             fi
             sleep "$INTERVAL"
         done
@@ -131,6 +134,15 @@ Copy image on Windows → wait ~1s for poller → Alt+V in Claude Code → image
 ---
 
 ## Troubleshooting
+
+**API Error 400: "image cannot be empty"**
+- Cause 1: `wl-paste` on your system uses `--type` not `--mime`. Check your script uses
+  `wl-paste --type image/bmp` (not `--mime`). Verify: `wl-paste --help | grep type`
+- Cause 2: the old script piped directly into `wl-copy` with no size check, so if
+  `convert` failed silently it stored 0 bytes as `image/png`. The fix: write to a temp
+  file and only call `wl-copy` if the file is non-empty (`[[ -s "$tmp" ]]`).
+- Debug: after copying image, run `wl-paste --type image/bmp | wc -c` (should be > 0),
+  then `wl-paste --type image/bmp | convert - png:- | wc -c` (should also be > 0).
 
 **"no image found in clipboard"**
 - Check poller is running: `ps aux | grep wl-paste`
