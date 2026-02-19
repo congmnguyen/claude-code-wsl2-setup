@@ -1,0 +1,140 @@
+# Claude Code WSL2 Setup Notes
+
+## Image Paste (Alt+V) Fix
+
+### Problem
+Three issues prevent image paste from working on WSL2:
+
+1. **Wrong clipboard format**: Windows copies images as `image/bmp`, but Claude Code's
+   internal `checkImage` only accepts `png|jpeg|jpg|gif|webp`. So even if paste is
+   triggered, the image is rejected silently.
+
+2. **Keybinding conflict**: The default image paste key is `ctrl+v`, but Windows Terminal
+   intercepts that for text paste before it reaches Claude Code.
+
+3. **Missing dependencies**: `wl-clipboard` and `imagemagick` are not installed by default.
+
+---
+
+### Step 0: Install dependencies
+
+```bash
+sudo apt install wl-clipboard imagemagick
+```
+
+---
+
+### Fix 1: BMP → PNG clipboard converter
+
+**Script**: `~/.local/bin/clip2png`
+
+Polls the Wayland clipboard every 1s. When `image/bmp` is detected, converts it to PNG
+via ImageMagick and puts it back. Claude Code then sees a valid `image/png`.
+
+> **Why polling and not `wl-paste --watch`?**
+> WSLg does not support the wlroots data-control protocol that `--watch` requires.
+> Polling is the only option on WSLg.
+
+**Script contents** — save to `~/.local/bin/clip2png` and run `chmod +x ~/.local/bin/clip2png`:
+
+```bash
+#!/usr/bin/env bash
+# Polls Wayland clipboard and converts image/bmp to image/png.
+# WSLg does not support wlroots data-control protocol, so --watch is not available.
+# Usage: clip2png --watch   (start background poller)
+#        clip2png --stop    (stop it)
+
+PID_FILE="/tmp/clip2png.pid"
+INTERVAL=1  # seconds between polls
+
+stop() {
+    if [[ -f "$PID_FILE" ]]; then
+        kill "$(cat "$PID_FILE")" 2>/dev/null
+        rm -f "$PID_FILE"
+    fi
+}
+
+watch() {
+    stop
+
+    (
+        while true; do
+            if wl-paste --list-types 2>/dev/null | grep -q "image/bmp"; then
+                wl-paste --mime image/bmp 2>/dev/null \
+                    | convert - png:- \
+                    | wl-copy --type image/png
+            fi
+            sleep "$INTERVAL"
+        done
+    ) &
+    echo $! > "$PID_FILE"
+}
+
+case "${1:-}" in
+    --watch) watch ;;
+    --stop)  stop  ;;
+    *) echo "Usage: clip2png [--watch|--stop]" >&2; exit 1 ;;
+esac
+```
+
+The script supports two modes:
+- `--watch` — start the background poller (saves PID to `/tmp/clip2png.pid`)
+- `--stop` — kill the running poller
+
+**Auto-start/stop via Claude Code hooks** in `~/.claude/settings.json`:
+
+```json
+"SessionStart": [
+  { "hooks": [{ "type": "command", "command": "/home/YOU/.local/bin/clip2png --watch" }] }
+],
+"SessionEnd": [
+  { "hooks": [{ "type": "command", "command": "/home/YOU/.local/bin/clip2png --stop" }] }
+]
+```
+
+> **Note**: Hooks only take effect after restarting Claude Code. For the first run,
+> start the poller manually: `/home/YOU/.local/bin/clip2png --watch`
+
+The poller backgrounds itself immediately so the SessionStart hook does not block startup.
+
+---
+
+### Fix 2: Rebind image paste to Alt+V
+
+**File**: `~/.claude/keybindings.json` (create if it does not exist)
+
+```json
+{
+  "bindings": [
+    {
+      "context": "Chat",
+      "bindings": {
+        "alt+v": "chat:imagePaste"
+      }
+    }
+  ]
+}
+```
+
+> **Important**: The top level must be an object with a `bindings` array — NOT a bare JSON
+> array. A bare array will silently fail to load.
+
+---
+
+### Result
+
+Copy image on Windows → wait ~1s for poller → Alt+V in Claude Code → image pastes.
+
+---
+
+## Troubleshooting
+
+**"no image found in clipboard"**
+- Check poller is running: `ps aux | grep wl-paste`
+- Check clipboard types after copying image: `wl-paste --list-types`
+- If no `image/bmp` shown: WSLg may not be bridging the image — check WSLg is up to date
+- Start poller manually if hook hasn't fired yet: `clip2png --watch`
+
+**Alt+V does nothing**
+- Confirm `~/.claude/keybindings.json` exists with the correct object structure
+- Restart Claude Code after creating the file
