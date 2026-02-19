@@ -1,23 +1,38 @@
-# Shift+Enter: Insert Newline in VSCode Terminal (WSL)
+# Shift+Enter: Insert Newline in Claude Code (WSL2)
 
 ## Problem
 
-In the VSCode integrated terminal with WSL, pressing Shift+Enter either does nothing
-or inserts a `\` at the end of the line (zsh line continuation), making it unusable
-for sending a soft newline to CLI apps like Claude Code.
+Shift+Enter doesn't insert a newline in Claude Code by default when using WSL2,
+whether in VSCode's integrated terminal or Windows Terminal.
 
-## Fix
+## Fix: VSCode Integrated Terminal
 
-Add this to your VSCode `keybindings.json` (`Ctrl+Shift+P` → "Open Keyboard Shortcuts (JSON)"):
+Run `/terminal-setup` inside Claude Code from the VSCode integrated terminal.
+It will automatically configure the keybinding.
+
+> If it says "Found existing VSCode terminal Shift+Enter key binding. Remove it to continue.",
+> remove any existing `shift+enter` entry from your VSCode `keybindings.json`
+> (`C:\Users\<you>\AppData\Roaming\Code\User\keybindings.json`) and run `/terminal-setup` again.
+
+## Fix: Windows Terminal
+
+Windows Terminal needs a separate keybinding. Add this to your Windows Terminal `actions` array
+in `settings.json` (`C:\Users\<you>\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json`):
 
 ```json
-{
-  "key": "shift+enter",
-  "command": "workbench.action.terminal.sendSequence",
-  "args": { "text": "\u001B\u000A" },
-  "when": "terminalFocus"
-}
+"actions": [
+    {
+        "command": {
+            "action": "sendInput",
+            "input": "\u001b\r"
+        },
+        "keys": "shift+enter"
+    }
+]
 ```
 
-This sends the escape sequence `ESC + LF` (`\x1B\x0A`), which readline-based apps
-interpret as "insert a literal newline" — no trailing backslash.
+Then restart Windows Terminal. Shift+Enter will now insert a newline in Claude Code.
+
+## Fallback (no setup needed)
+
+Use `\` + `Enter` to insert a newline — works everywhere without any configuration.
