@@ -35,6 +35,22 @@ message="${2:-Notification}"
 title=$(echo "$title" | sed 's/"/\\"/g')
 message=$(echo "$message" | sed 's/"/\\"/g')
 /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command "
+Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+public class Win32 {
+    [DllImport(\"user32.dll\")]
+    public static extern IntPtr GetForegroundWindow();
+    [DllImport(\"user32.dll\")]
+    public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+}
+'@
+\$hwnd = [Win32]::GetForegroundWindow()
+\$pid = 0
+[Win32]::GetWindowThreadProcessId(\$hwnd, [ref]\$pid) | Out-Null
+\$proc = Get-Process -Id \$pid -ErrorAction SilentlyContinue
+if (\$proc -and \$proc.Name -eq 'WindowsTerminal') { exit 0 }
+
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 \$notification = New-Object System.Windows.Forms.NotifyIcon
