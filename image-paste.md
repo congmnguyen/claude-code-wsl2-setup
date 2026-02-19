@@ -31,6 +31,12 @@ sudo apt install wl-clipboard imagemagick
 Polls the Wayland clipboard every 1s. When `image/bmp` is detected, converts it to PNG
 via ImageMagick and puts it back. Claude Code then sees a valid `image/png`.
 
+The converted PNG is also saved to `/tmp/clip2png-last.png`. If `image/png` disappears
+from the Wayland clipboard (the `wl-copy` background server can exit unexpectedly — e.g.
+a WSLg clipboard sync takes back ownership) and no new content was copied, the script
+re-serves the saved PNG. This keeps alt+v working throughout a session without needing
+to re-copy the image from Windows.
+
 > **Why polling and not `wl-paste --watch`?**
 > WSLg does not support the wlroots data-control protocol that `--watch` requires.
 > Polling is the only option on WSLg.
@@ -42,9 +48,10 @@ via ImageMagick and puts it back. Claude Code then sees a valid `image/png`.
 # Polls Wayland clipboard and converts image/bmp to image/png.
 # WSLg does not support wlroots data-control protocol, so --watch is not available.
 # Usage: clip2png --watch   (start background poller)
-#        clip2png --stop    (stop it)
+#        clip2png --stop    (kill it)
 
 PID_FILE="/tmp/clip2png.pid"
+LAST_PNG="/tmp/clip2png-last.png"
 INTERVAL=1  # seconds between polls
 
 stop() {
@@ -59,13 +66,20 @@ watch() {
 
     (
         while true; do
-            if wl-paste --list-types 2>/dev/null | grep -q "image/bmp"; then
+            types=$(wl-paste --list-types 2>/dev/null)
+            if echo "$types" | grep -q "image/bmp"; then
                 tmp=$(mktemp)
                 wl-paste --type image/bmp 2>/dev/null | convert - png:- 2>/dev/null > "$tmp"
                 if [[ -s "$tmp" ]]; then
+                    cp "$tmp" "$LAST_PNG"
                     wl-copy --type image/png < "$tmp"
                 fi
                 rm -f "$tmp"
+            elif ! echo "$types" | grep -qE "image/png|text/" && [[ -f "$LAST_PNG" ]]; then
+                # image/png disappeared (wl-copy background server exited) and no
+                # new content was copied — re-serve the last converted image so
+                # alt+v keeps working without needing a fresh copy from Windows.
+                wl-copy --type image/png < "$LAST_PNG"
             fi
             sleep "$INTERVAL"
         done
