@@ -66,7 +66,7 @@ watch() {
             fi
             sleep "$INTERVAL"
         done
-    ) &
+    ) >/dev/null 2>&1 &
     echo $! > "$PID_FILE"
 }
 
@@ -95,7 +95,10 @@ The script supports two modes:
 > **Note**: Hooks only take effect after restarting Claude Code. For the first run,
 > start the poller manually: `/home/YOU/.local/bin/clip2png --watch`
 
-The poller backgrounds itself immediately so the SessionStart hook does not block startup.
+The `>/dev/null 2>&1` before `&` is critical: without it the background subshell inherits
+the hook's stdout pipe. Claude Code waits for that pipe to close (EOF) before considering
+the hook done — but the infinite loop never closes it, so the hook hangs forever and all
+input is silently discarded.
 
 ---
 
@@ -138,3 +141,20 @@ Copy image on Windows → wait ~1s for poller → Alt+V in Claude Code → image
 **Alt+V does nothing**
 - Confirm `~/.claude/keybindings.json` exists with the correct object structure
 - Restart Claude Code after creating the file
+
+**Typing Enter clears input and nothing happens (Claude Code on WSL)**
+- Cause: the background subshell in `clip2png --watch` is inheriting the hook's stdout
+  pipe, causing Claude Code to hang forever waiting for the hook to finish.
+- Fix: ensure the script has `>/dev/null 2>&1 &` (not just `&`) on the background line.
+
+**SessionStart hook error on startup**
+- Cause: `clip2png` script is not executable.
+- Fix: `chmod +x ~/.local/bin/clip2png`
+
+**Notification hook freezes UI for ~7 seconds**
+- Cause: if using a `claude-notify` script that calls PowerShell with `Start-Sleep`,
+  the hook blocks Claude Code's UI until it returns.
+- Fix: run it in the background in `~/.claude/settings.json`:
+  ```json
+  "command": "bash -c '~/bin/claude-notify \"Claude Code\" \"Needs your input!\" &'"
+  ```
