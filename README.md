@@ -29,3 +29,4 @@ Claude will read the docs and configure everything.
 | [`image-paste.md`](image-paste.md) | Alt+V image paste — BMP→PNG converter + keybinding |
 | [`shift-enter.md`](shift-enter.md) | Shift+Enter newline in VSCode terminal and Windows Terminal |
 | [`claude-notify.md`](claude-notify.md) | Windows balloon tip notification via PowerShell |
+| [`settings.md`](settings.md) | Disable git attribution, skip trust dialog |
