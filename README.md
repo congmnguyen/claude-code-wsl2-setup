@@ -8,6 +8,7 @@ Fixes for the most annoying Claude Code papercuts on WSL2 + Windows Terminal.
 - **Shift+Enter newline** — insert a newline without submitting, in both VSCode integrated terminal and Windows Terminal.
 - **"Needs your input" Windows notification** — get a system tray balloon tip when Claude finishes a long task and is waiting for you. Skipped automatically when Windows Terminal is already the active window.
 - **Settings tweaks** — disable the `Co-authored-by: Claude` git attribution and pre-accept the project trust dialog.
+- **Windows browser** — open links and OAuth flows in your existing Windows browser instead of Chromium inside WSL2.
 
 ## Setup
 
@@ -31,6 +32,7 @@ Claude will read the docs and configure everything.
 | [`shift-enter.md`](shift-enter.md) | Shift+Enter newline in VSCode terminal and Windows Terminal |
 | [`claude-notify.md`](claude-notify.md) | Windows balloon tip notification via PowerShell |
 | [`settings.md`](settings.md) | Disable git attribution, skip trust dialog |
+| [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` env var |
 
 ## Custom agents and skills
 
