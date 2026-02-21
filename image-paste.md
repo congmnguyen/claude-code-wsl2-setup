@@ -98,16 +98,18 @@ The script supports two modes:
 - `--watch` — start the background poller (saves PID to `/tmp/clip2png.pid`)
 - `--stop` — kill the running poller
 
-**Auto-start/stop via Claude Code hooks** in `~/.claude/settings.json`:
+**Auto-start via Claude Code hooks** in `~/.claude/settings.json`:
 
 ```json
 "SessionStart": [
   { "hooks": [{ "type": "command", "command": "/home/YOU/.local/bin/clip2png --watch" }] }
-],
-"SessionEnd": [
-  { "hooks": [{ "type": "command", "command": "/home/YOU/.local/bin/clip2png --stop" }] }
 ]
 ```
+
+> **Do not add a `SessionEnd` hook to stop the poller.** Claude Code fires `SessionStart`/`SessionEnd`
+> for every subagent spawned by the Task tool. A `SessionEnd` hook would kill the poller after each
+> subagent finishes, leaving it dead for the rest of the main session. The polling loop uses negligible
+> CPU and is cleaned up naturally when WSL exits.
 
 > **Note**: Hooks only take effect after restarting Claude Code. For the first run,
 > start the poller manually: `/home/YOU/.local/bin/clip2png --watch`
