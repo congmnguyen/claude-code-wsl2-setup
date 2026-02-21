@@ -164,6 +164,11 @@ Copy image on Windows → wait ~1s for poller → Alt+V in Claude Code → image
 - If no `image/bmp` shown: WSLg may not be bridging the image — check WSLg is up to date
 - Start poller manually if hook hasn't fired yet: `clip2png --watch`
 
+> **Note on v2.1.47+ native BMP support**: Claude Code's source has `wl-paste --type image/bmp`
+> fallback and BMP→PNG conversion via sharp, but in practice sharp fails to convert Windows
+> BMP on WSL2 and `aFH()` silently returns null — still showing "no image found". clip2png
+> (which uses ImageMagick's `convert`) remains necessary.
+
 **Alt+V does nothing**
 - Confirm `~/.claude/keybindings.json` exists with the correct object structure
 - Restart Claude Code after creating the file
