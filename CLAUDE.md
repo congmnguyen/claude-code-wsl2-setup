@@ -12,13 +12,14 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 - **`agents/`** — Custom Claude Code subagent definitions (YAML frontmatter + instructions). Installed to `~/.claude/agents/`.
 - **`skills/`** — Custom Claude Code slash-command skills. Installed to `~/.claude/skills/`.
 
-## The Five Fixes
+## The Fixes
 
 | File | What it configures |
 |------|-------------------|
 | `image-paste.md` | `~/.local/bin/clip2png` (BMP→PNG clipboard poller) + `~/.claude/keybindings.json` (Alt+V) + `SessionStart` hook only (no SessionEnd) |
 | `shift-enter.md` | VSCode `/terminal-setup` + Windows Terminal `settings.json` action (`\u001b\r`) |
-| `claude-notify.md` | `~/bin/claude-notify` (bash → PowerShell balloon tip) + `Notification` hook (must run with `&` to avoid blocking) |
+| `claude-notify.md` | `~/bin/claude-notify` (bash → PowerShell balloon tip) + `Notification` hook — **WSL2 only** |
+| `claude-notify-powershell.md` | `C:\Users\cong\.claude\scripts\claude-notify.ps1` + `Notification` hook — **native Windows PowerShell only** |
 | `settings.md` | `~/.claude/settings.json` `attribution` field + `~/.claude.json` `hasTrustDialogAccepted` |
 | `browser.md` | `BROWSER` env var in `~/.zshrc` pointing to Windows `.exe` |
 
@@ -28,7 +29,9 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 
 **clip2png SessionEnd pitfall**: Do not add a `SessionEnd` hook to stop the poller. Claude Code fires `SessionStart`/`SessionEnd` for every subagent spawned by the Task tool. The subagent's `SessionEnd` would kill the poller mid-session for the main session.
 
-**claude-notify async**: The `Notification` hook command must be wrapped as `bash -c '... &'` because the PowerShell script sleeps 6 s. Running it synchronously blocks Claude Code's UI for that duration.
+**claude-notify async (WSL2)**: The `Notification` hook command must be wrapped as `bash -c '... &'` because the PowerShell script sleeps 6 s. Running it synchronously blocks Claude Code's UI for that duration.
+
+**claude-notify async (Windows PowerShell)**: The hook command uses `Start-Process powershell` to launch `claude-notify.ps1` as a detached background process. The script lives at `C:\Users\cong\.claude\scripts\claude-notify.ps1` and the hook is configured in `C:\Users\cong\.claude\settings.json`.
 
 **clip2png re-serve logic**: When `image/png` disappears from the clipboard (WSLg clipboard sync can take back ownership) and no new content was copied, the script re-serves `/tmp/clip2png-last.png`. The detection condition is: no `image/png` AND no `text/` type AND the last PNG file exists.
 
