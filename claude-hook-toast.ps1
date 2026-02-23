@@ -6,8 +6,9 @@ $message = switch ($hookEvent) {
     "SessionStart"  { "Session started" }
     "SessionEnd"    { "Session completed" }
     "Stop"          { "Needs your input!" }
-    "Notification"  { $json.message }
-    default         { "$hookEvent : $($json.message)" }
+    "Notification"       { $json.message }
+    "PermissionRequest"  { "Permission needed!" }
+    default              { "$hookEvent : $($json.message)" }
 }
 
 # Windows Toast Notification
