@@ -9,49 +9,64 @@ terminal yourself.
 This is the **Windows-native variant** of the notification fix. If you are running
 Claude Code inside WSL2, see `claude-notify.md` instead.
 
+Credit: [soulee-dev/claude-code-notify-powershell](https://github.com/soulee-dev/claude-code-notify-powershell)
+
 ---
 
 ## How It Works
 
-1. Claude Code fires the `Notification` hook whenever it needs the user's attention.
-2. The hook runs a `Start-Process` call that launches `claude-notify.ps1` in a hidden
-   background PowerShell window — so Claude Code is not blocked.
-3. The script creates a `NotifyIcon` (system tray icon) and shows a balloon tip for 5 s.
-4. The script sleeps 6 s to keep the PowerShell process alive long enough for the
-   balloon to display, then disposes the icon and exits.
+1. Claude Code fires the `Stop` hook when it finishes responding and waits for input,
+   and the `Notification` hook for explicit notifications.
+2. Both hooks run `claude-hook-toast.ps1` via `cmd /c chcp 65001 && powershell ...`.
+   The `chcp 65001` sets UTF-8 code page so message text renders correctly.
+3. Claude Code pipes a JSON payload into the script's stdin containing `hook_event_name`
+   and `message`.
+4. The script uses the Windows Toast Notification API (`Windows.UI.Notifications`)
+   to show a modern toast — no sleep needed, no background process required.
+
+The key hook is **`Stop`** (fires when Claude finishes a response), not just
+`Notification` (fires for explicit notification messages).
 
 ---
 
 ## Setup
 
-### Step 1: Script is already installed
+### Step 1: Download the script
 
-The script is at:
-
-```
-C:\Users\cong\.claude\scripts\claude-notify.ps1
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/soulee-dev/claude-code-notify-powershell/main/claude-hook-toast.ps1" -OutFile "$env:USERPROFILE\.claude\claude-hook-toast.ps1"
 ```
 
-It accepts `-Title` and `-Message` parameters and skips the notification silently if
-Windows Terminal is the foreground window (you are already looking at it).
+The script is also already installed at `C:\Users\cong\.claude\claude-hook-toast.ps1`.
 
 ### Step 2: Hook is already configured
 
-`C:\Users\cong\.claude\settings.json` now contains:
+`C:\Users\cong\.claude\settings.json` contains:
 
 ```json
-"hooks": {
-  "Notification": [
-    {
-      "matcher": "",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "powershell -WindowStyle Hidden -NonInteractive -Command \"Start-Process powershell -WindowStyle Hidden -ArgumentList @('-NonInteractive','-File','C:\\Users\\cong\\.claude\\scripts\\claude-notify.ps1','-Title','Claude Code','-Message','Needs your input!')\""
-        }
-      ]
-    }
-  ]
+{
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd /c chcp 65001 >nul && powershell -ExecutionPolicy Bypass -File %USERPROFILE%\\.claude\\claude-hook-toast.ps1"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd /c chcp 65001 >nul && powershell -ExecutionPolicy Bypass -File %USERPROFILE%\\.claude\\claude-hook-toast.ps1"
+          }
+        ]
+      }
+    ]
+  }
 }
 ```
 
@@ -59,12 +74,18 @@ Windows Terminal is the foreground window (you are already looking at it).
 
 ---
 
-## Why `Start-Process` instead of just running the script directly?
+## Testing
 
-The script does `Start-Sleep -Seconds 6` to keep the balloon visible. Running it
-synchronously would block Claude Code's UI for ~7 s after every notification. The
-outer `powershell` call launches the script as a detached background process and
-returns immediately, so Claude Code is never blocked.
+1. Open Claude Code in PowerShell (`claude`)
+2. Type a prompt that takes a moment to respond (e.g. "explain quicksort in detail")
+3. **Immediately alt-tab** to another app before Claude finishes
+4. A Windows toast notification should appear when Claude is done
+
+Or test the script directly:
+
+```powershell
+echo '{"hook_event_name":"Stop","message":""}' | powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\.claude\claude-hook-toast.ps1"
+```
 
 ---
 
@@ -73,36 +94,22 @@ returns immediately, so Claude Code is never blocked.
 | | WSL2 (`claude-notify.md`) | Windows PowerShell (this file) |
 |---|---|---|
 | Script type | bash wrapper | native `.ps1` |
-| Async mechanism | `bash -c '... &'` | `Start-Process` |
-| Script location | `~/bin/claude-notify` | `C:\Users\cong\.claude\scripts\claude-notify.ps1` |
+| Notification type | `NotifyIcon` balloon tip | Windows Toast API |
+| Async mechanism | `bash -c '... &'` | not needed — toast fires and exits |
+| Key hook | `Notification` | `Stop` + `Notification` |
+| Script location | `~/bin/claude-notify` | `%USERPROFILE%\.claude\claude-hook-toast.ps1` |
 | Settings file | `~/.claude/settings.json` | `C:\Users\cong\.claude\settings.json` |
 
 ---
 
 ## Troubleshooting
 
-**No balloon appears**
+**No toast appears**
 
-- Test the script manually in PowerShell:
-  ```powershell
-  & "C:\Users\cong\.claude\scripts\claude-notify.ps1" -Title "Test" -Message "Hello"
-  ```
-- Check Windows notification settings — balloon tips require "Get notifications from
-  apps" to be enabled and Focus Assist must not be blocking them.
+- Test the script manually (see Testing above).
+- Check Windows Settings → Notifications — ensure notifications are enabled and
+  Focus Assist / Do Not Disturb is off.
 
-**UI freezes for ~7 seconds when Claude finishes a task**
+**Characters display as garbage**
 
-- The hook is running synchronously. Verify the hook command in `settings.json` uses
-  `Start-Process` (not a direct `-File` invocation).
-
-**Balloon tip flashes and disappears instantly**
-
-- `Start-Sleep -Seconds 6` in the script keeps the PowerShell process alive so the
-  notification stays visible. If you reduced it, restore it to at least 6 s.
-
-**ExecutionPolicy error**
-
-- PowerShell may block unsigned scripts. Run this once as Administrator:
-  ```powershell
-  Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-  ```
+- The `chcp 65001` in the hook command sets UTF-8. Make sure it is present.
