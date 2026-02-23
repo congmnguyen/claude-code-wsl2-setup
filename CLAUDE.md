@@ -18,8 +18,8 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 |------|-------------------|
 | `image-paste.md` | `~/.local/bin/clip2png` (BMP→PNG clipboard poller) + `~/.claude/keybindings.json` (Alt+V) + `SessionStart` hook only (no SessionEnd) |
 | `shift-enter.md` | VSCode `/terminal-setup` + Windows Terminal `settings.json` action (`\u001b\r`) |
-| `claude-notify.md` | `~/bin/claude-notify` (bash → PowerShell balloon tip) + `Notification` hook — **WSL2 only** |
-| `claude-notify-powershell.md` | `%USERPROFILE%\.claude\claude-hook-toast.ps1` + `Stop`/`Notification` hooks — **native Windows PowerShell only** |
+| `claude-notify.md` | `~/bin/claude-notify` (bash → PowerShell balloon tip) + `Notification`/`PermissionRequest` hooks — **WSL2 only** |
+| `claude-notify-powershell.md` | `%USERPROFILE%\.claude\claude-hook-toast.ps1` + `Stop`/`Notification`/`PermissionRequest` hooks — **native Windows PowerShell only** |
 | `settings.md` | `~/.claude/settings.json` `attribution` field + `~/.claude.json` `hasTrustDialogAccepted` |
 | `browser.md` | `BROWSER` env var in `~/.zshrc` pointing to Windows `.exe` |
 
@@ -31,7 +31,7 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 
 **claude-notify async (WSL2)**: The `Notification` hook command must be wrapped as `bash -c '... &'` because the PowerShell script sleeps 6 s. Running it synchronously blocks Claude Code's UI for that duration.
 
-**claude-notify async (Windows PowerShell)**: Uses the Windows Toast API (`Windows.UI.Notifications`) via [soulee-dev/claude-code-notify-powershell](https://github.com/soulee-dev/claude-code-notify-powershell). The script reads hook event JSON from stdin. No async wrapper needed — toast fires and exits immediately. The key hook is `Stop` (fires when Claude finishes a response), not just `Notification`. Script lives at `%USERPROFILE%\.claude\claude-hook-toast.ps1`; hook configured in `C:\Users\cong\.claude\settings.json`.
+**claude-notify async (Windows PowerShell)**: Uses the Windows Toast API (`Windows.UI.Notifications`) via [soulee-dev/claude-code-notify-powershell](https://github.com/soulee-dev/claude-code-notify-powershell). The script reads hook event JSON from stdin. No async wrapper needed — toast fires and exits immediately. The key hook is `Stop` (fires when Claude finishes a response), not just `Notification`. Script lives at `%USERPROFILE%\.claude\claude-hook-toast.ps1`; hook configured in `C:\Users\cong\.claude\settings.json`. Both variants skip the notification when Windows Terminal is the foreground window.
 
 **clip2png re-serve logic**: When `image/png` disappears from the clipboard (WSLg clipboard sync can take back ownership) and no new content was copied, the script re-serves `/tmp/clip2png-last.png`. The detection condition is: no `image/png` AND no `text/` type AND the last PNG file exists.
 
@@ -44,7 +44,7 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 Read all five `*.md` files, then:
 1. Install `wl-clipboard` and `imagemagick` if not present.
 2. Create `~/.local/bin/clip2png` and `~/bin/claude-notify` with the exact script contents from the docs, then `chmod +x` both.
-3. Merge the hooks (`SessionStart`, `Notification`) into `~/.claude/settings.json`. Do NOT add a `SessionEnd` hook for clip2png — subagents fire `SessionEnd` too, which would kill the poller mid-session.
+3. Merge the hooks (`SessionStart`, `Notification`, `PermissionRequest`) into `~/.claude/settings.json`. Do NOT add a `SessionEnd` hook for clip2png — subagents fire `SessionEnd` too, which would kill the poller mid-session.
 4. Create/update `~/.claude/keybindings.json` with the Alt+V binding.
 5. Set `attribution` in `~/.claude/settings.json`.
 6. Copy `agents/*.md` → `~/.claude/agents/` and `skills/*/SKILL.md` → `~/.claude/skills/<name>/SKILL.md`.
