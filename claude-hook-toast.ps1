@@ -7,7 +7,7 @@ $message = switch ($hookEvent) {
     "SessionEnd"    { "Session completed" }
     "Stop"          { "Needs your input!" }
     "Notification"       { $json.message }
-    "PermissionRequest"  { "Permission needed!" }
+    "PermissionRequest"  { "Needs your input!" }
     default              { "$hookEvent : $($json.message)" }
 }
 
