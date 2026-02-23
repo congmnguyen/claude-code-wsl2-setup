@@ -70,7 +70,7 @@ Make it executable:
 chmod +x ~/bin/claude-notify
 ```
 
-### Step 2: Add the Notification hook
+### Step 2: Add the hooks
 
 In `~/.claude/settings.json`, add inside the `"hooks"` object:
 
@@ -85,8 +85,23 @@ In `~/.claude/settings.json`, add inside the `"hooks"` object:
       }
     ]
   }
+],
+"PermissionRequest": [
+  {
+    "matcher": "",
+    "hooks": [
+      {
+        "type": "command",
+        "command": "bash -c '~/bin/claude-notify \"Claude Code\" \"Needs your input!\" &'"
+      }
+    ]
+  }
 ]
 ```
+
+Both hooks use the same message — `Notification` fires when Claude needs attention,
+`PermissionRequest` fires when Claude is waiting for you to approve a tool use (e.g.
+creating a file or running a command).
 
 > **Why `bash -c '... &'` and not just the command directly?**
 >
