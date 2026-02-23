@@ -30,7 +30,8 @@ Claude will read the docs and configure everything.
 |------|-----|
 | [`image-paste.md`](image-paste.md) | Alt+V image paste — BMP→PNG converter + keybinding |
 | [`shift-enter.md`](shift-enter.md) | Shift+Enter newline in VSCode terminal and Windows Terminal |
-| [`claude-notify.md`](claude-notify.md) | Windows balloon tip notification via PowerShell |
+| [`claude-notify.md`](claude-notify.md) | Windows balloon tip notification — WSL2 variant (bash → PowerShell) |
+| [`claude-notify-powershell.md`](claude-notify-powershell.md) | Windows balloon tip notification — native PowerShell variant |
 | [`settings.md`](settings.md) | Disable git attribution, skip trust dialog |
 | [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` env var |
 
