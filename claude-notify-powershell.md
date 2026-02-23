@@ -68,6 +68,16 @@ This is a lightly customised fork of [soulee-dev/claude-code-notify-powershell](
           }
         ]
       }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd /c chcp 65001 >nul && powershell -ExecutionPolicy Bypass -File %USERPROFILE%\\.claude\\claude-hook-toast.ps1"
+          }
+        ]
+      }
     ]
   }
 }
