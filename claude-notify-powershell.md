@@ -31,13 +31,16 @@ The key hook is **`Stop`** (fires when Claude finishes a response), not just
 
 ## Setup
 
-### Step 1: Download the script
+### Step 1: Install the script
+
+Copy `claude-hook-toast.ps1` from this repo to your Claude config directory:
 
 ```powershell
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/soulee-dev/claude-code-notify-powershell/main/claude-hook-toast.ps1" -OutFile "$env:USERPROFILE\.claude\claude-hook-toast.ps1"
+Copy-Item "claude-hook-toast.ps1" "$env:USERPROFILE\.claude\claude-hook-toast.ps1"
 ```
 
-The script is also already installed at `C:\Users\cong\.claude\claude-hook-toast.ps1`.
+This is a lightly customised fork of [soulee-dev/claude-code-notify-powershell](https://github.com/soulee-dev/claude-code-notify-powershell)
+— the only change is the `Stop` message reads **"Needs your input!"** instead of "Response finished".
 
 ### Step 2: Hook is already configured
 
