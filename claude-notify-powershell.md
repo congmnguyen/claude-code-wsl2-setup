@@ -21,7 +21,9 @@ Credit: [soulee-dev/claude-code-notify-powershell](https://github.com/soulee-dev
    The `chcp 65001` sets UTF-8 code page so message text renders correctly.
 3. Claude Code pipes a JSON payload into the script's stdin containing `hook_event_name`
    and `message`.
-4. The script uses the Windows Toast Notification API (`Windows.UI.Notifications`)
+4. The script checks if Windows Terminal is the foreground window — if it is, it exits
+   silently. No point notifying if you're already looking at the terminal.
+5. Otherwise it uses the Windows Toast Notification API (`Windows.UI.Notifications`)
    to show a modern toast — no sleep needed, no background process required.
 
 The key hook is **`Stop`** (fires when Claude finishes a response), not just
@@ -40,7 +42,8 @@ Copy-Item "claude-hook-toast.ps1" "$env:USERPROFILE\.claude\claude-hook-toast.ps
 ```
 
 This is a lightly customised fork of [soulee-dev/claude-code-notify-powershell](https://github.com/soulee-dev/claude-code-notify-powershell)
-— the only change is the `Stop` message reads **"Needs your input!"** instead of "Response finished".
+with two changes: the `Stop` message reads **"Needs your input!"** instead of "Response finished",
+and a foreground window check skips the toast if Windows Terminal is already active.
 
 ### Step 2: Hook is already configured
 
@@ -120,6 +123,8 @@ echo '{"hook_event_name":"Stop","message":""}' | powershell -ExecutionPolicy Byp
 **No toast appears**
 
 - Test the script manually (see Testing above).
+- Make sure you alt-tab away before Claude finishes — the toast is suppressed when
+  Windows Terminal is the active window.
 - Check Windows Settings → Notifications — ensure notifications are enabled and
   Focus Assist / Do Not Disturb is off.
 
