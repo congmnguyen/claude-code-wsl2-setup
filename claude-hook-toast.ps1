@@ -11,6 +11,23 @@ $message = switch ($hookEvent) {
     default              { "$hookEvent : $($json.message)" }
 }
 
+# Skip notification if Windows Terminal is the foreground window
+Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+public class Win32 {
+    [DllImport("user32.dll")]
+    public static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")]
+    public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+}
+'@
+$hwnd = [Win32]::GetForegroundWindow()
+$winPid = 0
+[Win32]::GetWindowThreadProcessId($hwnd, [ref]$winPid) | Out-Null
+$proc = Get-Process -Id $winPid -ErrorAction SilentlyContinue
+if ($proc -and $proc.Name -eq 'WindowsTerminal') { exit 0 }
+
 # Windows Toast Notification
 $template = [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime]::GetTemplateContent(
     [Windows.UI.Notifications.ToastTemplateType, Windows.UI.Notifications, ContentType = WindowsRuntime]::ToastText02
