@@ -6,7 +6,7 @@ Fixes for the most annoying Claude Code papercuts on WSL2 + Windows Terminal.
 
 - **Image paste** — copy a screenshot on Windows, press `Alt+V` in Claude Code and it just works. (Ctrl+V is intercepted by Windows Terminal; the Windows clipboard gives BMP not PNG — both fixed.) The last converted image is re-served automatically if clipboard ownership is lost mid-session, so you don't need to re-copy.
 - **Shift+Enter newline** — insert a newline without submitting, in both VSCode integrated terminal and Windows Terminal.
-- **"Needs your input" Windows notification** — get a system tray balloon tip when Claude finishes a long task and is waiting for you. Skipped automatically when Windows Terminal is already the active window.
+- **"Needs your input" Windows notification** — get a notification when Claude finishes a task or needs permission approval. Skipped automatically when Windows Terminal is already the active window. WSL2 variant uses a balloon tip; native PowerShell variant uses a modern Windows toast.
 - **Settings tweaks** — disable the `Co-authored-by: Claude` git attribution and pre-accept the project trust dialog.
 - **Windows browser** — open links and OAuth flows in your existing Windows browser instead of Chromium inside WSL2.
 
