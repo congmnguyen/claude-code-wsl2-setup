@@ -40,6 +40,6 @@ Claude will read the docs and configure everything.
 | Path | Contents |
 |------|----------|
 | [`agents/`](agents/) | `code-architect`, `code-simplifier` |
-| [`skills/`](skills/) | `commit-push-pr`, `dedupe`, `frontend-design`, `oncall-triage` |
+| [`skills/`](skills/) | `commit-push-pr`, `dedupe`, `frontend-design`, `oncall-triage`, `spec` |
 
 Copy to `~/.claude/agents/` and `~/.claude/skills/` respectively, or let Claude do it with **"set this up"**.
