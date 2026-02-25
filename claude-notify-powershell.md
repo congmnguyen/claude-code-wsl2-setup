@@ -15,9 +15,9 @@ Credit: [soulee-dev/claude-code-notify-powershell](https://github.com/soulee-dev
 
 ## How It Works
 
-1. Claude Code fires the `Stop` hook when it finishes responding and waits for input,
-   and the `Notification` hook for explicit notifications.
-2. Both hooks run `claude-hook-toast.ps1` via `cmd /c chcp 65001 && powershell ...`.
+1. Claude Code fires the `PermissionRequest` hook when it is blocked on a tool-use
+   approval prompt (e.g. "Do you want to proceed?").
+2. The hook runs `claude-hook-toast.ps1` via `cmd /c chcp 65001 && powershell ...`.
    The `chcp 65001` sets UTF-8 code page so message text renders correctly.
 3. Claude Code pipes a JSON payload into the script's stdin containing `hook_event_name`
    and `message`.
@@ -26,8 +26,8 @@ Credit: [soulee-dev/claude-code-notify-powershell](https://github.com/soulee-dev
 5. Otherwise it uses the Windows Toast Notification API (`Windows.UI.Notifications`)
    to show a modern toast — no sleep needed, no background process required.
 
-The key hook is **`Stop`** (fires when Claude finishes a response), not just
-`Notification` (fires for explicit notification messages).
+The key hook is **`PermissionRequest`** — it fires only when Claude is blocked on a
+permission prompt, not on every completed response.
 
 ---
 
@@ -52,26 +52,6 @@ and a foreground window check skips the toast if Windows Terminal is already act
 ```json
 {
   "hooks": {
-    "Notification": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cmd /c chcp 65001 >nul && powershell -ExecutionPolicy Bypass -File %USERPROFILE%\\.claude\\claude-hook-toast.ps1"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cmd /c chcp 65001 >nul && powershell -ExecutionPolicy Bypass -File %USERPROFILE%\\.claude\\claude-hook-toast.ps1"
-          }
-        ]
-      }
-    ],
     "PermissionRequest": [
       {
         "hooks": [
@@ -112,7 +92,7 @@ echo '{"hook_event_name":"Stop","message":""}' | powershell -ExecutionPolicy Byp
 | Script type | bash wrapper | native `.ps1` |
 | Notification type | `NotifyIcon` balloon tip | Windows Toast API |
 | Async mechanism | `bash -c '... &'` | not needed — toast fires and exits |
-| Key hook | `Notification` | `Stop` + `Notification` |
+| Key hook | `PermissionRequest` | `PermissionRequest` |
 | Script location | `~/bin/claude-notify` | `%USERPROFILE%\.claude\claude-hook-toast.ps1` |
 | Settings file | `~/.claude/settings.json` | `C:\Users\cong\.claude\settings.json` |
 
