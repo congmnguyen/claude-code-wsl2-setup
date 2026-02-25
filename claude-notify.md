@@ -5,14 +5,16 @@
 When Claude Code finishes a long task on WSL2, the terminal gives no visual signal that
 it is waiting. You only notice if you switch back to the terminal yourself.
 
-The `Notification` hook lets Claude Code fire a Windows balloon tip (system tray popup)
-so you get an OS-level alert even when the terminal is in the background.
+The `PermissionRequest` hook lets Claude Code fire a Windows balloon tip (system tray popup)
+when it needs you to approve or deny a tool use — so you get an OS-level alert even when
+the terminal is in the background.
 
 ---
 
 ## How It Works
 
-1. Claude Code fires the `Notification` hook whenever it needs the user's attention.
+1. Claude Code fires the `PermissionRequest` hook whenever it is blocked on a tool-use
+   approval prompt (e.g. "Do you want to proceed?").
 2. The hook runs `~/bin/claude-notify`, a bash script that calls Windows PowerShell
    directly from WSL via `/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe`.
 3. PowerShell creates a `NotifyIcon` (system tray icon) and shows a balloon tip for 5 s.
@@ -75,17 +77,6 @@ chmod +x ~/bin/claude-notify
 In `~/.claude/settings.json`, add inside the `"hooks"` object:
 
 ```json
-"Notification": [
-  {
-    "matcher": "",
-    "hooks": [
-      {
-        "type": "command",
-        "command": "bash -c '~/bin/claude-notify \"Claude Code\" \"Needs your input!\" &'"
-      }
-    ]
-  }
-],
 "PermissionRequest": [
   {
     "matcher": "",
@@ -99,9 +90,8 @@ In `~/.claude/settings.json`, add inside the `"hooks"` object:
 ]
 ```
 
-Both hooks use the same message — `Notification` fires when Claude needs attention,
-`PermissionRequest` fires when Claude is waiting for you to approve a tool use (e.g.
-creating a file or running a command).
+`PermissionRequest` fires when Claude is waiting for you to approve or deny a tool use
+(e.g. "Do you want to proceed? Yes / No").
 
 > **Why `bash -c '... &'` and not just the command directly?**
 >
@@ -117,8 +107,9 @@ Restart Claude Code for the hook to take effect.
 
 ## Result
 
-When Claude Code finishes a task and is waiting, a Windows balloon tip appears in the
-system tray with the title **Claude Code** and the message **Needs your input!**
+When Claude Code hits a permission prompt and is waiting for your approval, a Windows
+balloon tip appears in the system tray with the title **Claude Code** and the message
+**Needs your input!**
 
 ---
 
