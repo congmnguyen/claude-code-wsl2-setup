@@ -22,6 +22,7 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 | `claude-notify-powershell.md` | `%USERPROFILE%\.claude\claude-hook-toast.ps1` + `PermissionRequest` hook only — **native Windows PowerShell only** |
 | `settings.md` | `~/.claude/settings.json` `attribution` field + `~/.claude.json` `hasTrustDialogAccepted` |
 | `browser.md` | `BROWSER` env var in `~/.zshrc` pointing to Windows `.exe` |
+| `mcp-setup.md` | DeepWiki (HTTP, user-scoped), Playwright (npx), Figma Desktop (localhost:3845) |
 
 ## Key Technical Details
 
@@ -41,7 +42,7 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 
 ## When Asked to "Set This Up"
 
-Read all five `*.md` files, then:
+Read all `*.md` files, then:
 1. Install `wl-clipboard` and `imagemagick` if not present.
 2. Create `~/.local/bin/clip2png` and `~/bin/claude-notify` with the exact script contents from the docs, then `chmod +x` both.
 3. Merge the hooks (`SessionStart`, `PermissionRequest`) into `~/.claude/settings.json`. Do NOT add a `SessionEnd` hook for clip2png — subagents fire `SessionEnd` too, which would kill the poller mid-session.
