@@ -34,6 +34,7 @@ Claude will read the docs and configure everything.
 | [`claude-notify-powershell.md`](claude-notify-powershell.md) + [`claude-hook-toast.ps1`](claude-hook-toast.ps1) | Windows toast notification — native PowerShell variant |
 | [`settings.md`](settings.md) | Disable git attribution, skip trust dialog |
 | [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` env var |
+| [`mcp-setup.md`](mcp-setup.md) | DeepWiki, Playwright, and Figma Desktop MCP servers |
 
 ## Custom agents and skills
 
