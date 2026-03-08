@@ -35,6 +35,7 @@ Claude will read the docs and configure everything.
 | [`settings.md`](settings.md) | Disable git attribution, skip trust dialog |
 | [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` env var |
 | [`mcp-setup.md`](mcp-setup.md) | DeepWiki, Playwright, and Figma Desktop MCP servers |
+| [`lsp-setup.md`](lsp-setup.md) | LSP language servers — TypeScript, Python (pyright), Go (gopls), Rust (rust-analyzer) |
 
 ## Custom agents and skills
 
