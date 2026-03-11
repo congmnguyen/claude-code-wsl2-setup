@@ -9,6 +9,7 @@ Fixes for the most annoying Claude Code papercuts on WSL2 + Windows Terminal.
 - **"Needs your input" Windows notification** — get a notification when Claude finishes a task or needs permission approval. Skipped automatically when Windows Terminal is already the active window. WSL2 variant uses a balloon tip; native PowerShell variant uses a modern Windows toast.
 - **Settings tweaks** — disable the `Co-authored-by: Claude` git attribution and pre-accept the project trust dialog.
 - **Windows browser** — open links and OAuth flows in your existing Windows browser instead of Chromium inside WSL2.
+- **Voice mode** — fix ALSA errors so `/voice` works, routing audio through WSLg's PulseAudio server.
 
 ## Setup
 
@@ -36,6 +37,7 @@ Claude will read the docs and configure everything.
 | [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` env var |
 | [`mcp-setup.md`](mcp-setup.md) | DeepWiki, Playwright, and Figma Desktop MCP servers |
 | [`lsp-setup.md`](lsp-setup.md) | LSP language servers — TypeScript, Python (pyright), Go (gopls), Rust (rust-analyzer) |
+| [`voice.md`](voice.md) | Voice mode — ALSA → PulseAudio → WSLg bridge, `~/.asoundrc` + `PULSE_SERVER` |
 
 ## Custom agents and skills
 
@@ -43,5 +45,6 @@ Claude will read the docs and configure everything.
 |------|----------|
 | [`agents/`](agents/) | `code-architect`, `code-simplifier` |
 | [`skills/`](skills/) | `commit-push-pr`, `dedupe`, `frontend-design`, `oncall-triage`, `spec` |
+| [`codex-skills/`](codex-skills/) | Codex-native versions of `code-review`, `commit-push-pr`, `dedupe`, `frontend-design`, `oncall-triage`, `spec` |
 
-Copy to `~/.claude/agents/` and `~/.claude/skills/` respectively, or let Claude do it with **"set this up"**.
+Copy [`agents/`](agents/) and [`skills/`](skills/) to `~/.claude/agents/` and `~/.claude/skills/` for Claude Code. Copy [`codex-skills/`](codex-skills/) to `~/.codex/skills/` for Codex.
