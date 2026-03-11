@@ -11,6 +11,7 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 - **`*.md` at root** — Each file documents one fix: the problem, root cause, exact config or script to install, and troubleshooting steps. These are the primary artifacts.
 - **`agents/`** — Custom Claude Code subagent definitions (YAML frontmatter + instructions). Installed to `~/.claude/agents/`.
 - **`skills/`** — Custom Claude Code slash-command skills. Installed to `~/.claude/skills/`.
+- **`codex-skills/`** — Codex-native skills adapted from the Claude skill set. Installed to `~/.codex/skills/`.
 
 ## The Fixes
 
@@ -23,7 +24,8 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 | `settings.md` | `~/.claude/settings.json` `attribution` field + `~/.claude.json` `hasTrustDialogAccepted` |
 | `browser.md` | `BROWSER` env var in `~/.zshrc` pointing to Windows `.exe` |
 | `mcp-setup.md` | DeepWiki (HTTP, user-scoped), Playwright (npx), Figma Desktop (localhost:3845) |
-| `lsp-setup.md` | LSP binaries: typescript-language-server, pyright, gopls (Go 1.26+), rust-analyzer; PATH in `~/.zshrc` |
+| `lsp-setup.md` | LSP binaries: typescript-language-server, pyright, gopls (Go 1.26+), rust-analyzer; PATH in `~/.zshrc`; install official LSP plugins; `enabledPlugins` in `settings.json`; optional `ENABLE_LSP_TOOL` workaround |
+| `voice.md` | `pulseaudio-utils` + `libasound2-plugins`; `~/.asoundrc` routing ALSA default PCM to `pulse` plugin at WSLg socket; `PULSE_SERVER` in `~/.zshrc` |
 
 ## Key Technical Details
 
@@ -49,5 +51,6 @@ Read all `*.md` files, then:
 3. Merge the hooks (`SessionStart`, `PermissionRequest`) into `~/.claude/settings.json`. Do NOT add a `SessionEnd` hook for clip2png — subagents fire `SessionEnd` too, which would kill the poller mid-session.
 4. Create/update `~/.claude/keybindings.json` with the Alt+V binding.
 5. Set `attribution` in `~/.claude/settings.json`.
-6. Copy `agents/*.md` → `~/.claude/agents/` and `skills/*/SKILL.md` → `~/.claude/skills/<name>/SKILL.md`.
-7. Remind the user to manually apply the Windows-side changes (Windows Terminal `settings.json`, `~/.zshrc` `BROWSER` export) since WSL cannot edit Windows files.
+6. Copy `agents/*.md` → `~/.claude/agents/`, `skills/*/SKILL.md` → `~/.claude/skills/<name>/SKILL.md`, and `codex-skills/<name>/` → `~/.codex/skills/<name>/` when setting up Codex too.
+7. Install `pulseaudio-utils` and `libasound2-plugins`, create `~/.asoundrc` with the pulse PCM config, and add `PULSE_SERVER` to `~/.zshrc` (see `voice.md`).
+8. Remind the user to manually apply the Windows-side changes (Windows Terminal `settings.json`, `~/.zshrc` `BROWSER` export) since WSL cannot edit Windows files.
