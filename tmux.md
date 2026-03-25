@@ -25,7 +25,7 @@ Add to the end of `~/.zshrc`:
 ```bash
 if command -v tmux &> /dev/null && [ -z "$TMUX" ]; then
   tmux new-session -d -s main 2>/dev/null
-  tmux new-session -t main \; set-option destroy-unattached on
+  tmux new-session -t main \; set-option destroy-unattached on \; new-window
 fi
 ```
 
