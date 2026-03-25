@@ -28,6 +28,7 @@ It also saves tokens because Claude stops wasting context searching the wrong fi
 - **Settings tweaks** — disable the `Co-authored-by: Claude` git attribution and pre-accept the project trust dialog.
 - **Windows browser** — open links and OAuth flows in your existing Windows browser instead of Chromium inside WSL2.
 - **Voice mode** — fix ALSA errors so `/voice` works, routing audio through WSLg's PulseAudio server.
+- **tmux auto-attach** — every new terminal tab automatically joins a persistent grouped session so windows and scrollback survive across tab opens and closes.
 
 ## Setup
 
@@ -56,6 +57,7 @@ Claude will read the docs and configure everything.
 | [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` env var |
 | [`mcp-setup.md`](mcp-setup.md) | DeepWiki, Playwright, and Figma Desktop MCP servers |
 | [`voice.md`](voice.md) | Voice mode — ALSA → PulseAudio → WSLg bridge, `~/.asoundrc` + `PULSE_SERVER` |
+| [`tmux.md`](tmux.md) | tmux auto-attach — persistent grouped sessions, one `main` session shared across all terminal tabs |
 
 ## Custom agents and skills
 
