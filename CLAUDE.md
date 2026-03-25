@@ -26,6 +26,7 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 | `mcp-setup.md` | DeepWiki (HTTP, user-scoped), Playwright (npx), Figma Desktop (localhost:3845) |
 | `lsp-setup.md` | LSP binaries: typescript-language-server, pyright, gopls (Go 1.26+), rust-analyzer; PATH in `~/.zshrc`; install official LSP plugins; `enabledPlugins` in `settings.json`; optional `ENABLE_LSP_TOOL` workaround |
 | `voice.md` | `pulseaudio-utils` + `libasound2-plugins`; `~/.asoundrc` routing ALSA default PCM to `pulse` plugin at WSLg socket; `PULSE_SERVER` in `~/.zshrc` |
+| `tmux.md` | tmux auto-attach block appended to `~/.zshrc`; creates persistent `main` session + grouped session per terminal tab with `destroy-unattached on` |
 
 ## Key Technical Details
 
