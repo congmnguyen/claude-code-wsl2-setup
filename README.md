@@ -25,6 +25,7 @@ It also saves tokens because Claude stops wasting context searching the wrong fi
 - **Image paste** — copy a screenshot on Windows, press `Alt+V` in Claude Code and it just works. (Ctrl+V is intercepted by Windows Terminal; the Windows clipboard gives BMP not PNG — both fixed.) The last converted image is re-served automatically if clipboard ownership is lost mid-session, so you don't need to re-copy.
 - **Shift+Enter newline** — insert a newline without submitting, in both VSCode integrated terminal and Windows Terminal.
 - **"Needs your input" Windows notification** — get a notification when Claude finishes a task or needs permission approval. Skipped automatically when Windows Terminal is already the active window. WSL2 variant uses a balloon tip; native PowerShell variant uses a modern Windows toast.
+- **Status line** — shows git branch, context window fill bar, model name, and 5-hour / 7-day rate limit countdowns, color-coded by severity.
 - **Settings tweaks** — disable the `Co-authored-by: Claude` git attribution and pre-accept the project trust dialog.
 - **Windows browser** — open links and OAuth flows in your existing Windows browser instead of Chromium inside WSL2.
 - **Voice mode** — fix ALSA errors so `/voice` works, routing audio through WSLg's PulseAudio server.
@@ -53,6 +54,7 @@ Claude will read the docs and configure everything.
 | [`shift-enter.md`](shift-enter.md) | Shift+Enter newline in VSCode terminal and Windows Terminal |
 | [`claude-notify.md`](claude-notify.md) | Windows balloon tip notification — WSL2 variant (bash → PowerShell) |
 | [`claude-notify-powershell.md`](claude-notify-powershell.md) + [`claude-hook-toast.ps1`](claude-hook-toast.ps1) | Windows toast notification — native PowerShell variant |
+| [`statusline.md`](statusline.md) | Status line — git branch, context bar, model, 5h/7d rate limit countdowns |
 | [`settings.md`](settings.md) | Disable git attribution, skip trust dialog |
 | [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` env var |
 | [`mcp-setup.md`](mcp-setup.md) | DeepWiki, Playwright, and Figma Desktop MCP servers |

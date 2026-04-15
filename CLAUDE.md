@@ -21,6 +21,7 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 | `shift-enter.md` | VSCode `/terminal-setup` + Windows Terminal `settings.json` action (`\u001b\r`) |
 | `claude-notify.md` | `~/bin/claude-notify` (bash → PowerShell balloon tip) + `PermissionRequest` hook only — **WSL2 only** |
 | `claude-notify-powershell.md` | `%USERPROFILE%\.claude\claude-hook-toast.ps1` + `PermissionRequest` hook only — **native Windows PowerShell only** |
+| `statusline.md` | `~/.claude/statusline-command.sh` + `statusLine` in `~/.claude/settings.json` |
 | `settings.md` | `~/.claude/settings.json` `attribution` field + `~/.claude.json` `hasTrustDialogAccepted` |
 | `browser.md` | `BROWSER` env var in `~/.zshrc` pointing to Windows `.exe` |
 | `mcp-setup.md` | DeepWiki (HTTP, user-scoped), Playwright (npx), Figma Desktop (localhost:3845) |
@@ -44,6 +45,8 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 
 **settings.json attribution**: The correct field is `"attribution": { "commit": "", "pr": "" }`. The deprecated `includeCoAuthoredBy` key and non-existent `gitAttribution` key have no effect.
 
+**statusline JSON parsing**: Claude Code pipes a JSON blob to the script stdin on every refresh. All eight fields are extracted in a single `jq -r '@tsv'` call assigned via `IFS=$'\t' read`. The git branch is resolved with `git -C "$cwd" --no-optional-locks symbolic-ref --short HEAD` using the working dir from the JSON — no `cd` needed, and `--no-optional-locks` avoids touching `.git/` lock files. The `statusLine` setting takes `{ "type": "command", "command": "..." }` — the command must be a single string (no array form).
+
 ## When Asked to "Set This Up"
 
 Read all `*.md` files, then:
@@ -51,7 +54,7 @@ Read all `*.md` files, then:
 2. Create `~/.local/bin/clip2png` and `~/bin/claude-notify` with the exact script contents from the docs, then `chmod +x` both.
 3. Merge the hooks (`SessionStart`, `PermissionRequest`) into `~/.claude/settings.json`. Do NOT add a `SessionEnd` hook for clip2png — subagents fire `SessionEnd` too, which would kill the poller mid-session.
 4. Create/update `~/.claude/keybindings.json` with the Alt+V binding.
-5. Set `attribution` in `~/.claude/settings.json`.
+5. Set `attribution` in `~/.claude/settings.json`. Save `~/.claude/statusline-command.sh` from `statusline.md` and set `statusLine` in `~/.claude/settings.json`.
 6. Copy `agents/*.md` → `~/.claude/agents/`, `skills/*/SKILL.md` → `~/.claude/skills/<name>/SKILL.md`, and `codex-skills/<name>/` → `~/.codex/skills/<name>/` when setting up Codex too.
 7. Install `pulseaudio-utils` and `libasound2-plugins`, create `~/.asoundrc` with the pulse PCM config, and add `PULSE_SERVER` to `~/.zshrc` (see `voice.md`).
 8. Remind the user to manually apply the Windows-side changes (Windows Terminal `settings.json`, `~/.zshrc` `BROWSER` export) since WSL cannot edit Windows files.
