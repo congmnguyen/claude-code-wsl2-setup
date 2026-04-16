@@ -149,6 +149,53 @@ Copy image on Windows → wait ~1s for poller → Alt+V in Claude Code → image
 
 ---
 
+## Alternative: wsl-screenshot-cli
+
+A purpose-built Go tool that saves screenshots to disk and puts the **file path** in the clipboard. Unlike clip2png (which converts clipboard formats in Wayland), this approach works with both Claude Code and Codex CLI.
+
+### Comparison
+
+| | clip2png | wsl-screenshot-cli |
+|---|---|---|
+| Mechanism | BMP→PNG in Wayland clipboard | Screenshot → file → file path in clipboard |
+| Claude Code (Alt+V) | ✓ | ✓ (Ctrl+Shift+V, paste path) |
+| Codex CLI | ✗ | ✓ |
+| Dependencies | wl-clipboard, imagemagick | None (pre-built binary) |
+| Poll interval | 1s | 250ms |
+
+### Install
+
+```bash
+curl -fsSL https://nailu.dev/wscli/install.sh | bash
+```
+
+Installs binary to `~/.local/bin/`. No Go toolchain needed.
+
+### Usage
+
+```bash
+wsl-screenshot-cli start --daemon   # start
+wsl-screenshot-cli status           # check
+wsl-screenshot-cli stop             # stop
+wsl-screenshot-cli update           # update
+```
+
+After starting: take a screenshot on Windows → `Ctrl+Shift+V` in terminal → pastes `/tmp/.wsl-screenshot-cli/<hash>.png` → Claude Code / Codex loads the image.
+
+### Auto-start via SessionStart hook
+
+Add to `~/.claude/settings.json`:
+
+```json
+"SessionStart": [
+  { "hooks": [{ "type": "command", "command": "wsl-screenshot-cli start --daemon --quiet 2>/dev/null" }] }
+]
+```
+
+> **Do not add a `SessionEnd` hook.** Same reason as clip2png: Claude Code fires `SessionStart`/`SessionEnd` for every Task tool subagent — a `SessionEnd` stop would kill the daemon mid-session.
+
+---
+
 ## Troubleshooting
 
 **API Error 400: "image cannot be empty"**

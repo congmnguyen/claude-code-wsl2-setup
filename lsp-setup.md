@@ -4,8 +4,55 @@ Claude Code uses Language Server Protocol (LSP) to navigate code semantically â€
 definitions, references, and types â€” instead of falling back to text search. This gives
 Claude more accurate context when reading and editing code.
 
-LSP has been built into Claude Code since v2.0.74 and is enabled by default. No env var
-or setting is needed; you just need the language server binaries on your PATH.
+LSP has been built into Claude Code since v2.0.74. To fully enable it you need:
+1. The language server binaries on your PATH (see sections below)
+2. The official LSP plugins installed in Claude Code
+3. The installed plugins enabled in `~/.claude/settings.json`
+
+---
+
+## Install the official plugins
+
+Inside Claude Code, run `/plugin` and install these official plugins:
+
+- `pyright-lsp`
+- `typescript-lsp`
+- `gopls-lsp`
+- `rust-analyzer-lsp`
+
+If they are already installed, you only need to enable them in settings.
+
+---
+
+## Enable the installed plugins
+
+Merge these keys into your existing `~/.claude/settings.json` file. Do not replace the
+whole file if you already have hooks, attribution, or other settings:
+
+```jsonc
+{
+  "enabledPlugins": {
+    "pyright-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true
+  }
+}
+```
+
+If your current Claude Code build still does not expose the `LSP` tool after the plugins
+are installed and enabled, try this workaround by merging it into the same settings file:
+
+```jsonc
+{
+  "env": {
+    "ENABLE_LSP_TOOL": "1"
+  }
+}
+```
+
+`ENABLE_LSP_TOOL` is not officially documented (discovered via GitHub Issue #15619). Use
+it as a version-specific workaround, not as the baseline requirement.
 
 ---
 
@@ -87,6 +134,10 @@ which pyright                      # ~/.local/bin/pyright
 which gopls                        # ~/go/bin/gopls
 which rust-analyzer                # ~/.cargo/bin/rust-analyzer
 ```
+
+Then restart Claude Code, run `/plugin`, and confirm all four plugins are installed and
+enabled. If the `LSP` tool is still missing from the tool list, add the
+`ENABLE_LSP_TOOL` workaround above and restart Claude Code again.
 
 ---
 

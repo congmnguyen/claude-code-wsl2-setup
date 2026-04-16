@@ -1,0 +1,4 @@
+interface:
+  display_name: "Oncall Triage"
+  short_description: "Triage urgent GitHub issues for oncall"
+  default_prompt: "Use $oncall-triage to triage recent GitHub bugs for oncall."
