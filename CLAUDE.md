@@ -45,7 +45,7 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 
 **settings.json attribution**: The correct field is `"attribution": { "commit": "", "pr": "" }`. The deprecated `includeCoAuthoredBy` key and non-existent `gitAttribution` key have no effect.
 
-**statusline JSON parsing**: Claude Code pipes a JSON blob to the script stdin on every refresh. All eight fields are extracted in a single `jq -r '@tsv'` call assigned via `IFS=$'\t' read`. The git branch is resolved with `git -C "$cwd" --no-optional-locks symbolic-ref --short HEAD` using the working dir from the JSON — no `cd` needed, and `--no-optional-locks` avoids touching `.git/` lock files. The `statusLine` setting takes `{ "type": "command", "command": "..." }` — the command must be a single string (no array form).
+**statusline JSON parsing**: Claude Code pipes a JSON blob to the script stdin on every refresh. Four fields are extracted in a single `jq -r '@tsv'` call assigned via `IFS=$'\t' read`: working dir, context %, 5-hour usage %, 7-day usage %. The git branch is resolved with `git -C "$cwd" --no-optional-locks symbolic-ref --short HEAD` using the working dir from the JSON — no `cd` needed, and `--no-optional-locks` avoids touching `.git/` lock files. The `statusLine` setting takes `{ "type": "command", "command": "..." }` — the command must be a single string (no array form). Format: `cong | branch | [bar] % | 5h:X% | W:X%` — username hardcoded, branch omitted outside git repos, no model name, no reset timers.
 
 ## When Asked to "Set This Up"
 
