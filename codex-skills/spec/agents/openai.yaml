@@ -1,0 +1,4 @@
+interface:
+  display_name: "Write Spec"
+  short_description: "Interview the user and write SPEC.md"
+  default_prompt: "Use $spec to turn this idea into a detailed SPEC.md."

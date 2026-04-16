@@ -1,0 +1,4 @@
+interface:
+  display_name: "Issue Dedupe"
+  short_description: "Find likely duplicate GitHub issues"
+  default_prompt: "Use $dedupe to check whether this GitHub issue has duplicates."
