@@ -1,16 +1,15 @@
 # Claude Code Status Line
 
-A custom status line script that shows git branch, context window usage, model name, and rate limit countdown timers — all color-coded by severity.
+A custom status line script that shows username, git branch, context window usage, and rate limits — all color-coded by severity.
 
 ```
-main | [████░░░░░░] 42% | sonnet | ⏱ 28% 3h12m | W:91% 19h04m
+cong | main | [████░░░░░░] 42% | 5h:28% | W:4%
 ```
 
-- **Cyan** — current git branch
+- **Cyan** — hardcoded username + current git branch (branch only shown inside git repos)
 - **Progress bar** — context window fill (green < 50%, yellow < 80%, red ≥ 80%)
-- **Model** — `sonnet`, `opus`, or `haiku`
-- **⏱ X% Yh Zm** — 5-hour rolling usage + time until it resets
-- **W:X% Yh Zm** — 7-day rolling usage + time until it resets
+- **5h:X%** — 5-hour rolling usage
+- **W:X%** — 7-day rolling usage
 
 ---
 
@@ -22,38 +21,20 @@ main | [████░░░░░░] 42% | sonnet | ⏱ 28% 3h12m | W:91% 19h
 cat > ~/.claude/statusline-command.sh << 'EOF'
 #!/usr/bin/env bash
 # Claude Code status line
-# Receives JSON on stdin; outputs a single formatted line.
-# Elements: git-branch | context-bar% | model | ⏱ usage% time | W:usage% time
+# Format: cong | branch | [████░░░░░░] 42% | 5h:28% | W:4%
 
 input=$(cat)
 
-# ── Parse JSON once ───────────────────────────────────────────────────────────
-IFS=$'\t' read -r cwd ctx_pct model_id model_disp five_pct five_resets week_pct week_resets < <(
+IFS=$'\t' read -r cwd ctx_pct five_pct week_pct < <(
   printf '%s' "$input" | jq -r '[
     .workspace.current_dir // .cwd // "",
     .context_window.used_percentage // "",
-    .model.id // "",
-    .model.display_name // "",
     .rate_limits.five_hour.used_percentage // "",
-    .rate_limits.five_hour.resets_at // "",
-    .rate_limits.seven_day.used_percentage // "",
-    .rate_limits.seven_day.resets_at // ""
+    .rate_limits.seven_day.used_percentage // ""
   ] | @tsv'
 )
 
 parts=()
-
-# ── Helper: format seconds as Xh Ym or Ym ────────────────────────────────────
-fmt_remaining() {
-  local diff=$1
-  local h=$(( diff / 3600 ))
-  local m=$(( (diff % 3600) / 60 ))
-  if [ "$h" -gt 0 ]; then
-    printf "%dh%02dm" "$h" "$m"
-  else
-    printf "%dm" "$m"
-  fi
-}
 
 # ── Helper: pick ANSI color based on percentage ───────────────────────────────
 pct_color() {
@@ -64,7 +45,10 @@ pct_color() {
   fi
 }
 
-# ── 1. Git branch (cyan) ──────────────────────────────────────────────────────
+# ── 0. Username (cyan) ────────────────────────────────────────────────────────
+parts+=("$(printf '\033[36mcong\033[0m')")
+
+# ── 1. Git branch (cyan, only inside git repos) ───────────────────────────────
 if [ -n "$cwd" ]; then
   branch=$(git -C "$cwd" --no-optional-locks symbolic-ref --short HEAD 2>/dev/null)
   [ -n "$branch" ] && parts+=("$(printf '\033[36m%s\033[0m' "$branch")")
@@ -83,38 +67,18 @@ if [ -n "$ctx_pct" ]; then
   parts+=("$(printf "${color}[%s] %d%%\033[0m" "$bar" "$pct")")
 fi
 
-# ── 3. Model short name ───────────────────────────────────────────────────────
-if   printf '%s' "$model_id" | grep -qi 'sonnet'; then short="sonnet"
-elif printf '%s' "$model_id" | grep -qi 'opus';   then short="opus"
-elif printf '%s' "$model_id" | grep -qi 'haiku';  then short="haiku"
-else short=$(printf '%s' "$model_disp" | awk '{print tolower($NF)}')
-fi
-[ -n "$short" ] && parts+=("$short")
-
-# ── 4. 5-hour block: usage% + remaining time ──────────────────────────────────
-if [ -n "$five_pct" ] && [ -n "$five_resets" ]; then
+# ── 3. 5-hour usage ───────────────────────────────────────────────────────────
+if [ -n "$five_pct" ]; then
   pct=$(printf '%.0f' "$five_pct")
   color=$(pct_color "$pct")
-  now=$(date +%s)
-  diff=$(( five_resets - now ))
-  if [ "$diff" -gt 0 ]; then
-    parts+=("$(printf "${color}⏱ %d%% %s\033[0m" "$pct" "$(fmt_remaining "$diff")")")
-  else
-    parts+=("$(printf "${color}⏱ %d%%\033[0m" "$pct")")
-  fi
+  parts+=("$(printf "${color}5h:%d%%\033[0m" "$pct")")
 fi
 
-# ── 5. Weekly limit: usage% + remaining time ──────────────────────────────────
-if [ -n "$week_pct" ] && [ -n "$week_resets" ]; then
+# ── 4. Weekly usage ───────────────────────────────────────────────────────────
+if [ -n "$week_pct" ]; then
   pct=$(printf '%.0f' "$week_pct")
   color=$(pct_color "$pct")
-  now=$(date +%s)
-  diff=$(( week_resets - now ))
-  if [ "$diff" -gt 0 ]; then
-    parts+=("$(printf "${color}W:%d%% %s\033[0m" "$pct" "$(fmt_remaining "$diff")")")
-  else
-    parts+=("$(printf "${color}W:%d%%\033[0m" "$pct")")
-  fi
+  parts+=("$(printf "${color}W:%d%%\033[0m" "$pct")")
 fi
 
 # ── Join with " | " and print ─────────────────────────────────────────────────
@@ -145,18 +109,14 @@ Restart Claude Code. The status line appears at the bottom of the interface.
 
 ## How it works
 
-Claude Code pipes a JSON blob to the script's stdin on every refresh. The script extracts eight fields in one `jq` call:
+Claude Code pipes a JSON blob to the script's stdin on every refresh. The script extracts four fields in one `jq` call:
 
 | Field | JSON path |
 |-------|-----------|
 | Working dir | `.workspace.current_dir` |
 | Context % | `.context_window.used_percentage` |
-| Model ID | `.model.id` |
-| Model display name | `.model.display_name` |
 | 5-hour usage % | `.rate_limits.five_hour.used_percentage` |
-| 5-hour reset (Unix) | `.rate_limits.five_hour.resets_at` |
 | 7-day usage % | `.rate_limits.seven_day.used_percentage` |
-| 7-day reset (Unix) | `.rate_limits.seven_day.resets_at` |
 
 The git branch is resolved by running `git symbolic-ref` against the working directory from the JSON — no `cd` needed, and `--no-optional-locks` avoids touching `.git/` lock files.
 
@@ -164,13 +124,32 @@ The git branch is resolved by running `git symbolic-ref` against the working dir
 
 ## Debugging
 
-Dump the live JSON to a file so you can inspect the schema:
+Use a wrapper script to capture the live JSON without breaking the statusline:
 
 ```bash
-# Add a debug hook temporarily in settings.json:
-# "PreToolUse": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "cat > /tmp/statusline-debug.json" }] }]
+cat > /tmp/debug-statusline.sh << 'EOF'
+#!/usr/bin/env bash
+input=$(cat)
+printf '%s' "$input" | jq '.' > /tmp/statusline-debug.json
+printf '%s' "$input" | bash ~/.claude/statusline-command.sh
+EOF
+chmod +x /tmp/debug-statusline.sh
+```
 
-# Then inspect:
+Temporarily swap in `~/.claude/settings.json`:
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bash /tmp/debug-statusline.sh"
+  }
+}
+```
+
+Restart Claude Code, then inspect:
+
+```bash
 cat /tmp/statusline-debug.json | jq '{five_hour: .rate_limits.five_hour, seven_day: .rate_limits.seven_day}'
 ```
 
