@@ -1,27 +1,27 @@
-# Claude Code WSL2 — "Needs Your Input" Windows Notification
+# Claude Code WSL2 — "Done" Windows Notification
 
 ## Problem
 
 When Claude Code finishes a long task on WSL2, the terminal gives no visual signal that
-it is waiting. You only notice if you switch back to the terminal yourself.
+it is done. You only notice if you switch back to the terminal yourself.
 
-The `PermissionRequest` hook lets Claude Code fire a Windows balloon tip (system tray popup)
-when it needs you to approve or deny a tool use — so you get an OS-level alert even when
-the terminal is in the background.
+The `Stop` hook lets Claude Code fire a Windows balloon tip (system tray popup) when it
+finishes a response — but only when Windows Terminal is **not** the foreground window,
+so it won't interrupt you when you're already watching the output.
 
 ---
 
 ## How It Works
 
-1. Claude Code fires the `PermissionRequest` hook whenever it is blocked on a tool-use
-   approval prompt (e.g. "Do you want to proceed?").
+1. Claude Code fires the `Stop` hook whenever it finishes generating a response.
 2. The hook runs `~/bin/claude-notify`, a bash script that calls Windows PowerShell
    directly from WSL via `/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe`.
-3. PowerShell creates a `NotifyIcon` (system tray icon) and shows a balloon tip for 5 s.
-4. A WinForms message loop keeps the process alive until the balloon is dismissed or clicked.
-5. **Clicking the balloon** restores the Windows Terminal window (if minimised) and brings
+3. PowerShell checks the foreground window — if Windows Terminal is active, it exits silently.
+4. Otherwise, it creates a `NotifyIcon` (system tray icon) and shows a balloon tip for 5 s.
+5. A WinForms message loop keeps the process alive until the balloon is dismissed or clicked.
+6. **Clicking the balloon** restores the Windows Terminal window (if minimised) and brings
    it to the foreground via `ShowWindow` + `SetForegroundWindow`.
-6. On dismiss or click, the message loop exits, the icon is disposed, and the process ends.
+7. On dismiss or click, the message loop exits, the icon is disposed, and the process ends.
 
 ---
 
@@ -97,21 +97,21 @@ chmod +x ~/bin/claude-notify
 In `~/.claude/settings.json`, add inside the `"hooks"` object:
 
 ```json
-"PermissionRequest": [
+"Stop": [
   {
     "matcher": "",
     "hooks": [
       {
         "type": "command",
-        "command": "bash -c '~/bin/claude-notify \"Claude Code\" \"Needs your input!\" &'"
+        "command": "bash -c '~/bin/claude-notify \"Claude Code\" \"Done!\" &'"
       }
     ]
   }
 ]
 ```
 
-`PermissionRequest` fires when Claude is waiting for you to approve or deny a tool use
-(e.g. "Do you want to proceed? Yes / No").
+`Stop` fires when Claude finishes a response. The script exits silently if Windows Terminal
+is the foreground window, so notifications only appear when you're working in another window.
 
 > **Why `bash -c '... &'` and not just the command directly?**
 >
@@ -127,10 +127,10 @@ Restart Claude Code for the hook to take effect.
 
 ## Result
 
-When Claude Code hits a permission prompt and is waiting for your approval, a Windows
-balloon tip appears in the system tray with the title **Claude Code** and the message
-**Needs your input!** Clicking the balloon restores and focuses Windows Terminal so you
-can approve or deny immediately without manually switching windows.
+When Claude Code finishes a response and Windows Terminal is **not** the active window,
+a balloon tip appears in the system tray with the title **Claude Code** and the message
+**Done!** Clicking the balloon restores and focuses Windows Terminal. No notification
+fires if you are already looking at the terminal.
 
 ---
 
