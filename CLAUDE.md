@@ -19,7 +19,7 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 |------|-------------------|
 | `image-paste.md` | `~/.local/bin/clip2png` (BMP→PNG clipboard poller) + `~/.claude/keybindings.json` (Alt+V) + `SessionStart` hook only (no SessionEnd) |
 | `shift-enter.md` | VSCode `/terminal-setup` + Windows Terminal `settings.json` action (`\u001b\r`) |
-| `claude-notify.md` | `~/bin/claude-notify` (bash → PowerShell balloon tip) + `PermissionRequest` hook only — **WSL2 only** |
+| `claude-notify.md` | `~/bin/claude-notify` (bash → PowerShell balloon tip) + `Stop` hook only — **WSL2 only** — skips if Windows Terminal is foreground |
 | `claude-notify-powershell.md` | `%USERPROFILE%\.claude\claude-hook-toast.ps1` + `PermissionRequest` hook only — **native Windows PowerShell only** |
 | `statusline.md` | `~/.claude/statusline-command.sh` + `statusLine` in `~/.claude/settings.json` |
 | `settings.md` | `~/.claude/settings.json` `attribution` field + `~/.claude.json` `hasTrustDialogAccepted` |
