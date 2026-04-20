@@ -52,7 +52,7 @@ Claude will read the docs and configure everything.
 | [`lsp-setup.md`](lsp-setup.md) | **LSP** — `ENABLE_LSP_TOOL` + language servers for TypeScript, Python, Go, Rust |
 | [`image-paste.md`](image-paste.md) | Alt+V image paste — BMP→PNG converter + keybinding |
 | [`shift-enter.md`](shift-enter.md) | Shift+Enter newline in VSCode terminal and Windows Terminal |
-| [`claude-notify.md`](claude-notify.md) | Windows balloon tip notification — WSL2 variant (bash → PowerShell) |
+| [`claude-notify.md`](claude-notify.md) | Windows balloon tip notification — WSL2 variant for Claude Code hooks and Codex `notify` |
 | [`claude-notify-powershell.md`](claude-notify-powershell.md) + [`claude-hook-toast.ps1`](claude-hook-toast.ps1) | Windows toast notification — native PowerShell variant |
 | [`statusline.md`](statusline.md) | Status line — git branch, context bar, model, 5h/7d rate limit countdowns |
 | [`settings.md`](settings.md) | Disable git attribution, skip trust dialog |
