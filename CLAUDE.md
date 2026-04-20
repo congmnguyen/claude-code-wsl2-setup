@@ -19,7 +19,7 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 |------|-------------------|
 | `image-paste.md` | `~/.local/bin/clip2png` (BMP→PNG clipboard poller) + `~/.claude/keybindings.json` (Alt+V) + `SessionStart` hook only (no SessionEnd) |
 | `shift-enter.md` | VSCode `/terminal-setup` + Windows Terminal `settings.json` action (`\u001b\r`) |
-| `claude-notify.md` | `~/bin/claude-notify` (bash → PowerShell balloon tip) + `Stop` hook only — **WSL2 only** — skips if Windows Terminal is foreground |
+| `claude-notify.md` | `~/bin/claude-notify` (bash → PowerShell balloon tip) + Claude `Stop` hook or Codex `notify` — **WSL2 only** — skips if Windows Terminal is foreground |
 | `claude-notify-powershell.md` | `%USERPROFILE%\.claude\claude-hook-toast.ps1` + `PermissionRequest` hook only — **native Windows PowerShell only** |
 | `statusline.md` | `~/.claude/statusline-command.sh` + `statusLine` in `~/.claude/settings.json` |
 | `settings.md` | `~/.claude/settings.json` `attribution` field + `~/.claude.json` `hasTrustDialogAccepted` |
@@ -35,7 +35,7 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 
 **clip2png SessionEnd pitfall**: Do not add a `SessionEnd` hook to stop the poller. Claude Code fires `SessionStart`/`SessionEnd` for every subagent spawned by the Task tool. The subagent's `SessionEnd` would kill the poller mid-session for the main session.
 
-**claude-notify async (WSL2)**: The `PermissionRequest` hook command must be wrapped as `bash -c '... &'` because the PowerShell script sleeps 6 s. Running it synchronously blocks Claude Code's UI for that duration.
+**claude-notify async (WSL2)**: For Claude Code, wrap the `Stop` hook command as `bash -c '... &'` because the PowerShell script stays alive while the balloon is visible. For Codex, use `notify = ["bash", "-lc", "~/bin/claude-notify \"$1\" &", "--"]` in `~/.codex/config.toml`; Codex passes the JSON notification payload as a single argument.
 
 **claude-notify async (Windows PowerShell)**: Uses the Windows Toast API (`Windows.UI.Notifications`) via [soulee-dev/claude-code-notify-powershell](https://github.com/soulee-dev/claude-code-notify-powershell). The script reads hook event JSON from stdin. No async wrapper needed — toast fires and exits immediately. Only the `PermissionRequest` hook is used — notifications fire only when Claude needs you to approve a tool. Script lives at `%USERPROFILE%\.claude\claude-hook-toast.ps1`; hook configured in `C:\Users\cong\.claude\settings.json`. Both variants skip the notification when Windows Terminal is the foreground window.
 
