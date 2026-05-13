@@ -65,7 +65,22 @@ Claude will read the docs and configure everything.
 | Path | Contents |
 |------|----------|
 | [`agents/`](agents/) | `code-architect`, `code-simplifier` |
-| [`skills/`](skills/) | `commit-push-pr`, `dedupe`, `frontend-design`, `oncall-triage`, `spec` |
-| [`codex-skills/`](codex-skills/) | Codex-native versions: `code-review`, `commit-push-pr`, `dedupe`, `frontend-design`, `oncall-triage`, `spec` |
+| [`skills/`](skills/) | `commit-push-pr`, `dedupe`, `frontend-design`, `handoff`, `oncall-triage`, `spec` |
+| [`codex-skills/`](codex-skills/) | Codex-native versions: `code-review`, `commit-push-pr`, `dedupe`, `frontend-design`, `handoff`, `oncall-triage`, `spec` |
 
 Copy [`agents/`](agents/) and [`skills/`](skills/) to `~/.claude/agents/` and `~/.claude/skills/` for Claude Code. Copy [`codex-skills/`](codex-skills/) to `~/.codex/skills/` for Codex.
+
+## Recommended third-party skills
+
+Skills not authored here but worth installing alongside the setup:
+
+- **[liteparse](https://github.com/run-llama/liteparse)** (LlamaIndex, MIT) — parse PDF, DOCX, PPTX, XLSX, and images locally with no cloud calls. Useful for feeding unstructured documents into Claude or Codex without uploading them. Install the npm package globally and copy the upstream `SKILL.md` into `~/.claude/skills/liteparse/`:
+
+  ```bash
+  npm i -g @llamaindex/liteparse
+  sudo apt-get install -y libreoffice   # required for DOCX/PPTX/XLSX
+  ```
+
+## License
+
+[MIT](LICENSE) — feel free to copy, fork, or adapt for your own setup.
