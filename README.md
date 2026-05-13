@@ -21,6 +21,18 @@ It also saves tokens, because Claude stops scrolling through files that don't ma
 
 ---
 
+## Preview
+
+<p align="center">
+  <img src="assets/statusline.png" alt="Custom statusline showing project, context bar, 5h and weekly usage" width="640"><br>
+  <em>Status line — project · context bar · 5h / weekly usage</em>
+</p>
+
+<p align="center">
+  <img src="assets/notification.png" alt="Windows balloon tip notification — Claude Code Done!" width="420"><br>
+  <em>Balloon tip fires on <code>Stop</code> and <code>PermissionRequest</code>, skipped when Windows Terminal is focused</em>
+</p>
+
 ## What it fixes
 
 - **Image paste** — copy a screenshot on Windows and paste the file path straight into Claude Code or Codex. A small Go daemon ([wsl-screenshot-cli](https://github.com/Nailuu/wsl-screenshot-cli)) polls the Windows clipboard, saves new screenshots under `/tmp/.wsl-screenshot-cli/`, and rewrites the clipboard so paste returns the WSL path.

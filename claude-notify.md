@@ -1,5 +1,7 @@
 # Claude Code WSL2 — "Done" Windows Notification
 
+![Windows balloon tip — Claude Code Done!](assets/notification.png)
+
 ## Problem
 
 When Claude Code finishes a long task on WSL2, the terminal gives no visual signal that

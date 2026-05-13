@@ -2,6 +2,8 @@
 
 A custom status line script that shows the current project directory, git branch, context window usage, and rate limits — color-coded by severity.
 
+![Status line preview](assets/statusline.png)
+
 ```
 video-site | main | [████░░░░░░] 42% | 5h:28% | W:4%
 ```
