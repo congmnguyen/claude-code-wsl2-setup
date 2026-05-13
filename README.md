@@ -86,7 +86,7 @@ Copy [`agents/`](agents/) and [`skills/`](skills/) to `~/.claude/agents/` and `~
 
 Skills not authored here but worth installing alongside the setup:
 
-- **[liteparse](https://github.com/run-llama/liteparse)** (LlamaIndex, MIT) — parse PDF, DOCX, PPTX, XLSX, and images locally with no cloud calls. Useful for feeding unstructured documents into Claude or Codex without uploading them. Install the npm package globally and copy the upstream `SKILL.md` into `~/.claude/skills/liteparse/`:
+- **[liteparse](https://github.com/run-llama/liteparse)** (LlamaIndex, MIT) — parse PDF, DOCX, PPTX, XLSX, and images locally with no cloud calls. Useful for feeding unstructured documents into Claude or Codex without uploading them. Try it in the browser first: [simonw.github.io/liteparse](https://simonw.github.io/liteparse/). Then install the npm package globally and copy the upstream `SKILL.md` into `~/.claude/skills/liteparse/`:
 
   ```bash
   npm i -g @llamaindex/liteparse
