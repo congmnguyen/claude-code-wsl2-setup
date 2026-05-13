@@ -1,6 +1,6 @@
 # Image Paste on WSL2
 
-[wsl-screenshot-cli](https://github.com/nicholasgasior/wsl-screenshot-cli) — a Go daemon that saves screenshots to disk and puts the file path in the clipboard. Works with both Claude Code and Codex CLI.
+[wsl-screenshot-cli](https://github.com/Nailuu/wsl-screenshot-cli) — a Go daemon that saves screenshots to disk and puts the file path in the clipboard. Works with both Claude Code and Codex CLI.
 
 | | |
 |---|---|
