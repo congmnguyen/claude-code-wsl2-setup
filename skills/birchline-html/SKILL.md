@@ -5,7 +5,7 @@ description: Generate standalone HTML artifacts using the birchline light theme 
 
 # Birchline HTML Artifacts
 
-![Birchline HTML preview](preview.png)
+![Birchline HTML preview](../../assets/birchline-html.png)
 
 Generate clean, document-style HTML files using the birchline design system. Output is a single self-contained `.html` file (only external dep: Google Fonts CDN) saved to the user's Desktop for offline reading.
 
