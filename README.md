@@ -25,7 +25,7 @@ It also saves tokens, because Claude stops scrolling through files that don't ma
 
 <p align="center">
   <img src="assets/statusline.png" alt="Custom statusline showing project, context bar, 5h and weekly usage" width="640"><br>
-  <em>Status line — project · context bar · 5h / weekly usage</em>
+  <em>video-site | main | [████░░░░░░] 42% | 5h:28% | W:4%</em>
 </p>
 
 <p align="center">
