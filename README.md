@@ -33,6 +33,11 @@ It also saves tokens, because Claude stops scrolling through files that don't ma
   <em>Balloon tip fires on <code>Stop</code> and <code>PermissionRequest</code>, skipped when Windows Terminal is focused</em>
 </p>
 
+<p align="center">
+  <img src="assets/birchline-html.png" alt="Birchline HTML artifact preview — paper recap with tabs and before/after code panels" width="720"><br>
+  <em>Birchline HTML skill — single-file document-style artifacts with tabs, cards, and before/after panels</em>
+</p>
+
 ## What it fixes
 
 - **Image paste** — copy a screenshot on Windows and paste the file path straight into Claude Code or Codex. A small Go daemon ([wsl-screenshot-cli](https://github.com/Nailuu/wsl-screenshot-cli)) polls the Windows clipboard, saves new screenshots under `/tmp/.wsl-screenshot-cli/`, and rewrites the clipboard so paste returns the WSL path.
@@ -77,7 +82,7 @@ Claude will read the docs and configure everything.
 | Path | Contents |
 |------|----------|
 | [`agents/`](agents/) | `code-architect`, `code-simplifier` |
-| [`skills/`](skills/) | `commit-push-pr`, `dedupe`, `frontend-design`, `handoff`, `oncall-triage`, `spec` |
+| [`skills/`](skills/) | `birchline-html`, `commit-push-pr`, `dedupe`, `frontend-design`, `handoff`, `oncall-triage`, `spec` |
 | [`codex-skills/`](codex-skills/) | Codex-native versions: `code-review`, `commit-push-pr`, `dedupe`, `frontend-design`, `handoff`, `oncall-triage`, `spec` |
 
 Copy [`agents/`](agents/) and [`skills/`](skills/) to `~/.claude/agents/` and `~/.claude/skills/` for Claude Code. Copy [`codex-skills/`](codex-skills/) to `~/.codex/skills/` for Codex.
