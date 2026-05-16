@@ -1,28 +1,20 @@
 ---
 name: birchline-html
-description: Generate standalone HTML artifacts using the birchline light theme — Lora serif headings, Inter body, JetBrains Mono code, clay/olive/sky accents on warm oat background. Use when user asks for HTML output saved to Desktop, document-style summaries, paper recaps, design proposals, takeaway docs, or any readable single-file HTML artifact.
+description: Generate standalone HTML artifacts using the birchline light theme — Lora serif headings, Inter body, JetBrains Mono code, clay/olive/sky accents on warm oat background. Use for document-style summaries, paper recaps, design proposals, takeaway docs, or any readable single-file HTML artifact.
 ---
 
 # Birchline HTML Artifacts
 
-Generate clean, document-style HTML files using the birchline design system. Output is a single self-contained `.html` file (only external dep: Google Fonts CDN) saved to the user's Desktop for offline reading.
+![Birchline HTML preview](../../assets/birchline-html.png)
 
-## When to invoke
-
-- "trả lời dưới dạng HTML rồi để ngoài desktop"
-- "structure this as HTML"
-- "for me to read later"
-- Recap of a paper, long analysis, design proposal, takeaway summary
-- Multi-section document where tabs/cards help navigation
-
-Do NOT use for: throwaway prototypes, code-only output, anything the user wants to consume inside the terminal.
+Generate clean, document-style HTML files using the birchline design system. Output is a single self-contained `.html` file (only external dep: Google Fonts CDN).
 
 ## Output convention
 
-- Path: `/mnt/c/Users/cong/Desktop/<descriptive-kebab-name>.html`
+- Save to the path the user specifies; otherwise default to the current working directory
 - Filename should describe the content (e.g. `paper-schema-linking-takeaways.html`, `migration-plan-v2.html`)
 - Single self-contained file — all CSS inline, no JS frameworks, Google Fonts via CDN OK
-- Vietnamese content is fine; `<html lang="vi">` if document is Vietnamese
+- Set `<html lang="...">` to match the document's language
 
 ## Workflow
 
@@ -31,7 +23,7 @@ Do NOT use for: throwaway prototypes, code-only output, anything the user wants 
    - Choose 2-5 tabs based on natural content sections
    - Pick component variants per section (clay/olive/sky cards, before/after grids, stat cards, etc.)
    - Use file references (`<span class="file-ref">path:line</span>`) when discussing code
-3. Write the final file to Desktop
+3. Write the final file to the chosen path
 
 ## Design tokens
 
@@ -64,8 +56,8 @@ All components are pre-defined in `template.html`. Pick what fits:
 | `.card.olive` | Secondary/medium importance, P1 |
 | `.card.sky` | Tertiary/info, P2, low priority |
 | `.card` (no variant) | Neutral/blocked status |
-| `.compare` (before/after grid) | Hiện tại vs đề xuất, old vs new |
-| `.stat-grid` (3-up) | Key metrics, "paper đạt được gì" |
+| `.compare` (before/after grid) | Old vs new, current vs proposed |
+| `.stat-grid` (3-up) | Key metrics |
 | `.insight-grid` (2-up) | List of insights/principles |
 | `.takeaway` (gradient callout) | Key conclusion to highlight |
 | `blockquote` | Quote/aside |
@@ -79,10 +71,10 @@ All components are pre-defined in `template.html`. Pick what fits:
 
 ```html
 <nav class="tabs">
-  <button data-tab="overview" class="active">Tổng quan</button>
+  <button data-tab="overview" class="active">Overview</button>
   <button data-tab="insights">Key insights</button>
-  <button data-tab="apply">Áp dụng</button>
-  <button data-tab="examples">Ví dụ</button>
+  <button data-tab="apply">Apply</button>
+  <button data-tab="examples">Examples</button>
 </nav>
 
 <main>
@@ -123,8 +115,6 @@ Example:
 
 Before writing, decide:
 1. **Title** + subtitle (italic Lora) + meta line (source/date)
-2. **Tab count** (2-5) and labels (Vietnamese OK, short)
+2. **Tab count** (2-5) and labels (short)
 3. **Per-tab structure**: how many cards, which variants, where to place stat-grid/compare/insight-grid
 4. **Footer**: paper link / source / date
-
-When in doubt, follow the structure of `paper-schema-linking-takeaways.html` on the user's Desktop — that's the canonical reference artifact.
