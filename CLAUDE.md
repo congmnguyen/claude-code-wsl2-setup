@@ -56,6 +56,6 @@ Read all `*.md` files, then:
 3. Create/update `~/.claude/keybindings.json` with the Alt+V binding.
 4. Set `attribution` in `~/.claude/settings.json`. Save `~/.claude/statusline-command.sh` from `statusline.md` and set `statusLine` in `~/.claude/settings.json`.
 5. Install the LSP plugins per `lsp-setup.md` and set `enabledPlugins` in `~/.claude/settings.json`. Install language-server binaries for whichever languages the user works in.
-6. Copy `agents/*.md` → `~/.claude/agents/`, `skills/*/SKILL.md` → `~/.claude/skills/<name>/SKILL.md`, and `codex-skills/<name>/` → `~/.codex/skills/<name>/` when setting up Codex too.
+6. Copy `agents/*.md` → `~/.claude/agents/`, `skills/<name>/` → `~/.claude/skills/<name>/` (copy the entire directory — some skills include sibling files like `template.html`), and `codex-skills/<name>/` → `~/.codex/skills/<name>/` when setting up Codex too.
 7. Install `pulseaudio-utils` and `libasound2-plugins`, create `~/.asoundrc` with the pulse PCM config, and add `PULSE_SERVER` to `~/.zshrc` (see `voice.md`).
 8. Remind the user to manually apply the Windows-side changes (Windows Terminal `settings.json`, `~/.zshrc` `BROWSER` export, and — if they also run Claude Code natively on Windows — `claude-notify-powershell.md`) since WSL cannot edit Windows files.
