@@ -84,7 +84,7 @@ Claude will read the docs and configure everything.
 | Path | Contents |
 |------|----------|
 | [`agents/`](agents/) | `code-architect`, `code-simplifier` |
-| [`skills/`](skills/) | `birchline-html`, `commit-push-pr`, `dedupe`, `frontend-design`, `handoff`, `oncall-triage`, `spec` |
+| [`skills/`](skills/) | `birchline-html`, `commit-push-pr`, `dedupe`, `deep-teach`, `frontend-design`, `handoff`, `oncall-triage`, `spec` |
 | [`codex-skills/`](codex-skills/) | Codex-native versions: `code-review`, `commit-push-pr`, `dedupe`, `frontend-design`, `handoff`, `oncall-triage`, `spec` |
 
 Copy [`agents/`](agents/) and [`skills/`](skills/) to `~/.claude/agents/` and `~/.claude/skills/` for Claude Code. Copy [`codex-skills/`](codex-skills/) to `~/.codex/skills/` for Codex.
