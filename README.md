@@ -76,6 +76,7 @@ Claude will read the docs and configure everything.
 | [`settings.md`](settings.md) | Disable git attribution, skip trust dialog |
 | [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` env var |
 | [`mcp-setup.md`](mcp-setup.md) | DeepWiki, Playwright, and Figma Desktop MCP servers |
+| [`playwright-cli.md`](playwright-cli.md) | Playwright **CLI** — token-efficient browser automation; preferred over Playwright MCP for coding agents |
 | [`voice.md`](voice.md) | Voice mode — ALSA → PulseAudio → WSLg bridge, `~/.asoundrc` + `PULSE_SERVER` |
 | [`capslock-esc.md`](capslock-esc.md) | CapsLock → Escape — registry-level remap via SharpKeys (Windows-side only) |
 

@@ -25,6 +25,7 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 | `settings.md` | `~/.claude/settings.json` `attribution` field + `~/.claude.json` `hasTrustDialogAccepted` |
 | `browser.md` | `BROWSER` env var in `~/.zshrc` pointing to Windows `.exe` |
 | `mcp-setup.md` | DeepWiki (HTTP, user-scoped), Playwright (npx), Figma Desktop (localhost:3845) |
+| `playwright-cli.md` | `@playwright/cli` global install + `install --skills`; CLI alternative to Playwright MCP, token-efficient, preferred for coding agents |
 | `lsp-setup.md` | LSP binaries: typescript-language-server, pyright, gopls (Go 1.26+), rust-analyzer; PATH in `~/.zshrc`; install official LSP plugins; `enabledPlugins` in `settings.json`; optional `ENABLE_LSP_TOOL` workaround |
 | `voice.md` | `pulseaudio-utils` + `libasound2-plugins`; `~/.asoundrc` routing ALSA default PCM to `pulse` plugin at WSLg socket; `PULSE_SERVER` in `~/.zshrc` |
 | `capslock-esc.md` | SharpKeys registry remap: CapsLock → Escape, system-wide, Windows-side only — no WSL config needed |
@@ -42,6 +43,8 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 **claude-notify async (WSL2)**: For Claude Code, wrap the `Stop` hook command as `bash -c '... &'` because the PowerShell script stays alive while the balloon is visible. For Codex, use `notify = ["bash", "-lc", "~/bin/claude-notify \"$1\" &", "--"]` in `~/.codex/config.toml`; Codex passes the JSON notification payload as a single argument.
 
 **claude-notify async (Windows PowerShell)**: Uses the Windows Toast API (`Windows.UI.Notifications`) via [soulee-dev/claude-code-notify-powershell](https://github.com/soulee-dev/claude-code-notify-powershell). The script reads hook event JSON from stdin. No async wrapper needed — toast fires and exits immediately. Only the `PermissionRequest` hook is used — notifications fire only when Claude needs you to approve a tool. Script lives at `%USERPROFILE%\.claude\claude-hook-toast.ps1`; hook configured in `C:\Users\cong\.claude\settings.json`. Both variants skip the notification when Windows Terminal is the foreground window.
+
+**Playwright CLI vs MCP**: `playwright-cli.md` and the Playwright section of `mcp-setup.md` are intentionally kept as two docs, not merged — they're cross-linked. The CLI is the default for coding agents (no tool schemas in context → far fewer tokens); the MCP server stays for persistent-state / self-healing / long-running browser-only workflows. When editing one, keep the cross-link and the CLI-vs-MCP guidance in the other consistent.
 
 **keybindings.json format**: Must be `{ "bindings": [...] }` (object with array), not a bare array — a bare array silently fails to load.
 
