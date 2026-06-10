@@ -35,6 +35,11 @@ HTTP transport — no local process needed.
 
 ## Playwright
 
+> **For a coding agent, prefer [`playwright-cli`](playwright-cli.md)** — it drives the same
+> tools without loading MCP schemas into context, so it costs far fewer tokens. Use this MCP
+> server only when you need persistent browser state, self-healing test loops, or long-running
+> autonomous browser workflows.
+
 Browser automation: navigate pages, click, fill forms, take screenshots, inspect network
 requests, and run arbitrary JavaScript. Useful for testing web UIs, scraping, and
 debugging front-end behaviour.
