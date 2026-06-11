@@ -1,6 +1,5 @@
 ---
 name: handoff
-allowed-tools: Write
 description: Summarize the current conversation into a handoff file saved to ~/.claude/handoffs/
 ---
 
