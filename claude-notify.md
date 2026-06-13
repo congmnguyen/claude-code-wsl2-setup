@@ -143,6 +143,38 @@ Restart Claude Code for the hook to take effect.
 
 ---
 
+## Codex CLI
+
+Codex reuses the same `~/bin/claude-notify` script but wires it up differently: instead of
+hooks in `settings.json`, Codex has a **top-level `notify` key** in `~/.codex/config.toml`.
+
+> **Trap:** `[tui].notifications = true` is *not* this. That setting only controls the
+> in-terminal (escape-code) notification and never runs an external program. The Windows
+> balloon needs the separate top-level `notify` key — missing it means Codex never notifies
+> even with `[tui].notifications = true` enabled.
+
+Add to the top-level section of `~/.codex/config.toml` (before any `[table]`):
+
+```toml
+notify = ["bash", "-lc", "msg=$(printf '%s' \"$1\" | jq -r '.\"last-assistant-message\" // \"Done!\"' 2>/dev/null | head -c 120); ~/bin/claude-notify \"Codex\" \"${msg:-Done!}\" &", "--"]
+```
+
+How it works:
+
+- Codex emits an `agent-turn-complete` event and passes its JSON payload as the **final
+  argument** to the program. With `["bash", "-lc", "<script>", "--"]`, the `"--"` becomes
+  `$0` and the JSON lands in `$1`.
+- `jq` extracts `last-assistant-message` so the balloon shows **Codex's actual last reply**
+  (truncated to 120 chars), falling back to `"Done!"` if parsing fails.
+- The trailing `&` detaches it so Codex never blocks while the balloon is up — same reason
+  as the Claude `Stop` hook.
+- The script's `GetForegroundWindow()` check still applies, so the balloon is suppressed
+  when Windows Terminal is the active window.
+
+Requires `jq` (`sudo apt install jq`). Restart Codex to load the new config.
+
+---
+
 ## Result
 
 When Windows Terminal is **not** the active window, a balloon tip appears in the system
