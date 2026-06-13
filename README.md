@@ -2,6 +2,10 @@
 
 Fixes for the most annoying Claude Code papercuts on WSL2 + Windows Terminal.
 
+Most of these (image paste, notifications, CapsLock→Esc, voice) bridge WSL2 to the Windows
+host and are WSL-specific. But the LSP, statusline, MCP, and Playwright CLI guides are plain
+Claude Code config — they work on any Linux or macOS too.
+
 ## Turn on LSP so Claude reads code like an IDE, not grep
 
 Out of the box Claude Code falls back to text search when it needs to find a function or
