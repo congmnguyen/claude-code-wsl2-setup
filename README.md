@@ -81,6 +81,7 @@ Claude will read the docs and configure everything.
 | [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` env var |
 | [`mcp-setup.md`](mcp-setup.md) | DeepWiki, Playwright, and Figma Desktop MCP servers |
 | [`playwright-cli.md`](playwright-cli.md) | Playwright **CLI** — token-efficient browser automation; preferred over Playwright MCP for coding agents |
+| [`codex-delegate.md`](codex-delegate.md) | Delegate heavy/mechanical coding to Codex (`gpt-5.5`) via a cheap Sonnet subagent — keeps Codex's transcript out of the orchestrator context |
 | [`voice.md`](voice.md) | Voice mode — ALSA → PulseAudio → WSLg bridge, `~/.asoundrc` + `PULSE_SERVER` |
 | [`capslock-esc.md`](capslock-esc.md) | CapsLock → Escape — registry-level remap via SharpKeys (Windows-side only) |
 
@@ -88,8 +89,8 @@ Claude will read the docs and configure everything.
 
 | Path | Contents |
 |------|----------|
-| [`agents/`](agents/) | `code-architect`, `code-simplifier` |
-| [`skills/`](skills/) | `birchline-html`, `commit-push-pr`, `dedupe`, `deep-teach`, `frontend-design`, `handoff`, `oncall-triage`, `spec` |
+| [`agents/`](agents/) | `code-architect`, `code-simplifier`, `codex-delegate` |
+| [`skills/`](skills/) | `birchline-html`, `codex-delegate`, `commit-push-pr`, `dedupe`, `deep-teach`, `frontend-design`, `handoff`, `oncall-triage`, `spec` |
 | [`codex-skills/`](codex-skills/) | Codex-native versions: `code-review`, `commit-push-pr`, `dedupe`, `frontend-design`, `handoff`, `oncall-triage`, `spec` |
 
 Copy [`agents/`](agents/) and [`skills/`](skills/) to `~/.claude/agents/` and `~/.claude/skills/` for Claude Code. Copy [`codex-skills/`](codex-skills/) to `~/.codex/skills/` for Codex.
