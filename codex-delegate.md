@@ -46,11 +46,14 @@ transcript sits in a Sonnet subagent, not your Opus/Fable context.
 
 ## Setup
 
-Copy the agent and skill into your Claude config:
+Copy the agent, skill, and wrapper script into your Claude config:
 
 ```bash
+mkdir -p ~/.claude/agents ~/.claude/skills ~/.claude/scripts
 cp agents/codex-delegate.md          ~/.claude/agents/
 cp -r skills/codex-delegate          ~/.claude/skills/
+cp scripts/codex-run.sh              ~/.claude/scripts/
+chmod +x ~/.claude/scripts/codex-run.sh
 ```
 
 Requires the [Codex CLI](https://github.com/openai/codex) installed and authenticated
@@ -70,16 +73,16 @@ waiting to be asked each time:
 ```markdown
 ## Delegating implementation to Codex (gpt-5.5)
 
-The `codex-delegate` skill/agent runs `codex exec` inside a cheap Sonnet subagent and
-returns only a summary — the token-cheap way to offload work off the main orchestrator
-context. Route by task type; don't wait to be asked:
+The `codex-delegate` skill/agent runs `codex exec` through `~/.claude/scripts/codex-run.sh`
+inside a cheap Sonnet subagent and returns only a summary — the token-cheap way to offload
+work off the main orchestrator context. Route by task type; don't wait to be asked:
 
 - Delegate for large, well-specified work: multi-file refactor, migration, boilerplate,
   bulk-mechanical edits, clear-spec implementation that would cost many round-trips inline.
 - Do it yourself for: small one-shot edits, architecture judgment about this codebase, and
   user-facing work where taste matters.
 - Never call `codex exec` directly from the main context (it dumps the whole transcript).
-  Never pass approval-bypass flags; rely on `-s workspace-write` / `read-only`.
+  Always go through the subagent/script; the script refuses extra flags and detects quota/stalls.
 - After Codex returns, `git diff`/review before accepting — you own the merge.
 ```
 

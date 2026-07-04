@@ -91,9 +91,10 @@ Claude will read the docs and configure everything.
 |------|----------|
 | [`agents/`](agents/) | `code-architect`, `code-simplifier`, `codex-delegate` |
 | [`skills/`](skills/) | `birchline-html`, `codex-delegate`, `commit-push-pr`, `dedupe`, `deep-teach`, `frontend-design`, `handoff`, `oncall-triage`, `spec` |
+| [`scripts/`](scripts/) | `codex-run.sh` wrapper used by the `codex-delegate` Claude agent |
 | [`codex-skills/`](codex-skills/) | Codex-native versions: `code-review`, `commit-push-pr`, `dedupe`, `frontend-design`, `handoff`, `oncall-triage`, `spec` |
 
-Copy [`agents/`](agents/) and [`skills/`](skills/) to `~/.claude/agents/` and `~/.claude/skills/` for Claude Code. Copy [`codex-skills/`](codex-skills/) to `~/.codex/skills/` for Codex.
+Copy [`agents/`](agents/), [`skills/`](skills/), and [`scripts/`](scripts/) to `~/.claude/agents/`, `~/.claude/skills/`, and `~/.claude/scripts/` for Claude Code. Copy [`codex-skills/`](codex-skills/) to `~/.codex/skills/` for Codex.
 
 ## Recommended third-party skills
 

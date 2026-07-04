@@ -6,14 +6,7 @@ allowed-tools: Bash, Read, Glob, Grep, LS
 
 ## What this does
 
-Runs Codex the token-cheap way (benchmark-verified): spawn the **`codex-delegate` subagent** (Sonnet), which shells out to `codex exec` and returns only a ~10-line summary. Codex's work (tens of thousands of tokens) runs on OpenAI's side and its transcript is absorbed by the cheap Sonnet subagent — **the main context only pays for the summary.**
-
-Calling `codex exec` *directly* from the main context instead would dump the entire transcript (~90KB in the benchmark) back into Opus — convenient but the opposite of token-saving. Always go through the subagent.
-
-## When to use it (routing)
-
-- **Use**: well-specified implementation, refactor across many files, migration, boilerplate/scaffolding, bulk-mechanical edits, or work that would take many Read/Edit/Bash/test/fix round-trips inline.
-- **Don't use**: a small edit you can do correctly in one shot (delegation overhead isn't worth it), or anything needing deep judgment about *this* codebase's architecture — do that yourself.
+Spawns the **`codex-delegate` subagent** (Sonnet), which runs `codex exec` and returns only a ~10-line summary — Codex's huge transcript is absorbed by the cheap wrapper, so the main context pays only for the summary. Routing (when to delegate vs. do it yourself) lives in `~/.claude/CLAUDE.md` § *Delegating implementation to Codex*; by the time this skill loads, that decision is made. Wrapper mechanics live in the agent def — this file covers only the orchestrator side: how to spawn, and what to do with what comes back.
 
 ## How to invoke
 
@@ -25,7 +18,7 @@ Calling `codex exec` *directly* from the main context instead would dump the ent
    Agent(
      subagent_type: "codex-delegate",
      description: "delegate to codex",
-     prompt: "TASK: <full self-contained spec>\nWORKDIR: <abs path>\nSANDBOX: workspace-write\nVERIFY: <test/build cmd or omit>",
+     prompt: "TASK: <full self-contained spec>\nWORKDIR: <abs path>\nSANDBOX: workspace-write\nVERIFY: <test/build cmd or omit>\nTAKEOVER: allowed  # optional — lets the wrapper finish mechanical remainder itself if Codex is quota-blocked/crashed; omit to restrict it to salvage-only",
      run_in_background: true
    )
    ```
@@ -36,15 +29,21 @@ Calling `codex exec` *directly* from the main context instead would dump the ent
      subagent_type: "general-purpose",
      model: "sonnet",
      description: "delegate to codex",
-     prompt: "First Read ~/.claude/agents/codex-delegate.md and adopt it as your complete role and instructions. Then carry out:\nTASK: <full self-contained spec>\nWORKDIR: <abs path>\nSANDBOX: workspace-write\nVERIFY: <test/build cmd or omit>",
+     prompt: "First Read /home/cong/.claude/agents/codex-delegate.md and adopt it as your complete role and instructions. Then carry out:\nTASK: <full self-contained spec>\nWORKDIR: <abs path>\nSANDBOX: workspace-write\nVERIFY: <test/build cmd or omit>",
      run_in_background: true
    )
    ```
 
 3. When it returns its compact summary, **review the actual change yourself** before accepting: run `git diff` / `git status`, sanity-check the files it reports, and re-run VERIFY if correctness matters. Codex is fast but not infallible — you own the merge.
 
+## Long tasks, status checks, failures
+
+- A background wrapper sometimes ends its turn early ("waiting for notification") on multi-notification runs. If a long task has gone quiet, **SendMessage the same agent id** asking for a concrete status — don't spawn a fresh wrapper (it would re-derive everything cold). Same for follow-up work that needs the task's context.
+- The wrapper may return `BLOCKED — quota resets at <time>` (Codex usage limit). That's not a failure to retry — reschedule the same delegation after the reset, or do the work another way.
+- Codex quota is a shared budget: batch related work into one delegation instead of many small ones, and don't redo a delegation for cosmetic reasons.
+
 ## Safety notes
 
 - `workspace-write` lets Codex edit **any file under WORKDIR**, including things like `.env` or config/DB files. For a sensitive repo, pass a narrower WORKDIR (a subdir) or `read-only`.
-- The subagent is instructed to never use approval-bypass flags; it relies on the sandbox. Don't override that.
+- The subagent invokes Codex only via `~/.claude/scripts/codex-run.sh`, which accepts no flag pass-through — approval-bypass flags are structurally impossible, and quota/stall detection is built in. Don't bypass the script.
 - This needs the `codex` CLI installed and authenticated (`codex login`). If missing, `codex:setup`-style checks: `codex --version`.
