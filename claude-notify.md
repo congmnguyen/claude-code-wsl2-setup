@@ -41,9 +41,10 @@ Save to `~/bin/claude-notify`:
 #!/bin/bash
 title="${1:-Claude Code}"
 message="${2:-Notification}"
-# Escape quotes for PowerShell
-title=$(echo "$title" | sed 's/"/\\"/g')
-message=$(echo "$message" | sed 's/"/\\"/g')
+# Escape for PowerShell: text lands inside single-quoted PS strings, where the
+# only special character is the single quote itself (escaped by doubling).
+title=$(printf '%s' "$title" | sed "s/'/''/g")
+message=$(printf '%s' "$message" | sed "s/'/''/g")
 /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command "
 Add-Type -TypeDefinition @'
 using System;
@@ -133,11 +134,12 @@ foreground window, so notifications only appear when you're working in another w
 
 > **Why `bash -c '... &'` and not just the command directly?**
 >
-> The script calls PowerShell which does `Start-Sleep -Seconds 6` before exiting.
-> If the hook runs synchronously, Claude Code blocks for ~7 s every time a notification
-> fires — the UI appears frozen and input is unresponsive during that window.
-> Running it with `&` inside `bash -c` detaches it immediately so Claude Code continues
-> while the balloon tip displays in the background.
+> The PowerShell process stays alive in its WinForms message loop
+> (`[Application]::Run()`) until the balloon is clicked, dismissed, or times out
+> (~6 s). If the hook ran synchronously, Claude Code would block for that entire
+> time — the UI appears frozen and input is unresponsive. Running it with `&`
+> inside `bash -c` detaches it immediately so Claude Code continues while the
+> balloon tip displays in the background.
 
 Restart Claude Code for the hook to take effect.
 
@@ -165,7 +167,7 @@ at the terminal.
 - Check Windows notification settings — balloon tips require "Get notifications from apps"
   to be enabled for the app, and Focus Assist must not be blocking them.
 
-**UI freezes for ~7 seconds when Claude finishes a task**
+**UI freezes for several seconds when Claude finishes a task**
 - The hook is running synchronously (missing the `&`).
 - Ensure the command in `settings.json` is wrapped as `bash -c '... &'`.
 

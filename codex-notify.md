@@ -20,10 +20,12 @@ wires it up through Codex's `notify` config instead of Claude hooks.
 
 1. Codex finishes a turn and emits an `agent-turn-complete` event.
 2. It runs the program in the top-level `notify` key, passing the event JSON as the
-   **final argument**. With `["bash", "-lc", "<script>", "--"]`, the `"--"` becomes `$0`
+   **final argument**. With `["bash", "-c", "<script>", "--"]`, the `"--"` becomes `$0`
    and the JSON lands in `$1`.
 3. `jq` extracts `last-assistant-message` from the payload, so the balloon shows **Codex's
-   actual last reply** (truncated to 120 chars), falling back to `"Done!"` if parsing fails.
+   actual last reply** (truncated to 120 *characters* via jq's `.[0:120]` slice — not
+   `head -c`, which cuts bytes and can shred a multibyte UTF-8 char into mojibake),
+   falling back to `"Done!"` if parsing fails.
 4. `~/bin/claude-notify "Codex" "<msg>"` runs with a trailing `&` so it detaches
    immediately — Codex never blocks while the balloon is up.
 5. The script's `GetForegroundWindow()` check still applies: the balloon is suppressed when
@@ -48,7 +50,7 @@ Add to the **top-level** section of `~/.codex/config.toml` (before any `[table]`
 TOML requires top-level keys to precede tables):
 
 ```toml
-notify = ["bash", "-lc", "msg=$(printf '%s' \"$1\" | jq -r '.\"last-assistant-message\" // \"Done!\"' 2>/dev/null | head -c 120); ~/bin/claude-notify \"Codex\" \"${msg:-Done!}\" &", "--"]
+notify = ["bash", "-c", "msg=$(printf '%s' \"$1\" | jq -r '(.\"last-assistant-message\" // \"Done!\") | .[0:120]' 2>/dev/null); ~/bin/claude-notify \"Codex\" \"${msg:-Done!}\" &", "--"]
 ```
 
 Restart Codex for the config to take effect.
@@ -73,6 +75,12 @@ are already looking at the terminal.
   from Windows Terminal first, or it will self-suppress).
 - Confirm `jq` is installed: `command -v jq`.
 - Restart Codex — it only reads `config.toml` at startup.
+
+**Balloon appears for short replies but not for others**
+- An old `~/bin/claude-notify` that doesn't escape single quotes dies with a PowerShell
+  parse error on any reply containing an apostrophe ("I've…", "don't…"). Reinstall the
+  script from `claude-notify.md` — it must double single quotes (`sed "s/'/''/g"`), since
+  the text lands inside single-quoted PowerShell strings.
 
 **Balloon shows raw JSON instead of the reply**
 - The `jq` filter failed (older Codex payload, or `jq` missing). The script falls back to
