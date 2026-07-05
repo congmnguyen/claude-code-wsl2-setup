@@ -50,6 +50,7 @@ It also saves tokens, because Claude stops scrolling through files that don't ma
 - **"Needs your input" Windows notification** — fires when Claude finishes a task or asks for permission, and is suppressed automatically when Windows Terminal is already focused. WSL2 variant uses a balloon tip; the native PowerShell variant uses a modern Windows toast.
 - **Status line** — project directory, git branch, context-window fill bar, and 5-hour / 7-day usage, color-coded by severity.
 - **Secrets hygiene hook** — blocks Claude from reading credential files into the transcript with `Read`, `Grep`, or content-printing shell commands.
+- **Bash output truncation hook** — cuts huge command output (test runs, build logs, JSON dumps) down to head+tail with an omission marker, so one verbose command doesn't eat the context window for the rest of the session.
 - **Settings tweaks** — disable the `Co-authored-by: Claude` git attribution and pre-accept the project trust dialog.
 - **Windows browser** — open links and OAuth flows in your existing Windows browser instead of Chromium inside WSL2.
 - **Voice mode** — fix ALSA errors so `/voice` works, routing audio through WSLg's PulseAudio server.
@@ -79,6 +80,7 @@ Claude will read the docs and configure everything.
 | [`claude-notify-powershell.md`](claude-notify-powershell.md) + [`claude-hook-toast.ps1`](claude-hook-toast.ps1) | Windows toast — native PowerShell variant |
 | [`statusline.md`](statusline.md) | Status line — project dir, git branch, context bar, 5h / 7d usage |
 | [`secrets-hygiene-hook.md`](secrets-hygiene-hook.md) + [`hooks/block-secret-reads.sh`](hooks/block-secret-reads.sh) | PreToolUse hook — block credential-file reads before they hit the transcript |
+| [`truncate-bash-output.md`](truncate-bash-output.md) + [`hooks/truncate-bash-output.sh`](hooks/truncate-bash-output.sh) | PostToolUse hook — truncate huge Bash output to head+tail before it eats context |
 | [`settings.md`](settings.md) | Disable git attribution, skip trust dialog |
 | [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` env var |
 | [`mcp-setup.md`](mcp-setup.md) | DeepWiki, Playwright, and Figma Desktop MCP servers |
@@ -93,7 +95,7 @@ Claude will read the docs and configure everything.
 |------|----------|
 | [`agents/`](agents/) | `code-architect`, `code-simplifier`, `codex-delegate` |
 | [`skills/`](skills/) | `birchline-html`, `codex-delegate`, `commit-push-pr`, `dedupe`, `deep-teach`, `frontend-design`, `handoff`, `oncall-triage`, `pytorch-training`, `spec` |
-| [`hooks/`](hooks/) | `block-secret-reads.sh` PreToolUse hook |
+| [`hooks/`](hooks/) | `block-secret-reads.sh` PreToolUse hook, `truncate-bash-output.sh` PostToolUse hook |
 | [`scripts/`](scripts/) | `codex-run.sh` wrapper used by the `codex-delegate` Claude agent |
 | [`codex-skills/`](codex-skills/) | Codex-native versions: `code-review`, `commit-push-pr`, `dedupe`, `frontend-design`, `handoff`, `oncall-triage`, `spec` |
 

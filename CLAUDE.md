@@ -25,6 +25,7 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 | `claude-notify-powershell.md` | `%USERPROFILE%\.claude\claude-hook-toast.ps1` + `PermissionRequest` hook only — **native Windows PowerShell only** |
 | `statusline.md` | `~/.claude/statusline-command.sh` + `statusLine` in `~/.claude/settings.json` |
 | `secrets-hygiene-hook.md` | `~/.claude/hooks/block-secret-reads.sh` + `PreToolUse` hook for `Read|Grep|Bash`; blocks credential-file reads before transcript exposure |
+| `truncate-bash-output.md` | `~/.claude/hooks/truncate-bash-output.sh` + `PostToolUse` hook for `Bash`; truncates >200-line / >30k-char output to head+tail with an omission marker |
 | `settings.md` | `~/.claude/settings.json` `attribution` field + `~/.claude.json` `hasTrustDialogAccepted` |
 | `browser.md` | `BROWSER` env var in `~/.zshrc` pointing to Windows `.exe` |
 | `mcp-setup.md` | DeepWiki (HTTP, user-scoped), Playwright (npx), Figma Desktop (localhost:3845) |
@@ -57,6 +58,8 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 
 **secrets-hygiene PreToolUse hook**: `hooks/block-secret-reads.sh` is copied unchanged from the live `~/.claude/hooks/block-secret-reads.sh`. It exits `2` to block `Read`, `Grep`, or Bash content-printing commands aimed at credential-looking paths (`~/.ssh/*`, `.env`, `.aws/credentials`, kube/gcloud/docker configs, `.netrc`, `.npmrc`, private-key filenames, and generic `credential|secret|token`). It is pattern-based only: env dumps, direct variable expansion, and secrets already present in command output/logs still require a short `CLAUDE.md` prompt rule and manual rotation if leaked.
 
+**truncate-bash-output PostToolUse hook**: `hooks/truncate-bash-output.sh` is copied unchanged from the live `~/.claude/hooks/truncate-bash-output.sh`. Schema trap: `updatedToolOutput` must match the tool's output schema — for Bash that is the full `tool_response` object, so the script replaces `.stdout` in place with jq rather than emitting a bare string (a bare string is silently ignored and truncation stops working). Requires `jq`.
+
 ## When Asked to "Set This Up"
 
 Read all `*.md` files, then:
@@ -66,6 +69,6 @@ Read all `*.md` files, then:
 4. Set `attribution` in `~/.claude/settings.json`. Save `~/.claude/statusline-command.sh` from `statusline.md` and set `statusLine` in `~/.claude/settings.json`.
 5. Install the LSP plugins per `lsp-setup.md` and set `enabledPlugins` in `~/.claude/settings.json`. Install language-server binaries for whichever languages the user works in.
 6. Copy `agents/*.md` → `~/.claude/agents/`, `skills/<name>/SKILL.md` → `~/.claude/skills/<name>/SKILL.md`, `hooks/*.sh` → `~/.claude/hooks/`, and `codex-skills/<name>/` → `~/.codex/skills/<name>/` when setting up Codex too.
-7. Merge the `secrets-hygiene-hook.md` `PreToolUse` hook into `~/.claude/settings.json`.
+7. Merge the `secrets-hygiene-hook.md` `PreToolUse` hook and the `truncate-bash-output.md` `PostToolUse` hook into `~/.claude/settings.json`.
 8. Install `pulseaudio-utils` and `libasound2-plugins`, create `~/.asoundrc` with the pulse PCM config, and add `PULSE_SERVER` to `~/.zshrc` (see `voice.md`).
 9. Remind the user to manually apply the Windows-side changes (Windows Terminal `settings.json`, `~/.zshrc` `BROWSER` export, SharpKeys CapsLock→Escape remap from `capslock-esc.md`, and — if they also run Claude Code natively on Windows — `claude-notify-powershell.md`) since WSL cannot edit Windows files.
