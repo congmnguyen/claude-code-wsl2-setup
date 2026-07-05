@@ -5,12 +5,12 @@ A custom status line script that shows the current project directory, git branch
 ![Status line preview](assets/statusline.png)
 
 ```
-video-site | main | [████░░░░░░] 42% | 5h:28% | W:4%
+📁 video-site | 🌿 main | [████░░░░░░] 42% | 5h:28% | W:4%
 ```
 
-- **Project dir** — basename of `.workspace.current_dir` (fallback: `$PWD`), no color
-- **Git branch** — current branch, no color (only shown inside git repos)
-- **Progress bar** — context window fill (green < 50%, yellow < 80%, red ≥ 80%)
+- **Project dir** — basename of `.workspace.current_dir` (fallback: `$PWD`), prefixed with `📁`
+- **Git branch** — current branch, prefixed with `🌿` (only shown inside git repos)
+- **Progress bar** — context window fill (green < 70%, yellow < 90%, red ≥ 90%)
 - **5h:X%** — 5-hour rolling usage
 - **W:X%** — 7-day rolling usage
 
@@ -24,7 +24,7 @@ video-site | main | [████░░░░░░] 42% | 5h:28% | W:4%
 cat > ~/.claude/statusline-command.sh << 'EOF'
 #!/usr/bin/env bash
 # Claude Code status line
-# Format: video-site | branch | [████░░░░░░] 42% | 5h:28% | W:4%
+# Format: 📁 video-site | 🌿 branch | [████░░░░░░] 42% | 5h:28% | W:4%
 
 input=$(cat)
 
@@ -42,8 +42,8 @@ parts=()
 # ── Helper: pick ANSI color based on percentage ───────────────────────────────
 pct_color() {
   local pct=$1
-  if   [ "$pct" -lt 50 ]; then printf '\033[32m'
-  elif [ "$pct" -lt 80 ]; then printf '\033[33m'
+  if   [ "$pct" -lt 70 ]; then printf '\033[32m'
+  elif [ "$pct" -lt 90 ]; then printf '\033[33m'
   else                          printf '\033[31m'
   fi
 }
@@ -51,12 +51,12 @@ pct_color() {
 # ── 0. Project dir basename ───────────────────────────────────────────────────
 project_dir="${cwd:-$PWD}"
 project_name="$(basename "$project_dir")"
-parts+=("$project_name")
+parts+=("📁 $project_name")
 
 # ── 1. Git branch (only inside git repos) ─────────────────────────────────────
 if [ -n "$cwd" ]; then
   branch=$(git -C "$cwd" --no-optional-locks symbolic-ref --short HEAD 2>/dev/null)
-  [ -n "$branch" ] && parts+=("$branch")
+  [ -n "$branch" ] && parts+=("🌿 $branch")
 fi
 
 # ── 2. Context window progress bar + percentage ───────────────────────────────
