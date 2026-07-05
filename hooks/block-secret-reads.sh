@@ -7,7 +7,7 @@ input=$(cat)
 tool=$(jq -r '.tool_name // empty' <<<"$input")
 
 # Things that look secret but aren't (ML tokenizers, templates, counters, this hook itself)
-benign='(tokeniz|\.env\.(example|sample|template)|token_count|max_token|num_token|block-secret-reads|secrets-hygiene)'
+benign='(tokeniz|\.env\.(example|sample|template)|token_count|max_token|num_token|block-secret-reads\.sh|secrets-hygiene-hook\.md)'
 
 # Broad pattern for direct file targets (Read tool file_path, Grep path/glob)
 secret_file='(/\.ssh/|/\.aws/|/\.kube/|/\.config/gcloud/|/\.docker/config\.json|(^|/)\.env|\.netrc|\.npmrc|id_rsa|id_ed25519|credential|secret|token)'
