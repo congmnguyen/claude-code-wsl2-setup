@@ -11,6 +11,7 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 - **`*.md` at root** — Each file documents one fix: the problem, root cause, exact config or script to install, and troubleshooting steps. These are the primary artifacts.
 - **`agents/`** — Custom Claude Code subagent definitions (YAML frontmatter + instructions). Installed to `~/.claude/agents/`.
 - **`skills/`** — Custom Claude Code slash-command skills. Installed to `~/.claude/skills/`.
+- **`hooks/`** — Claude Code hook scripts. Installed to `~/.claude/hooks/`.
 - **`codex-skills/`** — Codex-native skills adapted from the Claude skill set. Installed to `~/.codex/skills/`.
 
 ## The Fixes
@@ -23,6 +24,7 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 | `codex-notify.md` | Reuses `~/bin/claude-notify` via Codex top-level `notify` key in `~/.codex/config.toml`; `jq` pulls `last-assistant-message` into the balloon — **WSL2 only** |
 | `claude-notify-powershell.md` | `%USERPROFILE%\.claude\claude-hook-toast.ps1` + `PermissionRequest` hook only — **native Windows PowerShell only** |
 | `statusline.md` | `~/.claude/statusline-command.sh` + `statusLine` in `~/.claude/settings.json` |
+| `secrets-hygiene-hook.md` | `~/.claude/hooks/block-secret-reads.sh` + `PreToolUse` hook for `Read|Grep|Bash`; blocks credential-file reads before transcript exposure |
 | `settings.md` | `~/.claude/settings.json` `attribution` field + `~/.claude.json` `hasTrustDialogAccepted` |
 | `browser.md` | `BROWSER` env var in `~/.zshrc` pointing to Windows `.exe` |
 | `mcp-setup.md` | DeepWiki (HTTP, user-scoped), Playwright (npx), Figma Desktop (localhost:3845) |
@@ -53,6 +55,8 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 
 **statusline JSON parsing**: Claude Code pipes a JSON blob to the script stdin on every refresh. Four fields are extracted in a single `jq -r '@tsv'` call assigned via `IFS=$'\t' read`: working dir, context %, 5-hour usage %, 7-day usage %. The git branch is resolved with `git -C "$cwd" --no-optional-locks symbolic-ref --short HEAD` using the working dir from the JSON — no `cd` needed, and `--no-optional-locks` avoids touching `.git/` lock files. The `statusLine` setting takes `{ "type": "command", "command": "..." }` — the command must be a single string (no array form). Format: `cong | branch | [bar] % | 5h:X% | W:X%` — username hardcoded, branch omitted outside git repos, no model name, no reset timers.
 
+**secrets-hygiene PreToolUse hook**: `hooks/block-secret-reads.sh` is copied unchanged from the live `~/.claude/hooks/block-secret-reads.sh`. It exits `2` to block `Read`, `Grep`, or Bash content-printing commands aimed at credential-looking paths (`~/.ssh/*`, `.env`, `.aws/credentials`, kube/gcloud/docker configs, `.netrc`, `.npmrc`, private-key filenames, and generic `credential|secret|token`). It is pattern-based only: env dumps, direct variable expansion, and secrets already present in command output/logs still require a short `CLAUDE.md` prompt rule and manual rotation if leaked.
+
 ## When Asked to "Set This Up"
 
 Read all `*.md` files, then:
@@ -61,6 +65,7 @@ Read all `*.md` files, then:
 3. Create/update `~/.claude/keybindings.json` with the Alt+V binding.
 4. Set `attribution` in `~/.claude/settings.json`. Save `~/.claude/statusline-command.sh` from `statusline.md` and set `statusLine` in `~/.claude/settings.json`.
 5. Install the LSP plugins per `lsp-setup.md` and set `enabledPlugins` in `~/.claude/settings.json`. Install language-server binaries for whichever languages the user works in.
-6. Copy `agents/*.md` → `~/.claude/agents/`, `skills/<name>/SKILL.md` → `~/.claude/skills/<name>/SKILL.md`, and `codex-skills/<name>/` → `~/.codex/skills/<name>/` when setting up Codex too.
-7. Install `pulseaudio-utils` and `libasound2-plugins`, create `~/.asoundrc` with the pulse PCM config, and add `PULSE_SERVER` to `~/.zshrc` (see `voice.md`).
-8. Remind the user to manually apply the Windows-side changes (Windows Terminal `settings.json`, `~/.zshrc` `BROWSER` export, SharpKeys CapsLock→Escape remap from `capslock-esc.md`, and — if they also run Claude Code natively on Windows — `claude-notify-powershell.md`) since WSL cannot edit Windows files.
+6. Copy `agents/*.md` → `~/.claude/agents/`, `skills/<name>/SKILL.md` → `~/.claude/skills/<name>/SKILL.md`, `hooks/*.sh` → `~/.claude/hooks/`, and `codex-skills/<name>/` → `~/.codex/skills/<name>/` when setting up Codex too.
+7. Merge the `secrets-hygiene-hook.md` `PreToolUse` hook into `~/.claude/settings.json`.
+8. Install `pulseaudio-utils` and `libasound2-plugins`, create `~/.asoundrc` with the pulse PCM config, and add `PULSE_SERVER` to `~/.zshrc` (see `voice.md`).
+9. Remind the user to manually apply the Windows-side changes (Windows Terminal `settings.json`, `~/.zshrc` `BROWSER` export, SharpKeys CapsLock→Escape remap from `capslock-esc.md`, and — if they also run Claude Code natively on Windows — `claude-notify-powershell.md`) since WSL cannot edit Windows files.
