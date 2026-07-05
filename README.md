@@ -92,7 +92,7 @@ Claude will read the docs and configure everything.
 | Path | Contents |
 |------|----------|
 | [`agents/`](agents/) | `code-architect`, `code-simplifier`, `codex-delegate` |
-| [`skills/`](skills/) | `birchline-html`, `codex-delegate`, `commit-push-pr`, `dedupe`, `deep-teach`, `frontend-design`, `handoff`, `oncall-triage`, `spec` |
+| [`skills/`](skills/) | `birchline-html`, `codex-delegate`, `commit-push-pr`, `dedupe`, `deep-teach`, `frontend-design`, `handoff`, `oncall-triage`, `pytorch-training`, `spec` |
 | [`hooks/`](hooks/) | `block-secret-reads.sh` PreToolUse hook |
 | [`scripts/`](scripts/) | `codex-run.sh` wrapper used by the `codex-delegate` Claude agent |
 | [`codex-skills/`](codex-skills/) | Codex-native versions: `code-review`, `commit-push-pr`, `dedupe`, `frontend-design`, `handoff`, `oncall-triage`, `spec` |
