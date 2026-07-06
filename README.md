@@ -25,6 +25,25 @@ It also saves tokens, because Claude stops scrolling through files that don't ma
 
 ---
 
+## Featured fixes
+
+Start with these — they are the highest-leverage pieces in the repo:
+
+- **[LSP setup](lsp-setup.md)** — lets Claude use real Go-to-Definition / reference
+  navigation instead of burning tokens on broad file search.
+- **[Codex delegate](codex-delegate.md)** — routes large mechanical implementation to Codex
+  through an isolated Sonnet wrapper, keeping the premium Claude orchestrator context clean.
+- **[Image paste](image-paste.md)** — paste a Windows screenshot into Claude Code or Codex as
+  a usable WSL file path.
+- **[Notifications](claude-notify.md)** — get a Windows notification when Claude finishes or
+  needs permission, without interrupting you while Windows Terminal is focused.
+- **[Secrets hygiene hook](secrets-hygiene-hook.md)** — blocks credential-file reads before
+  secrets can land in the transcript.
+- **[Bash output truncation hook](truncate-bash-output.md)** — trims huge command output to
+  head+tail so one verbose test/build log does not bloat the rest of the context.
+
+---
+
 ## Preview
 
 <p align="center">
@@ -76,23 +95,40 @@ Claude will read the docs and configure everything.
 
 ## What's included
 
+### Claude Code core
+
 | File | Fix |
 |------|-----|
-| [`lsp-setup.md`](lsp-setup.md) | **LSP** — official plugins + language servers for TypeScript, Python, Go, Rust |
-| [`image-paste.md`](image-paste.md) | Screenshot paste — wsl-screenshot-cli daemon + optional Alt+V keybinding |
-| [`shift-enter.md`](shift-enter.md) | Shift+Enter newline in VSCode terminal and Windows Terminal |
-| [`claude-notify.md`](claude-notify.md) | Windows balloon tip — WSL2 variant for Claude Code `Stop` / `PermissionRequest` hooks and Codex `notify` |
-| [`claude-notify-powershell.md`](claude-notify-powershell.md) + [`claude-hook-toast.ps1`](claude-hook-toast.ps1) | Windows toast — native PowerShell variant |
-| [`statusline.md`](statusline.md) | Status line — project dir, git branch, context bar, 5h / 7d usage |
+| [`lsp-setup.md`](lsp-setup.md) | Official LSP plugins + language servers for TypeScript, Python, Go, Rust |
+| [`statusline.md`](statusline.md) | Project dir, git branch, context bar, 5h / 7d usage |
+| [`settings.md`](settings.md) | Disable git attribution, skip trust dialog |
+
+### Agent workflows
+
+| File | Fix |
+|------|-----|
+| [`codex-delegate.md`](codex-delegate.md) | Codex delegation with token isolation via a Sonnet wrapper instead of direct MCP/plugin foreground output |
+| [`mcp-setup.md`](mcp-setup.md) | DeepWiki, Playwright, and Figma Desktop MCP servers |
+| [`playwright-cli.md`](playwright-cli.md) | Token-efficient browser automation; preferred over Playwright MCP for coding agents |
+
+### Safety and context hygiene
+
+| File | Fix |
+|------|-----|
 | [`secrets-hygiene-hook.md`](secrets-hygiene-hook.md) + [`hooks/block-secret-reads.sh`](hooks/block-secret-reads.sh) | PreToolUse hook — block credential-file reads before they hit the transcript |
 | [`truncate-bash-output.md`](truncate-bash-output.md) + [`hooks/truncate-bash-output.sh`](hooks/truncate-bash-output.sh) | PostToolUse hook — truncate huge Bash output to head+tail before it eats context |
-| [`settings.md`](settings.md) | Disable git attribution, skip trust dialog |
+
+### WSL / Windows bridge
+
+| File | Fix |
+|------|-----|
+| [`image-paste.md`](image-paste.md) | Screenshot paste — wsl-screenshot-cli daemon + optional Alt+V keybinding |
+| [`claude-notify.md`](claude-notify.md) | Windows balloon tip — WSL2 variant for Claude Code `Stop` / `PermissionRequest` hooks and Codex `notify` |
+| [`claude-notify-powershell.md`](claude-notify-powershell.md) + [`claude-hook-toast.ps1`](claude-hook-toast.ps1) | Windows toast — native PowerShell variant |
+| [`shift-enter.md`](shift-enter.md) | Shift+Enter newline in VSCode terminal and Windows Terminal |
 | [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` env var |
-| [`mcp-setup.md`](mcp-setup.md) | DeepWiki, Playwright, and Figma Desktop MCP servers |
-| [`playwright-cli.md`](playwright-cli.md) | Playwright **CLI** — token-efficient browser automation; preferred over Playwright MCP for coding agents |
-| [`codex-delegate.md`](codex-delegate.md) | Codex delegation with token isolation — why this repo uses a Sonnet wrapper instead of direct MCP/plugin foreground output |
-| [`voice.md`](voice.md) | Voice mode — ALSA → PulseAudio → WSLg bridge, `~/.asoundrc` + `PULSE_SERVER` |
-| [`capslock-esc.md`](capslock-esc.md) | CapsLock → Escape — registry-level remap via SharpKeys (Windows-side only) |
+| [`voice.md`](voice.md) | ALSA → PulseAudio → WSLg bridge, `~/.asoundrc` + `PULSE_SERVER` |
+| [`capslock-esc.md`](capslock-esc.md) | CapsLock → Escape registry remap via SharpKeys |
 
 ## Custom agents and skills
 
