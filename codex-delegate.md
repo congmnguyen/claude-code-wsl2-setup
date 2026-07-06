@@ -2,8 +2,8 @@
 
 ## Problem
 
-You want your Claude Code orchestrator (Opus, Fable, …) to hand heavy or mechanical coding
-off to Codex (`gpt-5.5`), so the big generation work runs on OpenAI's quota instead of your
+You want your Claude Code orchestrator to hand heavy or mechanical coding off to the
+configured Codex model, so the big generation work runs on OpenAI's quota instead of your
 Claude usage. The obvious ways backfire:
 
 - **`claude mcp add codex -- codex mcp-server`** (Codex as an MCP tool), or the
@@ -45,8 +45,8 @@ the place where a 90 KB implementation transcript lands.
 
 The self-written wrapper exists for four concrete reasons:
 
-- **Token isolation** — Codex's long transcript is absorbed by a low-effort Sonnet wrapper
-  subagent; Opus/Fable only sees the final summary.
+- **Token isolation** — Codex's long transcript is redirected to a wrapper-owned log;
+  the main Claude session only sees the final summary.
 - **Predictable contract** — the orchestrator gets the same small report every time:
   files changed, tests, wall-clock, Codex tokens, and failure mode.
 - **Safety rails** — Codex is only invoked through `scripts/codex-run.sh`, which uses a
@@ -61,21 +61,20 @@ large mechanical implementation.
 
 ## How it works
 
-A thin **Sonnet subagent** is the wrapper. The orchestrator writes a self-contained spec,
+A thin **low-effort Sonnet subagent** is the wrapper. The orchestrator writes a self-contained spec,
 spawns the subagent, and the subagent:
 
-1. Runs `codex exec -s workspace-write --skip-git-repo-check "<spec>"` via Bash.
-2. Absorbs Codex's full transcript (tens of KB) into **its own** cheap context.
+1. Runs `scripts/codex-run.sh`, which passes the spec to `codex exec` through stdin.
+2. Redirects Codex's full transcript to a log file outside the main conversation.
 3. Returns a ~10-line summary: files changed, codex tokens, wall-clock, test result.
 
 The orchestrator only ever sees the summary. The heavy generation runs on OpenAI; the heavy
-transcript sits in a Sonnet subagent, not your Opus/Fable context.
+transcript stays in a log file, not your Claude context.
 
 > **This does not make delegation free against your Claude usage.** The Sonnet subagent
-> still spends Claude tokens (~35k in the benchmark) to read the transcript — that counts
-> against your plan, it's just the cheaper tier instead of premium orchestrator tokens. The
-> genuinely-offloaded part is Codex's ~50k tokens, which run on OpenAI. Net: a clear win on
-> **large** tasks, a **loss** on small ones (the wrapper overhead exceeds the work).
+> still spends some Claude tokens preparing the handoff, monitoring the run, and reporting
+> the result. The raw Codex transcript is not fed back to it by default. Net: a clear win on
+> **large** tasks, a **loss** on small ones where wrapper overhead exceeds the work.
 
 ## Setup
 
@@ -90,8 +89,8 @@ chmod +x ~/.claude/scripts/codex-run.sh
 ```
 
 Requires the [Codex CLI](https://github.com/openai/codex) installed and authenticated
-(`codex --version`, `codex login`). Codex's default model lives in `~/.codex/config.toml`
-(set `model = "gpt-5.5"`).
+(`codex --version`, `codex login`). The wrapper uses whichever model is configured in
+`~/.codex/config.toml`; it does not hardcode a model name.
 
 **Trap — restart after adding the agent.** Custom agents in `~/.claude/agents/` load only at
 Claude Code startup, so a freshly-copied `codex-delegate` agent isn't callable until you
@@ -104,19 +103,12 @@ Add this to `~/.claude/CLAUDE.md` so the orchestrator delegates *proactively* in
 waiting to be asked each time:
 
 ```markdown
-## Delegating implementation to Codex (gpt-5.5)
+## Codex Delegation
 
-The `codex-delegate` skill/agent runs `codex exec` through `~/.claude/scripts/codex-run.sh`
-inside a cheap Sonnet subagent and returns only a summary — the token-cheap way to offload
-work off the main orchestrator context. Route by task type; don't wait to be asked:
-
-- Delegate for large, well-specified work: multi-file refactor, migration, boilerplate,
-  bulk-mechanical edits, clear-spec implementation that would cost many round-trips inline.
-- Do it yourself for: small one-shot edits, architecture judgment about this codebase, and
-  user-facing work where taste matters.
-- Never call `codex exec` directly from the main context (it dumps the whole transcript).
-  Always go through the subagent/script; the script refuses extra flags and detects quota/stalls.
-- After Codex returns, `git diff`/review before accepting — you own the merge.
+Use `codex-delegate` proactively for large, well-specified mechanical implementation. Keep
+small edits, architecture, ambiguous debugging, and final UX judgment in the main context.
+Never run raw `codex exec` from the main context; use `codex-delegate` so Codex output stays
+isolated.
 ```
 
 ## Result
@@ -134,8 +126,8 @@ before merging.
   needing deep judgment about *your* codebase — Codex comes in cold with no memory of the
   conversation, so it can produce technically-correct-but-off-convention code.
 - Delegation buys **speed and token routing, not quality**. Output quality only improves if
-  you add a review gate (orchestrator reviews Codex's diff) or the task fits `gpt-5.5`'s
-  strengths — not because Codex is universally better.
+  you add a review gate or the task fits the configured Codex model's strengths — not because
+  Codex is universally better.
 
 ## Safety
 

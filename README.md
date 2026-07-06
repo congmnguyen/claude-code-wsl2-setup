@@ -21,7 +21,7 @@ parallel while the main Claude session still showed 8% context and 6% five-hour 
 
 <p align="center">
   <img src="assets/preview-codex-delegate.png" alt="Claude Code running two Codex delegate subagents while the main context and five-hour usage stay low" width="720"><br>
-  <em>Claude keeps the decisions; Codex absorbs the implementation transcript.</em>
+  <em>Codex does the implementation; the main Claude context receives only a compact summary.</em>
 </p>
 
 **[Set up Codex delegation →](codex-delegate.md)**

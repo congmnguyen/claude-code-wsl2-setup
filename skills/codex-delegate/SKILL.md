@@ -1,12 +1,12 @@
 ---
 name: codex-delegate
-description: Delegate a heavy or mechanical coding task to Codex (gpt-5.5) via a cheap Sonnet wrapper subagent, so Codex's large transcript stays OUT of the main Opus context (token isolation). Trigger when the user says "delegate to codex", "hand this to codex", "let codex do X", or when a well-specified implementation/refactor/migration/bulk task is large enough that doing it inline would flood context with tool round-trips. Do NOT use for small tasks you can one-shot.
+description: Delegate a heavy or mechanical coding task to the configured Codex CLI model via a low-effort Sonnet wrapper, so Codex's large transcript stays OUT of the main orchestrator context. Trigger when the user says "delegate to codex", "hand this to codex", "let codex do X", or when a well-specified implementation/refactor/migration/bulk task is large enough that doing it inline would flood context with tool round-trips. Do NOT use for small tasks you can one-shot.
 allowed-tools: Bash, Read, Glob, Grep, LS
 ---
 
 ## What this does
 
-Spawns the **`codex-delegate` subagent** (Sonnet), which runs `codex exec` and returns only a ~10-line summary — Codex's huge transcript is absorbed by the cheap wrapper, so the main context pays only for the summary. Routing (when to delegate vs. do it yourself) lives in `~/.claude/CLAUDE.md` § *Delegating implementation to Codex*; by the time this skill loads, that decision is made. Wrapper mechanics live in the agent def — this file covers only the orchestrator side: how to spawn, and what to do with what comes back.
+Spawns the **`codex-delegate` subagent** (low-effort Sonnet), which runs `codex exec` with output redirected to a log and returns only a ~10-line summary. Routing lives in `~/.claude/CLAUDE.md` § *Codex Delegation*; wrapper mechanics live in the agent definition. This file covers only the orchestrator side: how to spawn and what to do with the result.
 
 ## How to invoke
 
