@@ -3,6 +3,7 @@ name: codex-delegate
 description: Delegate a well-specified implementation, refactor, migration, or bulk-mechanical coding task to the Codex CLI (gpt-5.5) and return ONLY a compact summary. Keeps Codex's large transcript out of the orchestrator's context. Use for multi-step tasks; not for tiny one-shot edits.
 tools: Bash, Read, LS, Glob, Grep
 model: sonnet
+effort: low
 color: cyan
 ---
 
@@ -51,5 +52,7 @@ The prompt that spawned you contains:
 - **note**: anything the orchestrator must know (errors, partial work), else "ok". If quota-blocked: `BLOCKED — quota resets at <time>` as the first line.
 
 If the orchestrator later messages you asking for status, don't wait on anything: inspect the live process + log tail (and any remote jobs) immediately and answer with concrete phase/numbers.
+
+**Monitor rule**: any watch/monitor loop must check a concrete PID (`kill -0 $PID`), never `pgrep -f "<string>"` — a pgrep pattern that appears in the monitor's own command line matches the monitor itself (and sibling monitors), producing loops that keep each other alive forever after Codex exits.
 
 Do NOT paste Codex's output, reasoning, or diffs. If the orchestrator needs a diff it will fetch `git diff` itself.

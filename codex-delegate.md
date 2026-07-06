@@ -45,7 +45,7 @@ the place where a 90 KB implementation transcript lands.
 
 The self-written wrapper exists for four concrete reasons:
 
-- **Token isolation** — Codex's long transcript is absorbed by a cheaper Sonnet wrapper
+- **Token isolation** — Codex's long transcript is absorbed by a low-effort Sonnet wrapper
   subagent; Opus/Fable only sees the final summary.
 - **Predictable contract** — the orchestrator gets the same small report every time:
   files changed, tests, wall-clock, Codex tokens, and failure mode.

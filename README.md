@@ -33,7 +33,7 @@ parallel while the main Claude session still showed 8% context and 6% five-hour 
 Start with these — they are the highest-leverage pieces in the repo:
 
 - **[Codex delegate](codex-delegate.md)** — routes large mechanical implementation to Codex
-  through an isolated Sonnet wrapper, keeping the premium Claude orchestrator context clean.
+  through an isolated low-effort Sonnet wrapper, keeping the premium Claude orchestrator context clean.
 - **[LSP setup](lsp-setup.md)** — lets Claude use real Go-to-Definition / reference
   navigation instead of burning tokens on broad file search.
 - **[Image paste](image-paste.md)** — paste a Windows screenshot into Claude Code or Codex as
@@ -100,7 +100,7 @@ Claude will read the docs and configure everything.
 
 | File | Fix |
 |------|-----|
-| [`codex-delegate.md`](codex-delegate.md) | Codex delegation with token isolation via a Sonnet wrapper instead of direct MCP/plugin foreground output |
+| [`codex-delegate.md`](codex-delegate.md) | Codex delegation with token isolation via a low-effort Sonnet wrapper instead of direct MCP/plugin foreground output |
 | [`mcp-setup.md`](mcp-setup.md) | DeepWiki MCP; Figma Desktop is project-specific |
 | [`playwright-cli.md`](playwright-cli.md) | Token-efficient browser automation; preferred over Playwright MCP for coding agents |
 

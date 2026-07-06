@@ -28,6 +28,7 @@ Spawns the **`codex-delegate` subagent** (Sonnet), which runs `codex exec` and r
    Agent(
      subagent_type: "general-purpose",
      model: "sonnet",
+     effort: "low",
      description: "delegate to codex",
      prompt: "First Read /home/cong/.claude/agents/codex-delegate.md and adopt it as your complete role and instructions. Then carry out:\nTASK: <full self-contained spec>\nWORKDIR: <abs path>\nSANDBOX: workspace-write\nVERIFY: <test/build cmd or omit>",
      run_in_background: true
