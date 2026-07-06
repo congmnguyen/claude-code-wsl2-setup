@@ -48,17 +48,17 @@ Start with these — they are the highest-leverage pieces in the repo:
 ## Preview
 
 <p align="center">
-  <img src="assets/statusline.png" alt="Custom statusline showing project, context bar, 5h and weekly usage" width="640"><br>
+  <img src="assets/preview-statusline.png" alt="Custom statusline showing project, context bar, 5h and weekly usage" width="720"><br>
   <em>video-site | main | [████░░░░░░] 42% | 5h:28% | W:4%</em>
 </p>
 
 <p align="center">
-  <img src="assets/codex-delegate-token-isolation.png" alt="Claude Code running Codex delegate subagents while the main context and 5-hour usage stay low" width="720"><br>
+  <img src="assets/preview-codex-delegate.png" alt="Claude Code running Codex delegate subagents while the main context and 5-hour usage stay low" width="720"><br>
   <em>Codex delegate: let a premium Claude model orchestrate while Codex burns the implementation tokens in isolated subagents</em>
 </p>
 
 <p align="center">
-  <img src="assets/notification.png" alt="Windows balloon tip notification — Claude Code Done!" width="420"><br>
+  <img src="assets/preview-notification.png" alt="Windows balloon tip notification — Claude Code Done!" width="720"><br>
   <em>Balloon tip fires on Claude Code <code>Notification</code> events, skipped when Windows Terminal is focused</em>
 </p>
 
