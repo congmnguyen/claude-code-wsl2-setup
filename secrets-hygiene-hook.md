@@ -51,6 +51,11 @@ If you already have other `PreToolUse` hooks, merge this entry into the existing
 
 Restart Claude Code after editing `settings.json`.
 
+For defense in depth, also add the targeted
+[`sandbox.filesystem.denyRead` rule](settings.md#block-sandboxed-access-to-claude-authentication-data). It prevents
+indirect reads by scripts and dependencies that do not expose the authentication path in the
+original Bash command.
+
 ---
 
 ## How It Works
