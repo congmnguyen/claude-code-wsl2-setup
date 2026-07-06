@@ -15,8 +15,8 @@ Credit: [soulee-dev/claude-code-notify-powershell](https://github.com/soulee-dev
 
 ## How It Works
 
-1. Claude Code fires the `PermissionRequest` hook when it is blocked on a tool-use
-   approval prompt (e.g. "Do you want to proceed?").
+1. Claude Code fires the `Notification` hook when it is done, needs approval, or a
+   background agent reports a notification.
 2. The hook runs `claude-hook-toast.ps1` via `cmd /c chcp 65001 && powershell ...`.
    The `chcp 65001` sets UTF-8 code page so message text renders correctly.
 3. Claude Code pipes a JSON payload into the script's stdin containing `hook_event_name`
@@ -26,8 +26,8 @@ Credit: [soulee-dev/claude-code-notify-powershell](https://github.com/soulee-dev
 5. Otherwise it uses the Windows Toast Notification API (`Windows.UI.Notifications`)
    to show a modern toast — no sleep needed, no background process required.
 
-The key hook is **`PermissionRequest`** — it fires only when Claude is blocked on a
-permission prompt, not on every completed response.
+The key hook is **`Notification`** with narrow matchers: `idle_prompt`,
+`permission_prompt`, `agent_completed`, and `agent_needs_input`.
 
 ---
 
@@ -42,8 +42,8 @@ Copy-Item "claude-hook-toast.ps1" "$env:USERPROFILE\.claude\claude-hook-toast.ps
 ```
 
 This is a lightly customised fork of [soulee-dev/claude-code-notify-powershell](https://github.com/soulee-dev/claude-code-notify-powershell)
-with two changes: the `Stop` message reads **"Needs your input!"** instead of "Response finished",
-and a foreground window check skips the toast if Windows Terminal is already active.
+with two changes: it handles Claude Code `Notification` event messages, and a foreground
+window check skips the toast if Windows Terminal is already active.
 
 ### Step 2: Hook is already configured
 
@@ -52,8 +52,36 @@ and a foreground window check skips the toast if Windows Terminal is already act
 ```json
 {
   "hooks": {
-    "PermissionRequest": [
+    "Notification": [
       {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd /c chcp 65001 >nul && powershell -ExecutionPolicy Bypass -File %USERPROFILE%\\.claude\\claude-hook-toast.ps1"
+          }
+        ]
+      },
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd /c chcp 65001 >nul && powershell -ExecutionPolicy Bypass -File %USERPROFILE%\\.claude\\claude-hook-toast.ps1"
+          }
+        ]
+      },
+      {
+        "matcher": "agent_completed",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd /c chcp 65001 >nul && powershell -ExecutionPolicy Bypass -File %USERPROFILE%\\.claude\\claude-hook-toast.ps1"
+          }
+        ]
+      },
+      {
+        "matcher": "agent_needs_input",
         "hooks": [
           {
             "type": "command",
@@ -66,7 +94,8 @@ and a foreground window check skips the toast if Windows Terminal is already act
 }
 ```
 
-**Restart Claude Code** (the Windows/PowerShell instance) for the hook to take effect.
+Run `/hooks` and select `Notification` to confirm the hook is registered. Restart Claude
+Code if the settings watcher does not pick it up.
 
 ---
 
@@ -80,7 +109,7 @@ and a foreground window check skips the toast if Windows Terminal is already act
 Or test the script directly:
 
 ```powershell
-echo '{"hook_event_name":"Stop","message":""}' | powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\.claude\claude-hook-toast.ps1"
+echo '{"hook_event_name":"Notification","message":"Claude Code needs your attention"}' | powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\.claude\claude-hook-toast.ps1"
 ```
 
 ---
@@ -92,7 +121,7 @@ echo '{"hook_event_name":"Stop","message":""}' | powershell -ExecutionPolicy Byp
 | Script type | bash wrapper | native `.ps1` |
 | Notification type | `NotifyIcon` balloon tip | Windows Toast API |
 | Async mechanism | `bash -c '... &'` | not needed — toast fires and exits |
-| Key hook | `PermissionRequest` | `PermissionRequest` |
+| Key hook | `Notification` | `Notification` |
 | Script location | `~/bin/claude-notify` | `%USERPROFILE%\.claude\claude-hook-toast.ps1` |
 | Settings file | `~/.claude/settings.json` | `C:\Users\cong\.claude\settings.json` |
 

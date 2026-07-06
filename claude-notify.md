@@ -1,25 +1,31 @@
-# Claude Code WSL2 — "Done" Windows Notification
+# Claude Code WSL2 — "Needs Your Input" Windows Notification
 
 ![Windows balloon tip — Claude Code Done!](assets/notification.png)
 
 ## Problem
 
-When Claude Code finishes a long task on WSL2, the terminal gives no visual signal that
-it is done. You only notice if you switch back to the terminal yourself.
+When Claude Code finishes a long task on WSL2, needs permission, or a background agent
+finishes, the terminal gives no visual signal unless you are watching it.
 
-Two hooks fire a Windows balloon tip (system tray popup):
+This hook uses Claude Code's `Notification` event, scoped by matcher:
 
-- `Stop` — when Claude finishes a response
-- `PermissionRequest` — when Claude is blocked waiting for tool-use approval
+- `idle_prompt` — Claude is done and waiting for your next prompt
+- `permission_prompt` — Claude needs you to approve a tool use
+- `agent_completed` — a background agent finishes or fails
+- `agent_needs_input` — a background agent starts waiting on your input
 
-Both are suppressed when Windows Terminal is the foreground window, so they don't
-interrupt you when you're already watching the output.
+All notifications are suppressed when Windows Terminal is the foreground window, so they
+don't interrupt you when you're already watching the output.
+
+`agent_completed` and `agent_needs_input` require Claude Code v2.1.198 or later and only
+fire while agent view is open. If your Claude Code version is older, keep only
+`idle_prompt` and `permission_prompt`.
 
 ---
 
 ## How It Works
 
-1. Claude Code fires the `Stop` or `PermissionRequest` hook.
+1. Claude Code fires the `Notification` hook for a matched notification type.
 2. The hook runs `~/bin/claude-notify`, a bash script that calls Windows PowerShell
    directly from WSL via `/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe`.
 3. PowerShell checks the foreground window — if Windows Terminal is active, it exits silently.
@@ -101,35 +107,52 @@ chmod +x ~/bin/claude-notify
 
 ### Step 2: Add the hooks
 
-In `~/.claude/settings.json`, add both hooks inside the `"hooks"` object:
+In `~/.claude/settings.json`, add these entries inside the `"hooks"` object:
 
 ```json
-"Stop": [
+"Notification": [
   {
-    "matcher": "",
+    "matcher": "idle_prompt",
     "hooks": [
       {
         "type": "command",
         "command": "bash -c '~/bin/claude-notify \"Claude Code\" \"Done!\" &'"
       }
     ]
-  }
-],
-"PermissionRequest": [
+  },
   {
-    "matcher": "",
+    "matcher": "permission_prompt",
     "hooks": [
       {
         "type": "command",
         "command": "bash -c '~/bin/claude-notify \"Claude Code\" \"Needs your input!\" &'"
       }
     ]
+  },
+  {
+    "matcher": "agent_completed",
+    "hooks": [
+      {
+        "type": "command",
+        "command": "bash -c '~/bin/claude-notify \"Claude Code\" \"Background agent completed\" &'"
+      }
+    ]
+  },
+  {
+    "matcher": "agent_needs_input",
+    "hooks": [
+      {
+        "type": "command",
+        "command": "bash -c '~/bin/claude-notify \"Claude Code\" \"Background agent needs input!\" &'"
+      }
+    ]
   }
 ]
 ```
 
-`Stop` fires when Claude finishes a response; `PermissionRequest` fires when Claude is
-blocked on a tool-approval prompt. Both exit silently if Windows Terminal is the
+`idle_prompt` fires when Claude is done and waiting. `permission_prompt` fires when Claude
+is blocked on a tool-approval prompt. The agent matchers are useful for background
+subagents such as `codex-delegate`. All commands exit silently if Windows Terminal is the
 foreground window, so notifications only appear when you're working in another window.
 
 > **Why `bash -c '... &'` and not just the command directly?**
@@ -141,7 +164,8 @@ foreground window, so notifications only appear when you're working in another w
 > inside `bash -c` detaches it immediately so Claude Code continues while the
 > balloon tip displays in the background.
 
-Restart Claude Code for the hook to take effect.
+Run `/hooks` and select `Notification` to confirm the hook is registered. If Claude Code
+doesn't pick up the settings change within a few seconds, restart the session.
 
 > **Running Codex too?** The same `~/bin/claude-notify` script is reused for Codex CLI,
 > but it's wired up through Codex's top-level `notify` key (not Claude hooks) and shows
@@ -152,10 +176,10 @@ Restart Claude Code for the hook to take effect.
 ## Result
 
 When Windows Terminal is **not** the active window, a balloon tip appears in the system
-tray with the title **Claude Code** — **Done!** when Claude finishes a response, or
-**Needs your input!** when it's blocked waiting for tool approval. Clicking the balloon
-restores and focuses Windows Terminal. No notification fires if you are already looking
-at the terminal.
+tray with the title **Claude Code** — **Done!** when Claude is waiting for your next
+prompt, **Needs your input!** when it needs approval, or an agent-specific message for
+background work. Clicking the balloon restores and focuses Windows Terminal. No
+notification fires if you are already looking at the terminal.
 
 ---
 
@@ -164,6 +188,8 @@ at the terminal.
 **No balloon appears**
 - Confirm `~/bin/claude-notify` exists and is executable: `ls -l ~/bin/claude-notify`
 - Test manually: `~/bin/claude-notify "Test" "Hello"`
+- Run `/hooks` and confirm `Notification` has entries for `idle_prompt` and
+  `permission_prompt`.
 - Check Windows notification settings — balloon tips require "Get notifications from apps"
   to be enabled for the app, and Focus Assist must not be blocking them.
 

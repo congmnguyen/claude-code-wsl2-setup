@@ -35,8 +35,9 @@ Start with these — they are the highest-leverage pieces in the repo:
   through an isolated Sonnet wrapper, keeping the premium Claude orchestrator context clean.
 - **[Image paste](image-paste.md)** — paste a Windows screenshot into Claude Code or Codex as
   a usable WSL file path.
-- **[Notifications](claude-notify.md)** — get a Windows notification when Claude finishes or
-  needs permission, without interrupting you while Windows Terminal is focused.
+- **[Notifications](claude-notify.md)** — get a Windows notification when Claude is done,
+  needs permission, or a background agent completes, without interrupting you while Windows
+  Terminal is focused.
 - **[Secrets hygiene hook](secrets-hygiene-hook.md)** — blocks credential-file reads before
   secrets can land in the transcript.
 - **[Bash output truncation hook](truncate-bash-output.md)** — trims huge command output to
@@ -58,7 +59,7 @@ Start with these — they are the highest-leverage pieces in the repo:
 
 <p align="center">
   <img src="assets/notification.png" alt="Windows balloon tip notification — Claude Code Done!" width="420"><br>
-  <em>Balloon tip fires on <code>Stop</code> and <code>PermissionRequest</code>, skipped when Windows Terminal is focused</em>
+  <em>Balloon tip fires on Claude Code <code>Notification</code> events, skipped when Windows Terminal is focused</em>
 </p>
 
 <p align="center">
@@ -71,7 +72,7 @@ Start with these — they are the highest-leverage pieces in the repo:
 - **Image paste** — copy a screenshot on Windows and paste the file path straight into Claude Code or Codex. A small Go daemon ([wsl-screenshot-cli](https://github.com/Nailuu/wsl-screenshot-cli)) polls the Windows clipboard, saves new screenshots under `/tmp/.wsl-screenshot-cli/`, and rewrites the clipboard so paste returns the WSL path.
 - **Shift+Enter newline** — insert a newline without submitting, in both the VSCode integrated terminal and Windows Terminal.
 - **CapsLock → Escape** — remap CapsLock to Escape system-wide via SharpKeys (registry-level, works in WSL2, Vim, games, and elevated processes).
-- **"Needs your input" Windows notification** — fires when Claude finishes a task or asks for permission, and is suppressed automatically when Windows Terminal is already focused. WSL2 variant uses a balloon tip; the native PowerShell variant uses a modern Windows toast.
+- **"Needs your input" Windows notification** — fires on Claude Code `Notification` events when Claude finishes, asks for permission, or a background agent completes; suppressed automatically when Windows Terminal is already focused. WSL2 variant uses a balloon tip; the native PowerShell variant uses a modern Windows toast.
 - **Status line** — project directory, git branch, context-window fill bar, and 5-hour / 7-day usage, color-coded by severity.
 - **Secrets hygiene hook** — blocks Claude from reading credential files into the transcript with `Read`, `Grep`, or content-printing shell commands.
 - **Bash output truncation hook** — cuts huge command output (test runs, build logs, JSON dumps) down to head+tail with an omission marker, so one verbose command doesn't eat the context window for the rest of the session.
@@ -123,7 +124,7 @@ Claude will read the docs and configure everything.
 | File | Fix |
 |------|-----|
 | [`image-paste.md`](image-paste.md) | Screenshot paste — wsl-screenshot-cli daemon + optional Alt+V keybinding |
-| [`claude-notify.md`](claude-notify.md) | Windows balloon tip — WSL2 variant for Claude Code `Stop` / `PermissionRequest` hooks and Codex `notify` |
+| [`claude-notify.md`](claude-notify.md) | Windows balloon tip — WSL2 variant for Claude Code `Notification` hooks and Codex `notify` |
 | [`claude-notify-powershell.md`](claude-notify-powershell.md) + [`claude-hook-toast.ps1`](claude-hook-toast.ps1) | Windows toast — native PowerShell variant |
 | [`shift-enter.md`](shift-enter.md) | Shift+Enter newline in VSCode terminal and Windows Terminal |
 | [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` env var |

@@ -20,9 +20,9 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 |------|-------------------|
 | `image-paste.md` | `~/.local/bin/wsl-screenshot-cli` (Go daemon polling Windows clipboard) + `~/.claude/keybindings.json` (Alt+V) + `SessionStart` hook only (no SessionEnd) |
 | `shift-enter.md` | VSCode `/terminal-setup` + Windows Terminal `settings.json` action (`\u001b\r`) |
-| `claude-notify.md` | `~/bin/claude-notify` (bash → PowerShell balloon tip) + Claude `Stop` and `PermissionRequest` hooks — **WSL2 only** — skips if Windows Terminal is foreground |
+| `claude-notify.md` | `~/bin/claude-notify` (bash → PowerShell balloon tip) + Claude `Notification` hooks (`idle_prompt`, `permission_prompt`, `agent_completed`, `agent_needs_input`) — **WSL2 only** — skips if Windows Terminal is foreground |
 | `codex-notify.md` | Reuses `~/bin/claude-notify` via Codex top-level `notify` key in `~/.codex/config.toml`; `jq` pulls `last-assistant-message` into the balloon — **WSL2 only** |
-| `claude-notify-powershell.md` | `%USERPROFILE%\.claude\claude-hook-toast.ps1` + `PermissionRequest` hook only — **native Windows PowerShell only** |
+| `claude-notify-powershell.md` | `%USERPROFILE%\.claude\claude-hook-toast.ps1` + Claude `Notification` hooks — **native Windows PowerShell only** |
 | `statusline.md` | `~/.claude/statusline-command.sh` + `statusLine` in `~/.claude/settings.json` |
 | `secrets-hygiene-hook.md` | `~/.claude/hooks/block-secret-reads.sh` + `PreToolUse` hook for `Read|Grep|Bash`; blocks credential-file reads before transcript exposure |
 | `truncate-bash-output.md` | `~/.claude/hooks/truncate-bash-output.sh` + `PostToolUse` hook for `Bash`; truncates >200-line / >30k-char output to head+tail with an omission marker |
@@ -44,9 +44,9 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 
 **wsl-screenshot-cli SessionEnd pitfall**: Keep the repo docs aligned with `image-paste.md`: do not add a `SessionEnd` hook in Claude Code. Claude Code fires `SessionStart`/`SessionEnd` for every Task-tool subagent, so a subagent `SessionEnd` would stop the daemon mid-session for the main agent.
 
-**claude-notify async (WSL2)**: For Claude Code, wrap the `Stop` hook command as `bash -c '... &'` because the PowerShell script stays alive while the balloon is visible. The Codex variant lives in `codex-notify.md` (reuses the same script via the top-level `notify` key) — keep the two docs cross-linked. The Codex trap: `[tui].notifications` is in-terminal only and runs no external program; the balloon needs the separate top-level `notify` key, which passes the `agent-turn-complete` JSON as the final arg (`$1`; `"--"` is `$0`) so `jq` can pull `last-assistant-message`. Requires `jq`.
+**claude-notify async (WSL2)**: For Claude Code, use the `Notification` hook with narrow matchers (`idle_prompt`, `permission_prompt`, `agent_completed`, `agent_needs_input`) and wrap each command as `bash -c '... &'` because the PowerShell script stays alive while the balloon is visible. `agent_completed`/`agent_needs_input` require Claude Code v2.1.198+ and only fire while agent view is open. The Codex variant lives in `codex-notify.md` (reuses the same script via the top-level `notify` key) — keep the two docs cross-linked. The Codex trap: `[tui].notifications` is in-terminal only and runs no external program; the balloon needs the separate top-level `notify` key, which passes the `agent-turn-complete` JSON as the final arg (`$1`; `"--"` is `$0`) so `jq` can pull `last-assistant-message`. Requires `jq`.
 
-**claude-notify async (Windows PowerShell)**: Uses the Windows Toast API (`Windows.UI.Notifications`) via [soulee-dev/claude-code-notify-powershell](https://github.com/soulee-dev/claude-code-notify-powershell). The script reads hook event JSON from stdin. No async wrapper needed — toast fires and exits immediately. Only the `PermissionRequest` hook is used — notifications fire only when Claude needs you to approve a tool. Script lives at `%USERPROFILE%\.claude\claude-hook-toast.ps1`; hook configured in `C:\Users\cong\.claude\settings.json`. Both variants skip the notification when Windows Terminal is the foreground window.
+**claude-notify async (Windows PowerShell)**: Uses the Windows Toast API (`Windows.UI.Notifications`) via [soulee-dev/claude-code-notify-powershell](https://github.com/soulee-dev/claude-code-notify-powershell). The script reads hook event JSON from stdin. No async wrapper needed — toast fires and exits immediately. Use the same `Notification` matchers as the WSL2 variant. Script lives at `%USERPROFILE%\.claude\claude-hook-toast.ps1`; hook configured in `C:\Users\cong\.claude\settings.json`. Both variants skip the notification when Windows Terminal is the foreground window.
 
 **Playwright CLI vs MCP**: `playwright-cli.md` and the Playwright section of `mcp-setup.md` are intentionally kept as two docs, not merged — they're cross-linked. The CLI is the default for coding agents (no tool schemas in context → far fewer tokens); the MCP server stays for persistent-state / self-healing / long-running browser-only workflows. When editing one, keep the cross-link and the CLI-vs-MCP guidance in the other consistent.
 
@@ -64,7 +64,7 @@ This repo is a collection of documentation files and scripts that fix Claude Cod
 
 Read all `*.md` files, then:
 1. Install `wsl-screenshot-cli` with the install script from `image-paste.md`, and create `~/bin/claude-notify` with the exact script contents from `claude-notify.md`.
-2. Merge into `~/.claude/settings.json`: the `SessionStart` hook for `wsl-screenshot-cli`, and the `Stop` + `PermissionRequest` hooks for `claude-notify`. Do NOT add a `SessionEnd` hook for `wsl-screenshot-cli` — subagents fire `SessionEnd` too, which would stop the daemon mid-session.
+2. Merge into `~/.claude/settings.json`: the `SessionStart` hook for `wsl-screenshot-cli`, and the `Notification` hook entries from `claude-notify.md`. Do NOT add a `SessionEnd` hook for `wsl-screenshot-cli` — subagents fire `SessionEnd` too, which would stop the daemon mid-session.
 3. Create/update `~/.claude/keybindings.json` with the Alt+V binding.
 4. Set `attribution` in `~/.claude/settings.json`. Save `~/.claude/statusline-command.sh` from `statusline.md` and set `statusLine` in `~/.claude/settings.json`.
 5. Install the LSP plugins per `lsp-setup.md` and set `enabledPlugins` in `~/.claude/settings.json`. Install language-server binaries for whichever languages the user works in.
