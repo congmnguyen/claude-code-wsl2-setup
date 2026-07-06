@@ -1,4 +1,0 @@
-interface:
-  display_name: "Deep Teach"
-  short_description: "Teach through layers and active recall"
-  default_prompt: "Use $deep-teach to teach me a concept deeply, check my understanding, and quiz me before moving on."

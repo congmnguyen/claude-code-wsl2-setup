@@ -12,7 +12,9 @@ This repo documents the active Claude Code setup used on this WSL2 machine. Ther
 - **`agents/`** — Custom Claude Code subagent definitions (YAML frontmatter + instructions). Installed to `~/.claude/agents/`.
 - **`skills/`** — Custom Claude Code slash-command skills. Installed to `~/.claude/skills/`.
 - **`hooks/`** — Claude Code hook scripts. Installed to `~/.claude/hooks/`.
-- **`codex-skills/`** — Backup of the active local Codex skills. Keep this synced to the live local skill set, not to old Claude skill ports.
+
+Codex skills are maintained in the separate `congmnguyen/codex-skills` repo; do not add
+that backup tree back here.
 
 ## The Fixes
 

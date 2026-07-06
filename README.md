@@ -131,11 +131,13 @@ Claude will read the docs and configure everything.
 | [`skills/`](skills/) | Active local skills: `codex-delegate`, `commit-push-pr`, `deep-teach`, `pytorch-training` |
 | [`hooks/`](hooks/) | `block-secret-reads.sh` PreToolUse hook, `truncate-bash-output.sh` PostToolUse hook |
 | [`scripts/`](scripts/) | `codex-run.sh` wrapper used by the `codex-delegate` Claude agent |
-| [`codex-skills/`](codex-skills/) | Backup of the active local Codex skills |
 
 Copy the matching files from [`agents/`](agents/), [`skills/`](skills/), [`hooks/`](hooks/),
 and [`scripts/`](scripts/) to `~/.claude/agents/`, `~/.claude/skills/`,
 `~/.claude/hooks/`, and `~/.claude/scripts/` for Claude Code.
+
+Codex skills are maintained separately at
+[`congmnguyen/codex-skills`](https://github.com/congmnguyen/codex-skills).
 
 ## Pruned notes
 
