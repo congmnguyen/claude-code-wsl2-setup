@@ -26,6 +26,39 @@ Same correctness all three ways. The only thing that changes is how much of Code
 transcript your expensive orchestrator has to swallow. The subagent wrapper is the only
 option that actually keeps it out.
 
+<p align="center">
+  <img src="assets/codex-delegate-token-isolation.png" alt="Claude Code running Codex delegate subagents while the main context and 5-hour usage stay low" width="760"><br>
+  <em>A real large task: the main Fable/Opus-style orchestrator stays focused, Codex burns
+  the implementation tokens in delegate subagents, and the 5-hour Claude usage moves only a
+  few percent.</em>
+</p>
+
+## Why not just use MCP or the plugin?
+
+Because this repo is optimizing for **orchestrator context**, not just "can Claude call
+Codex?"
+
+MCP and `codex-plugin-cc` are great convenience layers. If you want a simple button that
+lets Claude ask Codex for help, use them. This repo solves the sharper problem Theo-style
+power users run into: premium Claude models are good orchestrators, but they should not be
+the place where a 90 KB implementation transcript lands.
+
+The self-written wrapper exists for four concrete reasons:
+
+- **Token isolation** — Codex's long transcript is absorbed by a cheaper Sonnet wrapper
+  subagent; Opus/Fable only sees the final summary.
+- **Predictable contract** — the orchestrator gets the same small report every time:
+  files changed, tests, wall-clock, Codex tokens, and failure mode.
+- **Safety rails** — Codex is only invoked through `scripts/codex-run.sh`, which uses a
+  prompt file, writes logs outside the main transcript, refuses flag pass-through, and
+  detects quota/stall cases.
+- **Review gate** — Codex implements, but Claude still reviews the diff before accepting.
+  The workflow is route → execute → verify, not "trust another agent blindly."
+
+So this is not a replacement for the official transports. It is the opinionated version for
+people who care about keeping the expensive orchestrator clean while still using Codex for
+large mechanical implementation.
+
 ## How it works
 
 A thin **Sonnet subagent** is the wrapper. The orchestrator writes a self-contained spec,

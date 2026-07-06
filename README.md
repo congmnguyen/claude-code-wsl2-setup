@@ -33,6 +33,11 @@ It also saves tokens, because Claude stops scrolling through files that don't ma
 </p>
 
 <p align="center">
+  <img src="assets/codex-delegate-token-isolation.png" alt="Claude Code running Codex delegate subagents while the main context and 5-hour usage stay low" width="720"><br>
+  <em>Codex delegate: let a premium Claude model orchestrate while Codex burns the implementation tokens in isolated subagents</em>
+</p>
+
+<p align="center">
   <img src="assets/notification.png" alt="Windows balloon tip notification — Claude Code Done!" width="420"><br>
   <em>Balloon tip fires on <code>Stop</code> and <code>PermissionRequest</code>, skipped when Windows Terminal is focused</em>
 </p>
@@ -85,7 +90,7 @@ Claude will read the docs and configure everything.
 | [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` env var |
 | [`mcp-setup.md`](mcp-setup.md) | DeepWiki, Playwright, and Figma Desktop MCP servers |
 | [`playwright-cli.md`](playwright-cli.md) | Playwright **CLI** — token-efficient browser automation; preferred over Playwright MCP for coding agents |
-| [`codex-delegate.md`](codex-delegate.md) | Delegate heavy/mechanical coding to Codex (`gpt-5.5`) via a cheap Sonnet subagent — keeps Codex's transcript out of the orchestrator context |
+| [`codex-delegate.md`](codex-delegate.md) | Codex delegation with token isolation — why this repo uses a Sonnet wrapper instead of direct MCP/plugin foreground output |
 | [`voice.md`](voice.md) | Voice mode — ALSA → PulseAudio → WSLg bridge, `~/.asoundrc` + `PULSE_SERVER` |
 | [`capslock-esc.md`](capslock-esc.md) | CapsLock → Escape — registry-level remap via SharpKeys (Windows-side only) |
 
