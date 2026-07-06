@@ -38,9 +38,9 @@ Start with these — they are the highest-leverage pieces in the repo:
   navigation instead of burning tokens on broad file search.
 - **[Image paste](image-paste.md)** — paste a Windows screenshot into Claude Code or Codex as
   a usable WSL file path.
-- **[Notifications](claude-notify.md)** — get a Windows notification when Claude is done,
-  needs permission, or a background agent completes, without interrupting you while Windows
-  Terminal is focused.
+- **Notifications ([Claude Code](claude-notify.md) · [Codex](codex-notify.md))** — get a
+  Windows notification when either agent finishes, while suppressing alerts when Windows
+  Terminal is already focused.
 - **[Secrets hygiene hook](secrets-hygiene-hook.md)** — blocks credential-file reads before
   secrets can land in the transcript.
 - **[Bash output truncation hook](truncate-bash-output.md)** — trims huge command output to
@@ -121,7 +121,8 @@ Claude will read the docs and configure everything.
 | File | Fix |
 |------|-----|
 | [`image-paste.md`](image-paste.md) | Screenshot paste — wsl-screenshot-cli daemon + optional Alt+V keybinding |
-| [`claude-notify.md`](claude-notify.md) | Windows balloon tip — WSL2 variant for Claude Code `Notification` hooks and Codex `notify` |
+| [`claude-notify.md`](claude-notify.md) | Windows balloon tip for Claude Code `Notification` hooks |
+| [`codex-notify.md`](codex-notify.md) | Reuse the same balloon script through Codex's top-level `notify` command |
 | [`shift-enter.md`](shift-enter.md) | Shift+Enter newline in VSCode terminal and Windows Terminal |
 | [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` env var |
 | [`capslock-esc.md`](capslock-esc.md) | CapsLock → Escape registry remap via SharpKeys |
