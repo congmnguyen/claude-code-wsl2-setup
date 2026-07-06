@@ -118,6 +118,9 @@ orchestrator writes a spec, a Sonnet subagent drives Codex in the background, an
 back a short summary while your main context stays lean. Then review the diff yourself
 before merging.
 
+Run `/usage` before and after representative delegated tasks when you want to verify the
+Claude usage savings; the statusline is sufficient for normal day-to-day monitoring.
+
 ## When to use it
 
 - **Use** for large, well-specified, mechanical work — the kind that would otherwise flood

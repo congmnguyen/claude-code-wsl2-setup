@@ -140,8 +140,17 @@ Copy the matching files from [`agents/`](agents/), [`skills/`](skills/), [`hooks
 and [`scripts/`](scripts/) to `~/.claude/agents/`, `~/.claude/skills/`,
 `~/.claude/hooks/`, and `~/.claude/scripts/` for Claude Code.
 
+After adding or updating a skill, run `/reload-skills` to make it available without
+restarting the session. Custom agents still require a restart.
+
 Codex skills are maintained separately at
 [`congmnguyen/codex-skills`](https://github.com/congmnguyen/codex-skills).
+
+## Troubleshooting
+
+If a hook, plugin, or other customization breaks Claude Code, start a clean diagnostic
+session with `claude --safe-mode`. Use `/doctor`, `/hooks`, and `/mcp` to inspect the
+installation and loaded integrations.
 
 ## Pruned notes
 
