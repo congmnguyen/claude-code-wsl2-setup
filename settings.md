@@ -19,6 +19,24 @@ non-existent `gitAttribution` key do nothing — `attribution` is the correct fi
 
 ---
 
+## Enable Bash sandbox globally
+
+Set the Bash sandbox in user settings so it applies across projects:
+
+```json
+{
+  "sandbox": {
+    "enabled": true
+  }
+}
+```
+
+Project-local `.claude/settings.local.json` entries can still tune sandbox behavior
+for one repository. Keep global settings minimal unless a rule should apply
+everywhere.
+
+---
+
 ## Block sandboxed access to Claude authentication data
 
 The secrets hygiene hook blocks explicit attempts to print authentication files, but a
