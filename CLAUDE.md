@@ -5,7 +5,7 @@
 - This repository documents the active Claude Code setup on this WSL2 machine. It has no build system, test suite, or package manager; deliverables are Markdown docs, shell scripts, and config snippets.
 - Treat the live files under `~/.claude/` as runtime truth and this repository as their documented, version-controlled counterpart. When changing an active setup component, inspect both and keep them synchronized.
 - Root `*.md` files document setup components; `agents/`, `skills/`, and `hooks/` contain installable artifacts. Do not promote optional or legacy components in `README.md` unless the live machine uses them.
-- Codex skills live in the separate `congmnguyen/codex-skills` repository. Do not restore a Codex backup tree here.
+- Codex skills and setup live in the separate `congmnguyen/codex-wsl2-setup` repository. Do not restore a Codex backup tree here.
 
 ## Non-obvious constraints
 

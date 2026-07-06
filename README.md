@@ -143,8 +143,8 @@ and [`scripts/`](scripts/) to `~/.claude/agents/`, `~/.claude/skills/`,
 After adding or updating a skill, run `/reload-skills` to make it available without
 restarting the session. Custom agents still require a restart.
 
-Codex skills are maintained separately at
-[`congmnguyen/codex-skills`](https://github.com/congmnguyen/codex-skills).
+Codex skills and the rest of my Codex setup live in the companion repo
+[`congmnguyen/codex-wsl2-setup`](https://github.com/congmnguyen/codex-wsl2-setup).
 
 ## Troubleshooting
 
