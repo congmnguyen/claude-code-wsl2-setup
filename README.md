@@ -1,27 +1,30 @@
 # Claude Code WSL2 Setup
 
-My active Claude Code setup for WSL2 + Windows Terminal.
+My active Claude Code setup for WSL2 + Windows Terminal, built around one idea:
+keep Claude focused on orchestration and hand implementation churn to Codex.
 
-The repo intentionally tracks the pieces I actually use: LSP navigation, screenshot paste,
-Windows notifications, statusline, token/context hygiene hooks, and Codex delegation. Some
-older/optional notes remain at the bottom, but the main setup path is the live WSL2 setup.
+The repo only tracks the pieces I actually use: Codex delegation, LSP navigation, screenshot
+paste, Windows notifications, statusline, and token/context hygiene hooks.
 
-## Turn on LSP so Claude reads code like an IDE, not grep
+## Delegate implementation without filling Claude's main context
 
-Out of the box Claude Code falls back to text search when it needs to find a function or
-trace a reference. That's why "find the auth handler" sometimes drifts into the wrong file.
+Large implementation tasks are expensive twice: Claude spends tokens doing the work, then
+keeps every file read, edit, test run, and retry in the main conversation. That history
+competes with the architecture and product context Claude needs to orchestrate well.
 
-LSP plugins ship with Claude Code since v2.0.74 — they wire Claude into the same language
-servers VSCode uses for Go-to-Definition. Once the four official plugins are installed and
-the binaries are on your PATH:
+[`codex-delegate`](codex-delegate.md) sends a well-specified implementation task to Codex
+through an isolated Claude subagent. Codex does the read/edit/test loop; the main session gets
+back a short result and keeps its context for planning, steering, and review.
 
-- `"add a stripe webhook to my payments page"` jumps straight to the existing payment module
-- `"fix the auth bug on my dashboard"` follows the actual call hierarchy instead of guessing
-- After every edit Claude picks up type errors immediately instead of finding them 10 prompts later
+In the real run below, two Codex delegates handled tens of thousands of worker tokens in
+parallel while the main Claude session still showed 8% context and 6% five-hour usage.
 
-It also saves tokens, because Claude stops scrolling through files that don't match.
+<p align="center">
+  <img src="assets/preview-codex-delegate.png" alt="Claude Code running two Codex delegate subagents while the main context and five-hour usage stay low" width="720"><br>
+  <em>Claude keeps the decisions; Codex absorbs the implementation transcript.</em>
+</p>
 
-2-minute setup. TypeScript, Python, Go, Rust. **[→ LSP setup guide](lsp-setup.md)**
+**[Set up Codex delegation →](codex-delegate.md)**
 
 ---
 
@@ -29,10 +32,10 @@ It also saves tokens, because Claude stops scrolling through files that don't ma
 
 Start with these — they are the highest-leverage pieces in the repo:
 
-- **[LSP setup](lsp-setup.md)** — lets Claude use real Go-to-Definition / reference
-  navigation instead of burning tokens on broad file search.
 - **[Codex delegate](codex-delegate.md)** — routes large mechanical implementation to Codex
   through an isolated Sonnet wrapper, keeping the premium Claude orchestrator context clean.
+- **[LSP setup](lsp-setup.md)** — lets Claude use real Go-to-Definition / reference
+  navigation instead of burning tokens on broad file search.
 - **[Image paste](image-paste.md)** — paste a Windows screenshot into Claude Code or Codex as
   a usable WSL file path.
 - **[Notifications](claude-notify.md)** — get a Windows notification when Claude is done,
@@ -50,11 +53,6 @@ Start with these — they are the highest-leverage pieces in the repo:
 <p align="center">
   <img src="assets/preview-statusline.png" alt="Custom statusline showing project, context bar, 5h and weekly usage" width="720"><br>
   <em>claude-code-wsl2-setup | main | [░░░░░░░░░░] 6% | 5h:10% | W:95%</em>
-</p>
-
-<p align="center">
-  <img src="assets/preview-codex-delegate.png" alt="Claude Code running Codex delegate subagents while the main context and 5-hour usage stay low" width="720"><br>
-  <em>Codex delegate: let a premium Claude model orchestrate while Codex burns the implementation tokens in isolated subagents</em>
 </p>
 
 <p align="center">
