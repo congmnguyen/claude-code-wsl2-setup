@@ -60,6 +60,11 @@ Start with these — they are the highest-leverage pieces in the repo:
   <em>Balloon tip fires on Claude Code <code>Notification</code> events, skipped when Windows Terminal is focused</em>
 </p>
 
+<p align="center">
+  <img src="assets/preview-codex-notification.png" alt="Windows balloon tip notification showing Codex's last reply" width="720"><br>
+  <em>Codex's top-level <code>notify</code> command shows the completed turn's last reply</em>
+</p>
+
 ## What it fixes
 
 - **Image paste** — copy a screenshot on Windows and paste the file path straight into Claude Code or Codex. A small Go daemon ([wsl-screenshot-cli](https://github.com/Nailuu/wsl-screenshot-cli)) polls the Windows clipboard, saves new screenshots under `/tmp/.wsl-screenshot-cli/`, and rewrites the clipboard so paste returns the WSL path.

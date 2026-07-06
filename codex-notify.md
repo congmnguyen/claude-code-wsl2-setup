@@ -1,5 +1,7 @@
 # Codex CLI WSL2 — "Done" Windows Notification
 
+![Windows balloon tip showing Codex's last reply](assets/codex-notification.png)
+
 ## Problem
 
 When Codex CLI finishes a turn on WSL2, the terminal gives no visual signal that it is
