@@ -5,7 +5,7 @@ A custom status line script that shows the current project directory, git branch
 ![Status line preview](assets/statusline.png)
 
 ```
-📁 video-site | 🌿 main | [████░░░░░░] 42% | 5h:28% | W:4%
+📁 claude-code-wsl2-setup | 🌿 main | [░░░░░░░░░░] 6% | 5h:10% | W:95%
 ```
 
 - **Project dir** — basename of `.workspace.current_dir` (fallback: `$PWD`), prefixed with `📁`
@@ -24,7 +24,7 @@ A custom status line script that shows the current project directory, git branch
 cat > ~/.claude/statusline-command.sh << 'EOF'
 #!/usr/bin/env bash
 # Claude Code status line
-# Format: 📁 video-site | 🌿 branch | [████░░░░░░] 42% | 5h:28% | W:4%
+# Format: 📁 claude-code-wsl2-setup | 🌿 main | [░░░░░░░░░░] 6% | 5h:10% | W:95%
 
 input=$(cat)
 

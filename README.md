@@ -49,7 +49,7 @@ Start with these — they are the highest-leverage pieces in the repo:
 
 <p align="center">
   <img src="assets/preview-statusline.png" alt="Custom statusline showing project, context bar, 5h and weekly usage" width="720"><br>
-  <em>video-site | main | [████░░░░░░] 42% | 5h:28% | W:4%</em>
+  <em>claude-code-wsl2-setup | main | [░░░░░░░░░░] 6% | 5h:10% | W:95%</em>
 </p>
 
 <p align="center">
