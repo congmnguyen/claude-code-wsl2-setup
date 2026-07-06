@@ -1,4 +1,0 @@
-interface:
-  display_name: "Code Review"
-  short_description: "Review local changes or GitHub PRs"
-  default_prompt: "Use $code-review to review these changes for bugs and regressions."

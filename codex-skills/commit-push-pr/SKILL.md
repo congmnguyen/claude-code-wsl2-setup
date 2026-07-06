@@ -1,25 +1,20 @@
 ---
 name: commit-push-pr
-description: Prepare a branch, create a commit, push it, and open a GitHub pull request. Use when the user wants Codex to finish the git workflow after changes are ready to ship.
+description: Commit, push, and open a PR
 ---
 
-# Commit Push Pr
+## Context
 
-Finish the git handoff after implementation is complete. Inspect the working tree first, then branch, commit, push, and open a PR with a concise summary.
+- Current git status: !`git status`
+- Current git diff (staged and unstaged changes): !`git diff HEAD`
+- Current branch: !`git branch --show-current`
 
-## Workflow
+## Your task
 
-1. Inspect state with `git status --short`, `git diff --stat`, `git diff HEAD`, and `git branch --show-current`.
-2. Stop if there are no relevant changes, if the repo is in a conflicted state, or if unrelated dirty changes make it unsafe to continue.
-3. If currently on `main` or `master`, create a short descriptive branch before committing.
-4. Stage only the files relevant to the requested work.
-5. Write one clear commit message that describes the user-facing or developer-facing outcome.
-6. Push the branch to `origin`.
-7. Open a PR with `gh pr create` using a concise title and body grounded in the actual diff.
+Based on the above changes:
 
-## Guardrails
-
-- Do not amend or rewrite history unless the user explicitly asks.
-- Do not stage unrelated changes.
-- If push or PR creation needs credentials or approval, request it instead of working around it.
-- After completion, report the branch name, commit hash, and PR URL.
+1. Create a new branch if on main
+2. Create a single commit with an appropriate message
+3. Push the branch to origin
+4. Create a pull request using `gh pr create`
+5. You have the capability to call multiple tools in a single response. You MUST do all of the above in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.

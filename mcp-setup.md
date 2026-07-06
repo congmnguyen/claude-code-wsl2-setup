@@ -1,7 +1,9 @@
-# Claude Code — Useful MCP Servers
+# Claude Code — MCP Setup
 
-MCP (Model Context Protocol) servers extend Claude Code with external capabilities. These
-three cover deep code research, browser automation, and Figma design-to-code workflows.
+MCP (Model Context Protocol) servers extend Claude Code with external tools. My active
+global MCP setup is intentionally small: **DeepWiki** only. Figma Desktop is useful for
+specific design projects, but it is not a global default. For browser automation, use
+[`playwright-cli.md`](playwright-cli.md) instead of Playwright MCP.
 
 ---
 
@@ -33,45 +35,13 @@ HTTP transport — no local process needed.
 
 ---
 
-## Playwright
-
-> **For a coding agent, prefer [`playwright-cli`](playwright-cli.md)** — it drives the same
-> tools without loading MCP schemas into context, so it costs far fewer tokens. Use this MCP
-> server only when you need persistent browser state, self-healing test loops, or long-running
-> autonomous browser workflows.
-
-Browser automation: navigate pages, click, fill forms, take screenshots, inspect network
-requests, and run arbitrary JavaScript. Useful for testing web UIs, scraping, and
-debugging front-end behaviour.
-
-### Install
-
-```bash
-claude mcp add playwright npx @playwright/mcp@latest
-```
-
-Runs via `npx` — no global install required. Requires Node.js on the machine.
-
-### What it can do
-
-- Navigate to URLs and take screenshots
-- Click buttons, fill forms, select options
-- Inspect console logs and network requests
-- Run JavaScript in the page context
-- Test multi-step UI flows interactively
-
-### Example prompt
-
-> Open my local dev server at localhost:3000, navigate to the login page, fill in the
-> test credentials, and screenshot the dashboard.
-
----
-
-## Figma Desktop
+## Optional: Figma Desktop
 
 Reads Figma design files directly from the Figma Desktop app running locally. Provides
 design context (layout, styles, components, variables) for accurate design-to-code
 implementation.
+
+This is project-specific on my machine, not a global default.
 
 ### Prerequisites
 
@@ -104,11 +74,6 @@ Connects to the MCP server embedded in Figma Desktop at `localhost:3845`.
 **DeepWiki returns nothing for a repo**
 - Only indexes public GitHub repos. Private repos are not supported.
 - Try `ask_question` with a more specific question rather than a broad summary request.
-
-**Playwright can't find a browser**
-- Run `npx playwright install` once to download browser binaries.
-- On WSL2, headed (visible) browser mode may not work without a display server; use
-  headless mode or set up an X server.
 
 **Figma Desktop MCP not connecting**
 - Confirm Figma Desktop is running and the MCP server option is enabled in Settings.

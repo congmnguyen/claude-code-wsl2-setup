@@ -1,10 +1,10 @@
 # Claude Code WSL2 Setup
 
-Fixes for the most annoying Claude Code papercuts on WSL2 + Windows Terminal.
+My active Claude Code setup for WSL2 + Windows Terminal.
 
-Most of these (image paste, notifications, CapsLock→Esc, voice) bridge WSL2 to the Windows
-host and are WSL-specific. But the LSP, statusline, MCP, and Playwright CLI guides are plain
-Claude Code config — they work on any Linux or macOS too.
+The repo intentionally tracks the pieces I actually use: LSP navigation, screenshot paste,
+Windows notifications, statusline, token/context hygiene hooks, and Codex delegation. Some
+older/optional notes remain at the bottom, but the main setup path is the live WSL2 setup.
 
 ## Turn on LSP so Claude reads code like an IDE, not grep
 
@@ -62,11 +62,6 @@ Start with these — they are the highest-leverage pieces in the repo:
   <em>Balloon tip fires on Claude Code <code>Notification</code> events, skipped when Windows Terminal is focused</em>
 </p>
 
-<p align="center">
-  <img src="assets/birchline-html.png" alt="Birchline HTML artifact preview — paper recap with tabs and before/after code panels" width="720"><br>
-  <em>Birchline HTML skill — single-file document-style artifacts with tabs, cards, and before/after panels</em>
-</p>
-
 ## What it fixes
 
 - **Image paste** — copy a screenshot on Windows and paste the file path straight into Claude Code or Codex. A small Go daemon ([wsl-screenshot-cli](https://github.com/Nailuu/wsl-screenshot-cli)) polls the Windows clipboard, saves new screenshots under `/tmp/.wsl-screenshot-cli/`, and rewrites the clipboard so paste returns the WSL path.
@@ -78,7 +73,6 @@ Start with these — they are the highest-leverage pieces in the repo:
 - **Bash output truncation hook** — cuts huge command output (test runs, build logs, JSON dumps) down to head+tail with an omission marker, so one verbose command doesn't eat the context window for the rest of the session.
 - **Settings tweaks** — disable the `Co-authored-by: Claude` git attribution and pre-accept the project trust dialog.
 - **Windows browser** — open links and OAuth flows in your existing Windows browser instead of Chromium inside WSL2.
-- **Voice mode** — fix ALSA errors so `/voice` works, routing audio through WSLg's PulseAudio server.
 
 ## Setup
 
@@ -109,7 +103,7 @@ Claude will read the docs and configure everything.
 | File | Fix |
 |------|-----|
 | [`codex-delegate.md`](codex-delegate.md) | Codex delegation with token isolation via a Sonnet wrapper instead of direct MCP/plugin foreground output |
-| [`mcp-setup.md`](mcp-setup.md) | DeepWiki, Playwright, and Figma Desktop MCP servers |
+| [`mcp-setup.md`](mcp-setup.md) | DeepWiki MCP; Figma Desktop is project-specific |
 | [`playwright-cli.md`](playwright-cli.md) | Token-efficient browser automation; preferred over Playwright MCP for coding agents |
 
 ### Safety and context hygiene
@@ -125,23 +119,28 @@ Claude will read the docs and configure everything.
 |------|-----|
 | [`image-paste.md`](image-paste.md) | Screenshot paste — wsl-screenshot-cli daemon + optional Alt+V keybinding |
 | [`claude-notify.md`](claude-notify.md) | Windows balloon tip — WSL2 variant for Claude Code `Notification` hooks and Codex `notify` |
-| [`claude-notify-powershell.md`](claude-notify-powershell.md) + [`claude-hook-toast.ps1`](claude-hook-toast.ps1) | Windows toast — native PowerShell variant |
 | [`shift-enter.md`](shift-enter.md) | Shift+Enter newline in VSCode terminal and Windows Terminal |
 | [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` env var |
-| [`voice.md`](voice.md) | ALSA → PulseAudio → WSLg bridge, `~/.asoundrc` + `PULSE_SERVER` |
 | [`capslock-esc.md`](capslock-esc.md) | CapsLock → Escape registry remap via SharpKeys |
 
 ## Custom agents and skills
 
 | Path | Contents |
 |------|----------|
-| [`agents/`](agents/) | `code-architect`, `code-simplifier`, `codex-delegate` |
-| [`skills/`](skills/) | `birchline-html`, `codex-delegate`, `commit-push-pr`, `dedupe`, `deep-teach`, `frontend-design`, `handoff`, `oncall-triage`, `pytorch-training`, `spec` |
+| [`agents/`](agents/) | `code-architect`, `codex-delegate` |
+| [`skills/`](skills/) | Active local skills: `codex-delegate`, `commit-push-pr`, `deep-teach`, `pytorch-training` |
 | [`hooks/`](hooks/) | `block-secret-reads.sh` PreToolUse hook, `truncate-bash-output.sh` PostToolUse hook |
 | [`scripts/`](scripts/) | `codex-run.sh` wrapper used by the `codex-delegate` Claude agent |
-| [`codex-skills/`](codex-skills/) | Codex-native versions: `code-review`, `commit-push-pr`, `dedupe`, `frontend-design`, `handoff`, `oncall-triage`, `spec` |
+| [`codex-skills/`](codex-skills/) | Backup of the active local Codex skills |
 
-Copy [`agents/`](agents/), [`skills/`](skills/), [`hooks/`](hooks/), and [`scripts/`](scripts/) to `~/.claude/agents/`, `~/.claude/skills/`, `~/.claude/hooks/`, and `~/.claude/scripts/` for Claude Code. Copy [`codex-skills/`](codex-skills/) to `~/.codex/skills/` for Codex.
+Copy the matching files from [`agents/`](agents/), [`skills/`](skills/), [`hooks/`](hooks/),
+and [`scripts/`](scripts/) to `~/.claude/agents/`, `~/.claude/skills/`,
+`~/.claude/hooks/`, and `~/.claude/scripts/` for Claude Code.
+
+## Pruned notes
+
+Native Windows PowerShell notifications, WSLg voice-mode audio, and uninstalled Claude
+skills were removed from the main repo because they are not part of the active local setup.
 
 ## Recommended third-party skills
 

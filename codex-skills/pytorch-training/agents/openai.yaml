@@ -1,0 +1,4 @@
+interface:
+  display_name: "PyTorch Training"
+  short_description: "PyTorch model and training checks"
+  default_prompt: "Use $pytorch-training to review this PyTorch model and training loop."
