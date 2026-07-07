@@ -131,6 +131,11 @@ Highest-priority targets found with GitHub search:
 - https://github.com/rohitg00/awesome-claude-code-toolkit - toolkit-style Claude Code list.
 - https://github.com/Transcenda/awesome-agentic-coding - smaller agentic-coding list; pitch Codex delegation.
 
+Submission status:
+
+- https://github.com/sirredbeard/awesome-wsl/pull/114 - opened PR to refresh the existing stale entry.
+- https://github.com/hesreallyhim/awesome-claude-code - already lists this repo, but issue creation is restricted to collaborators; cannot update by CLI.
+
 Title:
 
 ```text
