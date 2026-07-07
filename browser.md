@@ -18,7 +18,7 @@ program to launch for URLs.
 
 ## Setup
 
-Add to `~/.zshrc` (or `~/.bashrc`):
+Add to `~/.bashrc`:
 
 ```bash
 export BROWSER="/mnt/c/Users/<YourUsername>/AppData/Local/BraveSoftware/Brave-Browser/Application/brave.exe"
@@ -36,8 +36,11 @@ Replace the path with your browser of choice. Common paths:
 Then reload your shell:
 
 ```bash
-source ~/.zshrc
+source ~/.bashrc
 ```
+
+These commands target Ubuntu's default `bash`; if you use `zsh`, use `~/.zshrc`
+instead.
 
 ---
 
@@ -55,5 +58,5 @@ directly in your Windows browser instead of launching Chromium inside WSL2.
 - Test manually: `$BROWSER "https://example.com"`
 
 **Wrong browser still opens**
-- Make sure `source ~/.zshrc` was run in the current session after editing.
+- Make sure `source ~/.bashrc` was run in the current session after editing.
 - Check no other config is overriding `BROWSER`: `echo $BROWSER`

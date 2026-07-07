@@ -77,7 +77,7 @@ python3 -m pip install pyright --break-system-packages
 
 `--break-system-packages` is required on Ubuntu 24.04+ due to PEP 668. The binary
 installs to `~/.local/bin/pyright`, which should already be on your PATH via
-`export PATH="$HOME/.local/bin:$PATH"` in `.zshrc`.
+`export PATH="$HOME/.local/bin:$PATH"` in `.bashrc`.
 
 ---
 
@@ -112,7 +112,7 @@ rust-analyzer lands in `~/.cargo/bin/rust-analyzer`.
 
 ---
 
-## PATH — add to `~/.zshrc`
+## PATH — add to `~/.bashrc`
 
 ```bash
 # LSP tooling paths
@@ -128,12 +128,15 @@ The `2>/dev/null || true` guard prevents an error in non-interactive shells wher
 ## Verify
 
 ```bash
-source ~/.zshrc
+source ~/.bashrc
 which typescript-language-server   # ~/.nvm/.../bin/typescript-language-server
 which pyright                      # ~/.local/bin/pyright
 which gopls                        # ~/go/bin/gopls
 which rust-analyzer                # ~/.cargo/bin/rust-analyzer
 ```
+
+These commands target Ubuntu's default `bash`; if you use `zsh`, use `~/.zshrc`
+instead.
 
 Then restart Claude Code, run `/plugin`, and confirm all four plugins are installed and
 enabled. If the `LSP` tool is still missing from the tool list, add the
