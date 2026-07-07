@@ -123,6 +123,14 @@ The relevant part is <file>, especially <specific fix>.
 
 ## Awesome-list PR
 
+Highest-priority targets found with GitHub search:
+
+- https://github.com/hesreallyhim/awesome-claude-code - broad Claude Code ecosystem list.
+- https://github.com/sirredbeard/awesome-wsl - WSL-specific list; pitch the Windows/WSL bridge features.
+- https://github.com/ccplugins/awesome-claude-code-plugins - Claude Code plugins/hooks list; pitch the hooks, agents, and skills.
+- https://github.com/rohitg00/awesome-claude-code-toolkit - toolkit-style Claude Code list.
+- https://github.com/Transcenda/awesome-agentic-coding - smaller agentic-coding list; pitch Codex delegation.
+
 Title:
 
 ```text
@@ -135,4 +143,10 @@ Description:
 Adds a practical Claude Code setup for WSL2 + Windows Terminal, covering Codex
 delegation, screenshot paste, Windows notifications, LSP setup, statusline, and
 secrets/context hygiene hooks.
+```
+
+One-line listing:
+
+```text
+- [Claude Code WSL2 Setup](https://github.com/congmnguyen/claude-code-wsl2-setup) - Practical Claude Code setup for WSL2 + Windows Terminal with Codex delegation, screenshot paste, Windows notifications, LSP, statusline, and safety/context hooks.
 ```
