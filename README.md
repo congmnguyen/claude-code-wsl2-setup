@@ -6,6 +6,17 @@ keep Claude focused on orchestration and hand implementation churn to Codex.
 The repo only tracks the pieces I actually use: Codex delegation, LSP navigation, screenshot
 paste, Windows notifications, statusline, and token/context hygiene hooks.
 
+## Who this is for
+
+Use this if you run Claude Code from WSL2 and want the Windows side to stop feeling
+bolted on: screenshots paste as WSL paths, notifications land in Windows, browser
+links open in your normal browser, and long implementation loops can move to Codex
+without filling Claude's main conversation.
+
+Start with [`codex-delegate`](codex-delegate.md) if your main pain is context burn.
+Start with [`image-paste`](image-paste.md) and [`claude-notify`](claude-notify.md)
+if your main pain is day-to-day Windows/WSL friction.
+
 ## Delegate implementation without filling Claude's main context
 
 Large implementation tasks are expensive twice: Claude spends tokens doing the work, then
@@ -90,6 +101,10 @@ Then prompt:
 > Set this up
 
 Claude will read the docs and configure everything.
+
+For a manual install, copy the relevant files from [`agents/`](agents/), [`skills/`](skills/),
+[`hooks/`](hooks/), and [`scripts/`](scripts/) into the matching `~/.claude/` directories,
+then read the linked setup page for the feature you want.
 
 ## What's included
 
