@@ -35,7 +35,10 @@ case "$tool" in
     # Only block print-style verbs aimed at concrete credential paths;
     # ls/stat/jq-keys style inspection stays allowed per user's hygiene rule.
     read_verb='(^|[|;&[:space:]])(cat|less|more|head|tail|bat|strings|xxd|hexdump|base64|sed|awk|cut|source|vim|nano)[[:space:]]'
-    secret_path='(\.ssh/|\.aws/(credentials|config)|\.kube/config|\.config/gcloud/|\.docker/config\.json|(^|[[:space:]"'"'"'/])\.env|\.netrc|\.npmrc|id_rsa|id_ed25519|credential|secret|token)'
+    # Concrete credential paths always match; the bare words secret/token/credential
+    # only match when standalone (file-like), so LLM flags such as
+    # --max-num-batched-tokens or grep patterns like 'token|api' don't trip it.
+    secret_path='(\.ssh/|\.aws/(credentials|config)|\.kube/config|\.config/gcloud/|\.docker/config\.json|(^|[[:space:]"'"'"'/])\.env|\.netrc|\.npmrc|id_rsa|id_ed25519|(^|[[:space:]"'"'"'/])(secret|token|credential)s?(\.[A-Za-z0-9]+)?([[:space:]"'"'"'/]|$))'
     if [[ "$cmd" =~ $read_verb ]] && [[ "$cmd" =~ $secret_path ]] && ! [[ "$cmd" =~ $benign ]]; then
       block "this command appears to print credential-file contents."
     fi
