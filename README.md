@@ -3,8 +3,9 @@
 My active Claude Code setup for WSL2 + Windows Terminal, built around one idea:
 keep Claude focused on orchestration and hand implementation churn to Codex.
 
-The repo only tracks the pieces I actually use: Codex delegation, LSP navigation, screenshot
-paste, Windows notifications, statusline, and token/context hygiene hooks.
+The repo only tracks the pieces I actually use: Codex delegation, LangSmith tracing,
+LSP navigation, screenshot paste, Windows notifications, statusline, and token/context
+hygiene hooks.
 
 ## Who this is for
 
@@ -47,6 +48,8 @@ Start with these — they are the highest-leverage pieces in the repo:
   through an isolated low-effort Sonnet wrapper, keeping the premium Claude orchestrator context clean.
 - **[LSP setup](lsp-setup.md)** — lets Claude use real Go-to-Definition / reference
   navigation instead of burning tokens on broad file search.
+- **[LangSmith tracing](langsmith-tracing.md)** — trace selected Claude Code projects
+  without enabling telemetry for every local session.
 - **[Image paste](image-paste.md)** — paste a Windows screenshot into Claude Code or Codex as
   a usable WSL file path.
 - **Notifications ([Claude Code](claude-notify.md) · [Codex](codex-notify.md))** — get a
@@ -83,6 +86,7 @@ Start with these — they are the highest-leverage pieces in the repo:
 - **CapsLock → Escape** — remap CapsLock to Escape system-wide via SharpKeys (registry-level, works in WSL2, Vim, games, and elevated processes).
 - **"Needs your input" Windows notification** — fires on Claude Code `Notification` events when Claude finishes, asks for permission, or a background agent completes; suppressed automatically when Windows Terminal is already focused. WSL2 variant uses a balloon tip; the native PowerShell variant uses a modern Windows toast.
 - **Status line** — project directory, git branch, context-window fill bar, and 5-hour / 7-day usage, color-coded by severity.
+- **LangSmith tracing** — send selected Claude Code project turns, tool calls, subagent runs, and compaction events to project-specific LangSmith traces.
 - **Secrets hygiene hook** — blocks Claude from reading credential files into the transcript with `Read`, `Grep`, or content-printing shell commands.
 - **Bash output truncation hook** — cuts huge command output (test runs, build logs, JSON dumps) down to head+tail with an omission marker, so one verbose command doesn't eat the context window for the rest of the session.
 - **Settings tweaks** — disable the `Co-authored-by: Claude` git attribution and pre-accept the project trust dialog.
@@ -114,6 +118,7 @@ then read the linked setup page for the feature you want.
 |------|-----|
 | [`lsp-setup.md`](lsp-setup.md) | Official LSP plugins + language servers for TypeScript, Python, Go, Rust |
 | [`statusline.md`](statusline.md) | Project dir, git branch, context bar, 5h / 7d usage |
+| [`langsmith-tracing.md`](langsmith-tracing.md) | Project-level LangSmith traces for Claude Code turns, tools, subagents, and compaction |
 | [`settings.md`](settings.md) | Disable git attribution, skip trust dialog |
 
 ### Agent workflows
