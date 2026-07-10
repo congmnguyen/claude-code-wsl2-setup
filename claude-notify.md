@@ -116,7 +116,10 @@ In `~/.claude/settings.json`, add these entries inside the `"hooks"` object:
     "hooks": [
       {
         "type": "command",
-        "command": "bash -c '~/bin/claude-notify \"Claude Code\" \"Done!\" &'"
+        "command": "/home/cong/bin/claude-notify",
+        "args": ["Claude Code", "Done!"],
+        "async": true,
+        "timeout": 15
       }
     ]
   },
@@ -125,7 +128,10 @@ In `~/.claude/settings.json`, add these entries inside the `"hooks"` object:
     "hooks": [
       {
         "type": "command",
-        "command": "bash -c '~/bin/claude-notify \"Claude Code\" \"Needs your input!\" &'"
+        "command": "/home/cong/bin/claude-notify",
+        "args": ["Claude Code", "Needs your input!"],
+        "async": true,
+        "timeout": 15
       }
     ]
   },
@@ -134,7 +140,10 @@ In `~/.claude/settings.json`, add these entries inside the `"hooks"` object:
     "hooks": [
       {
         "type": "command",
-        "command": "bash -c '~/bin/claude-notify \"Claude Code\" \"Background agent completed\" &'"
+        "command": "/home/cong/bin/claude-notify",
+        "args": ["Claude Code", "Background agent completed"],
+        "async": true,
+        "timeout": 15
       }
     ]
   },
@@ -143,7 +152,10 @@ In `~/.claude/settings.json`, add these entries inside the `"hooks"` object:
     "hooks": [
       {
         "type": "command",
-        "command": "bash -c '~/bin/claude-notify \"Claude Code\" \"Background agent needs input!\" &'"
+        "command": "/home/cong/bin/claude-notify",
+        "args": ["Claude Code", "Background agent needs input!"],
+        "async": true,
+        "timeout": 15
       }
     ]
   }
@@ -155,14 +167,15 @@ is blocked on a tool-approval prompt. The agent matchers are useful for backgrou
 subagents such as `codex-delegate`. All commands exit silently if Windows Terminal is the
 foreground window, so notifications only appear when you're working in another window.
 
-> **Why `bash -c '... &'` and not just the command directly?**
+> **Why `async: true`?**
 >
 > The PowerShell process stays alive in its WinForms message loop
 > (`[Application]::Run()`) until the balloon is clicked, dismissed, or times out
 > (~6 s). If the hook ran synchronously, Claude Code would block for that entire
-> time — the UI appears frozen and input is unresponsive. Running it with `&`
-> inside `bash -c` detaches it immediately so Claude Code continues while the
-> balloon tip displays in the background.
+> time — the UI appears frozen and input is unresponsive. Native async hooks let
+> Claude Code continue immediately while it manages the notification process in
+> the background. Exec-form `args` also pass spaces, apostrophes, and other special
+> characters without shell quoting.
 
 Run `/hooks` and select `Notification` to confirm the hook is registered. If Claude Code
 doesn't pick up the settings change within a few seconds, restart the session.
@@ -194,8 +207,9 @@ notification fires if you are already looking at the terminal.
   to be enabled for the app, and Focus Assist must not be blocking them.
 
 **UI freezes for several seconds when Claude finishes a task**
-- The hook is running synchronously (missing the `&`).
-- Ensure the command in `settings.json` is wrapped as `bash -c '... &'`.
+- The hook is running synchronously (missing `"async": true`).
+- Ensure each notification command hook has `"async": true` and a timeout longer than
+  the balloon lifetime.
 
 **Balloon tip flashes and disappears instantly**
 - The WinForms message loop (`Application.Run()`) keeps the PowerShell process alive until
