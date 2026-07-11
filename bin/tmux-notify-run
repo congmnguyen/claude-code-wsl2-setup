@@ -152,7 +152,7 @@ else
 fi
 
 if [[ -x $notify ]]; then
-  setsid -f "$notify" "$title" "$message" </dev/null >/dev/null 2>&1
+  setsid -f "$notify" "$title" "$message" --force </dev/null >/dev/null 2>&1
 fi
 
 exit "$rc"

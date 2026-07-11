@@ -47,6 +47,11 @@ Save to `~/bin/claude-notify`:
 #!/bin/bash
 title="${1:-Claude Code}"
 message="${2:-Notification}"
+case "${3:-}" in
+    "") force_ps='$false' ;;
+    --force) force_ps='$true' ;;
+    *) printf 'claude-notify: unknown option: %s\n' "$3" >&2; exit 2 ;;
+esac
 # Escape for PowerShell: text lands inside single-quoted PS strings, where the
 # only special character is the single quote itself (escaped by doubling).
 title=$(printf '%s' "$title" | sed "s/'/''/g")
@@ -67,11 +72,13 @@ public class Win32 {
     public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 }
 '@
-\$hwnd = [Win32]::GetForegroundWindow()
-\$winPid = 0
-[Win32]::GetWindowThreadProcessId(\$hwnd, [ref]\$winPid) | Out-Null
-\$proc = Get-Process -Id \$winPid -ErrorAction SilentlyContinue
-if (\$proc -and \$proc.Name -eq 'WindowsTerminal') { exit 0 }
+if (-not $force_ps) {
+    \$hwnd = [Win32]::GetForegroundWindow()
+    \$winPid = 0
+    [Win32]::GetWindowThreadProcessId(\$hwnd, [ref]\$winPid) | Out-Null
+    \$proc = Get-Process -Id \$winPid -ErrorAction SilentlyContinue
+    if (\$proc -and \$proc.Name -eq 'WindowsTerminal') { exit 0 }
+}
 
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
@@ -216,7 +223,9 @@ tmux-notify-run bird-eval \
 The helper preserves command arguments and the caller environment, streams output to tmux
 and the log, records the exit code under
 `~/.local/state/tmux-notify-run/<session>/status`, and sends a Windows notification on
-success or failure. `wsl --shutdown`, Windows shutdown, or a WSL
+success or failure. It uses `claude-notify --force`, so long-running jobs still notify
+while Windows Terminal is in the foreground; normal Claude and Codex completion hooks keep
+their foreground suppression. `wsl --shutdown`, Windows shutdown, or a WSL
 auto-shutdown watcher still stops both the job and its tmux session.
 
 ---
