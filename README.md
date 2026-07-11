@@ -142,6 +142,7 @@ then read the linked setup page for the feature you want.
 |------|-----|
 | [`image-paste.md`](image-paste.md) | Screenshot paste — wsl-screenshot-cli daemon + optional Alt+V keybinding |
 | [`claude-notify.md`](claude-notify.md) | Windows balloon tip for Claude Code `Notification` hooks |
+| [`bin/tmux-notify-run`](bin/tmux-notify-run) | Detached tmux jobs with logs, exit status, and Windows completion notification |
 | [`codex-notify.md`](codex-notify.md) | Reuse the same balloon script through Codex's top-level `notify` command |
 | [`shift-enter.md`](shift-enter.md) | Shift+Enter newline in VSCode terminal and Windows Terminal |
 | [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` env var |

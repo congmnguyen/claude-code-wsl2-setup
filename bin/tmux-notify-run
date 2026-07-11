@@ -1,0 +1,173 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage:
+  tmux-notify-run SESSION [--title TITLE] [--log PATH] [--cwd DIR] -- COMMAND [ARG...]
+
+Starts COMMAND in a detached tmux session and sends a Windows notification when
+it exits. Runtime state is stored under ~/.local/state/tmux-notify-run/SESSION/.
+EOF
+}
+
+die() {
+  printf 'tmux-notify-run: %s\n' "$*" >&2
+  exit 2
+}
+
+[[ $# -gt 0 ]] || { usage >&2; exit 2; }
+if [[ $1 == -h || $1 == --help ]]; then
+  usage
+  exit 0
+fi
+
+session=$1
+shift
+[[ $session =~ ^[A-Za-z0-9_.-]+$ ]] || die "SESSION may contain only letters, numbers, dot, underscore, and hyphen"
+
+title="tmux: $session"
+cwd=$PWD
+log=""
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --title)
+      [[ $# -ge 2 ]] || die "--title requires a value"
+      title=$2
+      shift 2
+      ;;
+    --log)
+      [[ $# -ge 2 ]] || die "--log requires a value"
+      log=$2
+      shift 2
+      ;;
+    --cwd)
+      [[ $# -ge 2 ]] || die "--cwd requires a value"
+      cwd=$2
+      shift 2
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      die "unknown option: $1"
+      ;;
+  esac
+done
+
+[[ $# -gt 0 ]] || die "missing COMMAND after --"
+command -v tmux >/dev/null || die "tmux is not installed"
+command -v setsid >/dev/null || die "setsid is not installed"
+[[ -d $cwd ]] || die "working directory does not exist: $cwd"
+tmux has-session -t "=$session" 2>/dev/null && die "tmux session already exists: $session"
+
+state_root=${XDG_STATE_HOME:-$HOME/.local/state}/tmux-notify-run
+job_dir=$state_root/$session
+mkdir -p "$job_dir"
+
+if [[ -z $log ]]; then
+  log=$job_dir/job.log
+elif [[ $log != /* ]]; then
+  log=$PWD/$log
+fi
+mkdir -p "$(dirname "$log")"
+
+runner=$job_dir/run.sh
+status_file=$job_dir/status
+meta_file=$job_dir/meta
+notify=${TMUX_NOTIFY_COMMAND:-$HOME/bin/claude-notify}
+
+tmux_env=()
+env_names=()
+while IFS= read -r -d '' entry; do
+  name=${entry%%=*}
+  case $name in
+    TMUX|TMUX_PANE|SHLVL|_)
+      continue
+      ;;
+  esac
+  tmux_env+=("$entry")
+  env_names+=("$name")
+done < <(env -0)
+
+{
+  printf '#!/usr/bin/env bash\n'
+  printf 'set -uo pipefail\n'
+  printf 'cwd=%q\n' "$cwd"
+  printf 'log=%q\n' "$log"
+  printf 'status_file=%q\n' "$status_file"
+  printf 'meta_file=%q\n' "$meta_file"
+  printf 'notify=%q\n' "$notify"
+  printf 'title=%q\n' "$title"
+  printf 'session=%q\n' "$session"
+  printf 'command=('
+  printf ' %q' "$@"
+  printf ' )\n'
+  printf 'env_names=('
+  printf ' %q' "${env_names[@]}"
+  printf ' )\n'
+  cat <<'EOF'
+cd "$cwd" || exit 125
+: >"$log"
+printf 'running\n' >"$status_file"
+{
+  printf 'session=%s\n' "$session"
+  printf 'pid=%s\n' "$$"
+  printf 'started_at=%s\n' "$(date --iso-8601=seconds)"
+  printf 'cwd=%s\n' "$cwd"
+  printf 'log=%s\n' "$log"
+} >"$meta_file"
+
+declare -A allowed_env=()
+for name in "${env_names[@]}"; do
+  allowed_env["$name"]=1
+done
+job_env=()
+while IFS= read -r -d '' entry; do
+  name=${entry%%=*}
+  if [[ ${allowed_env[$name]+present} ]]; then
+    job_env+=("$entry")
+  fi
+done < <(env -0)
+
+env -i "${job_env[@]}" "${command[@]}" > >(tee -a "$log") 2>&1
+rc=$?
+
+printf '%s\n' "$rc" >"$status_file"
+{
+  printf 'finished_at=%s\n' "$(date --iso-8601=seconds)"
+  printf 'exit_code=%s\n' "$rc"
+} >>"$meta_file"
+
+if [[ $rc -eq 0 ]]; then
+  message="Completed successfully"
+else
+  message="Failed with exit code $rc"
+fi
+
+if [[ -x $notify ]]; then
+  setsid -f "$notify" "$title" "$message" </dev/null >/dev/null 2>&1
+fi
+
+exit "$rc"
+EOF
+} >"$runner"
+chmod 700 "$runner"
+
+tmux_args=(new-session -d -s "$session")
+for entry in "${tmux_env[@]}"; do
+  tmux_args+=(-e "$entry")
+done
+
+tmux "${tmux_args[@]}" "$runner"
+
+printf 'Started tmux session: %s\n' "$session"
+printf 'Log: %s\n' "$log"
+printf 'Status: %s\n' "$status_file"
+printf 'Attach: tmux attach -t %s\n' "$session"

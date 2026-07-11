@@ -194,6 +194,31 @@ prompt, **Needs your input!** when it needs approval, or an agent-specific messa
 background work. Clicking the balloon restores and focuses Windows Terminal. No
 notification fires if you are already looking at the terminal.
 
+## Long-running tmux jobs
+
+Claude Code hooks report Claude lifecycle events, but a command left running in tmux may
+finish after the Claude turn ends. Install the companion helper to notify on process exit:
+
+```bash
+install -Dm755 bin/tmux-notify-run ~/bin/tmux-notify-run
+```
+
+Run a detached job by putting its command after `--`:
+
+```bash
+tmux-notify-run bird-eval \
+  --title "Claude Code: BIRD evaluation" \
+  --log evaluation/results/bird-eval.log \
+  --cwd ~/code/text2sql-agent \
+  -- ./evaluation/scripts/run_eval.sh
+```
+
+The helper preserves command arguments and the caller environment, streams output to tmux
+and the log, records the exit code under
+`~/.local/state/tmux-notify-run/<session>/status`, and sends a Windows notification on
+success or failure. `wsl --shutdown`, Windows shutdown, or a WSL
+auto-shutdown watcher still stops both the job and its tmux session.
+
 ---
 
 ## Troubleshooting
