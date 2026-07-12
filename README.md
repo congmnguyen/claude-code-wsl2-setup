@@ -145,7 +145,7 @@ then read the linked setup page for the feature you want.
 | [`bin/tmux-notify-run`](bin/tmux-notify-run) | Detached tmux jobs with logs, exit status, and Windows completion notification |
 | [`codex-notify.md`](codex-notify.md) | Reuse the same balloon script through Codex's top-level `notify` command |
 | [`shift-enter.md`](shift-enter.md) | Shift+Enter newline in VSCode terminal and Windows Terminal |
-| [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` env var |
+| [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` plus an XDG fallback for OAuth CLIs |
 | [`capslock-esc.md`](capslock-esc.md) | CapsLock → Escape registry remap via SharpKeys |
 
 ## Custom agents and skills
