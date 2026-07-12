@@ -4,10 +4,10 @@ Claude Code and Codex can overwrite the Windows Terminal tab title, leaving seve
 tabs hard to tell apart. This optional zsh setup makes the shell the single title owner:
 
 ```text
-~ · codex
-~ · claude
-text2sql-agent · codex
-text2sql-agent · claude
+~ · >_ Codex
+~ · ✳ Claude
+text2sql-agent · >_ Codex
+text2sql-agent · ✳ Claude
 ```
 
 <p align="center">
@@ -66,7 +66,14 @@ _wt_title_idle() {
 _wt_title_running() {
   local project=$(_wt_project_name)
   local command_name="${1%% *}"
-  _wt_set_title "${project} · ${command_name}"
+  local command_label="$command_name"
+
+  case "$command_name" in
+    codex) command_label=">_ Codex" ;;
+    claude) command_label="✳ Claude" ;;
+  esac
+
+  _wt_set_title "${project} · ${command_label}"
 }
 
 add-zsh-hook precmd _wt_title_idle
@@ -113,7 +120,9 @@ codex
 claude
 ```
 
-The tabs should show `text2sql-agent · codex` and `text2sql-agent · claude` respectively.
+The tabs should show `text2sql-agent · >_ Codex` and `text2sql-agent · ✳ Claude`
+respectively. `>_` matches Codex's own terminal header; `✳` matches the Claude Code tab
+mark. Other commands continue to use their executable name without a special symbol.
 
 ## Troubleshooting
 

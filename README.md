@@ -53,7 +53,7 @@ Start with these — they are the highest-leverage pieces in the repo:
 - **[Image paste](image-paste.md)** — paste a Windows screenshot into Claude Code or Codex as
   a usable WSL file path.
 - **[Distinct terminal titles](terminal-title.md)** — label zsh tabs by the current project
-  and active agent, such as `text2sql-agent · claude` or `text2sql-agent · codex`.
+  and active agent, such as `text2sql-agent · ✳ Claude` or `text2sql-agent · >_ Codex`.
 - **Notifications ([Claude Code](claude-notify.md) · [Codex](codex-notify.md))** — get a
   Windows notification when either agent finishes, while suppressing alerts when Windows
   Terminal is already focused.
