@@ -52,6 +52,8 @@ Start with these — they are the highest-leverage pieces in the repo:
   without enabling telemetry for every local session.
 - **[Image paste](image-paste.md)** — paste a Windows screenshot into Claude Code or Codex as
   a usable WSL file path.
+- **[Distinct terminal titles](terminal-title.md)** — label zsh tabs by the current project
+  and active agent, such as `text2sql-agent · claude` or `text2sql-agent · codex`.
 - **Notifications ([Claude Code](claude-notify.md) · [Codex](codex-notify.md))** — get a
   Windows notification when either agent finishes, while suppressing alerts when Windows
   Terminal is already focused.
@@ -77,6 +79,11 @@ Start with these — they are the highest-leverage pieces in the repo:
 <p align="center">
   <img src="assets/preview-codex-notification.png" alt="Windows balloon tip notification showing Codex's last reply" width="720"><br>
   <em>Codex's top-level <code>notify</code> command shows the completed turn's last reply</em>
+</p>
+
+<p align="center">
+  <img src="assets/preview-terminal-title.png" alt="Windows Terminal tabs labelled by directory and active coding agent" width="720"><br>
+  <em>Shell-managed titles keep Claude Code and Codex tabs distinguishable.</em>
 </p>
 
 ## What it fixes
@@ -141,6 +148,7 @@ then read the linked setup page for the feature you want.
 | File | Fix |
 |------|-----|
 | [`image-paste.md`](image-paste.md) | Screenshot paste — wsl-screenshot-cli daemon + optional Alt+V keybinding |
+| [`terminal-title.md`](terminal-title.md) | Distinct zsh tab titles for the current directory, Claude Code, and Codex |
 | [`claude-notify.md`](claude-notify.md) | Windows balloon tip for Claude Code `Notification` hooks |
 | [`bin/tmux-notify-run`](bin/tmux-notify-run) | Detached tmux jobs with logs, exit status, and Windows completion notification |
 | [`codex-notify.md`](codex-notify.md) | Reuse the same balloon script through Codex's top-level `notify` command |
