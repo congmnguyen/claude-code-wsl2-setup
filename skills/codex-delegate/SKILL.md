@@ -46,5 +46,6 @@ Spawns the **`codex-delegate` subagent** (low-effort Sonnet), which runs `codex 
 ## Safety notes
 
 - `workspace-write` lets Codex edit **any file under WORKDIR**, including things like `.env` or config/DB files. For a sensitive repo, pass a narrower WORKDIR (a subdir) or `read-only`.
+- Never run two `workspace-write` delegations against the same `WORKDIR` concurrently, and do not edit that checkout from the main context while a write delegation is running. Parallel `read-only` delegations are safe. If parallel writers are explicitly needed, create a separate Git worktree for each task and pass its path as `WORKDIR`.
 - The subagent invokes Codex only via `~/.claude/scripts/codex-run.sh`, which accepts no flag pass-through — approval-bypass flags are structurally impossible, and quota/stall detection is built in. Don't bypass the script.
 - This needs the `codex` CLI installed and authenticated (`codex login`). If missing, `codex:setup`-style checks: `codex --version`.
