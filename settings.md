@@ -1,21 +1,24 @@
 # Claude Code Settings Tweaks
 
-## Disable git attribution
+## Disable git attribution and session links
 
 By default Claude Code appends `Co-authored-by: Claude` to commits and PR descriptions.
-To remove it, set empty strings in `~/.claude/settings.json`:
+Web and Remote Control sessions can also append a `Claude-Session` link to commits
+and PR descriptions. To remove both, update `~/.claude/settings.json`:
 
 ```json
 {
   "attribution": {
     "commit": "",
-    "pr": ""
+    "pr": "",
+    "sessionUrl": false
   }
 }
 ```
 
-Empty string = no attribution. The deprecated `includeCoAuthoredBy` key and the
-non-existent `gitAttribution` key do nothing — `attribution` is the correct field.
+Empty strings disable commit and PR attribution. `sessionUrl: false` disables the
+session link. The deprecated `includeCoAuthoredBy` key and the non-existent
+`gitAttribution` key do nothing — `attribution` is the correct field.
 
 ---
 
