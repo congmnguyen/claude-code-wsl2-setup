@@ -34,19 +34,42 @@ After starting: take a screenshot on Windows → `Ctrl+Shift+V` in terminal → 
 
 ---
 
-## Auto-start via SessionStart hook
+## Auto-start with systemd
 
-Add to `~/.claude/settings.json`:
+Create `~/.config/systemd/user/wsl-screenshot-cli.service`:
 
-```json
-"hooks": {
-  "SessionStart": [
-    { "hooks": [{ "type": "command", "command": "wsl-screenshot-cli start --daemon --quiet 2>/dev/null" }] }
-  ]
-}
+```ini
+[Unit]
+Description=WSL screenshot clipboard monitor
+After=default.target
+
+[Service]
+Type=simple
+Environment=WSL_INTEROP=/run/WSL/1_interop
+Environment=PATH=%h/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=%h/.local/bin/wsl-screenshot-cli start --quiet
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=default.target
 ```
 
-> **Do not add a `SessionEnd` hook.** Claude Code fires `SessionStart`/`SessionEnd` for every Task tool subagent — a stop hook would kill the daemon mid-session.
+Then enable it:
+
+```bash
+systemctl --user daemon-reload
+systemctl --user enable --now wsl-screenshot-cli.service
+systemctl --user status wsl-screenshot-cli.service
+```
+
+The explicit `WSL_INTEROP` and `PATH` entries are required because the systemd user manager does not inherit them from an interactive WSL shell. Run `start` in the foreground here: systemd must own the process so it can restart it if the clipboard client exits. Do not also start the daemon from `.bashrc`, `.zshrc`, or Claude hooks.
+
+Inspect failures with:
+
+```bash
+journalctl --user -u wsl-screenshot-cli.service -n 50 --no-pager
+```
 
 ---
 

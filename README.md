@@ -88,7 +88,7 @@ Start with these — they are the highest-leverage pieces in the repo:
 
 ## What it fixes
 
-- **Image paste** — copy a screenshot on Windows and paste the file path straight into Claude Code or Codex. A small Go daemon ([wsl-screenshot-cli](https://github.com/Nailuu/wsl-screenshot-cli)) polls the Windows clipboard, saves new screenshots under `/tmp/.wsl-screenshot-cli/`, and rewrites the clipboard so paste returns the WSL path.
+- **Image paste** — copy a screenshot on Windows and paste the file path straight into Claude Code or Codex. A systemd user service keeps [wsl-screenshot-cli](https://github.com/Nailuu/wsl-screenshot-cli) running, saves new screenshots under `/tmp/.wsl-screenshot-cli/`, and restarts the clipboard monitor if it exits.
 - **Shift+Enter newline** — insert a newline without submitting, in both the VSCode integrated terminal and Windows Terminal.
 - **CapsLock → Escape** — remap CapsLock to Escape system-wide via SharpKeys (registry-level, works in WSL2, Vim, games, and elevated processes).
 - **"Needs your input" Windows notification** — fires on Claude Code `Notification` events when Claude finishes, asks for permission, or a background agent completes; suppressed automatically when Windows Terminal is already focused. WSL2 variant uses a balloon tip; the native PowerShell variant uses a modern Windows toast.
@@ -147,7 +147,7 @@ then read the linked setup page for the feature you want.
 
 | File | Fix |
 |------|-----|
-| [`image-paste.md`](image-paste.md) | Screenshot paste — wsl-screenshot-cli daemon + optional Alt+V keybinding |
+| [`image-paste.md`](image-paste.md) | Screenshot paste — supervised wsl-screenshot-cli service + optional Alt+V keybinding |
 | [`terminal-title.md`](terminal-title.md) | Distinct zsh tab titles for the current directory, Claude Code, and Codex |
 | [`claude-notify.md`](claude-notify.md) | Windows balloon tip for Claude Code `Notification` hooks |
 | [`bin/tmux-notify-run`](bin/tmux-notify-run) | Detached tmux jobs with logs, exit status, and Windows completion notification |

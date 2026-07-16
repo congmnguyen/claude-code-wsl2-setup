@@ -9,7 +9,7 @@
 
 ## Non-obvious constraints
 
-- For screenshot paste, never add a Claude Code `SessionEnd` hook: Task subagents also emit `SessionEnd`, which would stop the shared `wsl-screenshot-cli` daemon mid-session. See `image-paste.md`.
+- Run screenshot paste only through the systemd user service; do not add shell or Claude hooks that can race or stop the supervised `wsl-screenshot-cli` process. See `image-paste.md`.
 - `hooks/block-secret-reads.sh` and `hooks/truncate-bash-output.sh` mirror their live copies. Verify hook changes with synthetic JSON payloads, not file presence alone. The Bash post-tool hook must preserve the full `tool_response` object when replacing `.stdout`. See `secrets-hygiene-hook.md` and `truncate-bash-output.md`.
 - Keep `playwright-cli.md` and the Playwright section of `mcp-setup.md` separate and cross-linked: CLI is the coding default; MCP is for persistent-state or long-running browser workflows.
 - `~/.claude/keybindings.json` must be an object containing a `bindings` array; a bare array silently fails.
