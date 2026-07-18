@@ -70,6 +70,8 @@ public class Win32 {
     public static extern bool SetForegroundWindow(IntPtr hWnd);
     [DllImport(\"user32.dll\")]
     public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    [DllImport(\"user32.dll\")]
+    public static extern bool IsIconic(IntPtr hWnd);
 }
 '@
 if (-not $force_ps) {
@@ -91,7 +93,10 @@ Add-Type -AssemblyName System.Drawing
 \$notification.add_BalloonTipClicked({
     \$wt = Get-Process -Name 'WindowsTerminal' -ErrorAction SilentlyContinue | Select-Object -First 1
     if (\$wt -and \$wt.MainWindowHandle -ne [IntPtr]::Zero) {
-        [Win32]::ShowWindow(\$wt.MainWindowHandle, 9) | Out-Null
+        # SW_RESTORE (9) would un-maximize a maximized window; only use it when
+        # the window is actually minimized, otherwise SW_SHOW (5) keeps its state.
+        \$show = if ([Win32]::IsIconic(\$wt.MainWindowHandle)) { 9 } else { 5 }
+        [Win32]::ShowWindow(\$wt.MainWindowHandle, \$show) | Out-Null
         [Win32]::SetForegroundWindow(\$wt.MainWindowHandle) | Out-Null
     }
     [System.Windows.Forms.Application]::Exit()
