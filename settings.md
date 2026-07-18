@@ -22,21 +22,27 @@ session link. The deprecated `includeCoAuthoredBy` key and the non-existent
 
 ---
 
-## Enable Bash sandbox globally
+## Bash sandbox: filesystem rules staged, toggle off
 
-Set the Bash sandbox in user settings so it applies across projects:
+The live config keeps the Bash sandbox **disabled globally** (`"enabled": false`) but
+stages the filesystem rules so enabling it is a one-flag change:
 
 ```json
 {
   "sandbox": {
-    "enabled": true
+    "enabled": false,
+    "filesystem": {
+      "allowWrite": ["~/.cache/uv", "~/.codex"],
+      "denyRead": ["~/.claude/.credentials.json"]
+    }
   }
 }
 ```
 
-Project-local `.claude/settings.local.json` entries can still tune sandbox behavior
-for one repository. Keep global settings minimal unless a rule should apply
-everywhere.
+`~/.cache/uv` keeps `uvx`-based hooks (e.g. the Ruff format hook) working under the
+sandbox; `~/.codex` lets the Codex delegate wrapper write its session state. To enable
+the sandbox everywhere, flip `enabled` to `true`; project-local
+`.claude/settings.local.json` entries can still tune sandbox behavior for one repository.
 
 ---
 

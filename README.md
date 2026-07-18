@@ -96,6 +96,7 @@ Start with these — they are the highest-leverage pieces in the repo:
 - **LangSmith tracing** — send selected Claude Code project turns, tool calls, subagent runs, and compaction events to project-specific LangSmith traces.
 - **Secrets hygiene hook** — blocks Claude from reading credential files into the transcript with `Read`, `Grep`, or content-printing shell commands.
 - **Bash output truncation hook** — cuts huge command output (test runs, build logs, JSON dumps) down to head+tail with an omission marker, so one verbose command doesn't eat the context window for the rest of the session.
+- **Ruff auto-format hook** — formats Python files after every Claude edit, but only in projects that declare Ruff configuration.
 - **Settings tweaks** — disable the `Co-authored-by: Claude` git attribution and pre-accept the project trust dialog.
 - **Windows browser** — open links and OAuth flows in your existing Windows browser instead of Chromium inside WSL2.
 
@@ -142,6 +143,7 @@ then read the linked setup page for the feature you want.
 |------|-----|
 | [`secrets-hygiene-hook.md`](secrets-hygiene-hook.md) + [`hooks/block-secret-reads.sh`](hooks/block-secret-reads.sh) | PreToolUse hook — block credential-file reads before they hit the transcript |
 | [`truncate-bash-output.md`](truncate-bash-output.md) + [`hooks/truncate-bash-output.sh`](hooks/truncate-bash-output.sh) | PostToolUse hook — truncate huge Bash output to head+tail before it eats context |
+| [`format-python-with-ruff.md`](format-python-with-ruff.md) + [`hooks/format-python-with-ruff.sh`](hooks/format-python-with-ruff.sh) | PostToolUse hook — auto-format Python edits with Ruff, only in projects that declare Ruff config |
 
 ### WSL / Windows bridge
 
@@ -162,7 +164,7 @@ then read the linked setup page for the feature you want.
 |------|----------|
 | [`agents/`](agents/) | `code-architect`, `codex-delegate` |
 | [`skills/`](skills/) | Active local skills: `codex-delegate`, `commit-push-pr`, `deep-teach`, `pytorch-training` |
-| [`hooks/`](hooks/) | `block-secret-reads.sh` PreToolUse hook, `truncate-bash-output.sh` PostToolUse hook |
+| [`hooks/`](hooks/) | `block-secret-reads.sh` PreToolUse hook; `truncate-bash-output.sh` and `format-python-with-ruff.sh` PostToolUse hooks |
 | [`scripts/`](scripts/) | `codex-run.sh` wrapper used by the `codex-delegate` Claude agent |
 
 Copy the matching files from [`agents/`](agents/), [`skills/`](skills/), [`hooks/`](hooks/),

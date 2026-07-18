@@ -10,7 +10,7 @@
 ## Non-obvious constraints
 
 - Run screenshot paste only through the systemd user service; do not add shell or Claude hooks that can race or stop the supervised `wsl-screenshot-cli` process. See `image-paste.md`.
-- `hooks/block-secret-reads.sh` and `hooks/truncate-bash-output.sh` mirror their live copies. Verify hook changes with synthetic JSON payloads, not file presence alone. The Bash post-tool hook must preserve the full `tool_response` object when replacing `.stdout`. See `secrets-hygiene-hook.md` and `truncate-bash-output.md`.
+- Scripts in `hooks/` mirror their live copies in `~/.claude/hooks/`. Verify hook changes with synthetic JSON payloads, not file presence alone. The Bash post-tool hook must preserve the full `tool_response` object when replacing `.stdout`. See `secrets-hygiene-hook.md`, `truncate-bash-output.md`, and `format-python-with-ruff.md`.
 - Keep `playwright-cli.md` and the Playwright section of `mcp-setup.md` separate and cross-linked: CLI is the coding default; MCP is for persistent-state or long-running browser workflows.
 - `~/.claude/keybindings.json` must be an object containing a `bindings` array; a bare array silently fails.
 - In `~/.claude/settings.json`, merge settings instead of replacing the file. Use `attribution`, not deprecated or invented attribution keys. See `settings.md`.
