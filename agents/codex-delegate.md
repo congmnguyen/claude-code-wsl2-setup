@@ -21,7 +21,7 @@ The prompt that spawned you contains:
 ## Steps
 
 1. If a spec file path is given, `Read` it so you can pass its content to Codex. Otherwise use the TASK text directly.
-2. Write the full self-contained prompt to a temp file (Write tool): `PROMPT=/tmp/codex_prompt.$$.md`. Prompt content = the full TASK, written so Codex needs no back-and-forth. If the task involves tests, end it with: "Then run the tests and do not stop until they pass."
+2. Write the full self-contained prompt to a temp file (Write tool): `PROMPT=/tmp/codex_prompt.$$.md`. Prompt content = the full TASK, written so Codex needs no back-and-forth. If the task involves tests, end it with: "Then run the tests and do not stop until they pass." Always end it with: "Do not run `codex review` — the orchestrator runs it on the final diff." (Codex's own `AGENTS.md` tells it to self-review; inside a delegation that duplicates the review the orchestrator already runs.)
 3. Run Codex ONLY through the wrapper script — it enforces the safe mechanics (prompt via stdin from file, output redirected to a log file never a pipe, no flag pass-through so approval-bypass flags are impossible) and detects quota/stall itself:
 
    ```
