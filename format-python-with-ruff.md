@@ -23,7 +23,8 @@ cp hooks/format-python-with-ruff.sh ~/.claude/hooks/format-python-with-ruff.sh
 chmod +x ~/.claude/hooks/format-python-with-ruff.sh
 ```
 
-Requires `jq` and `uv` (the hook invokes Ruff through `uvx ruff`).
+Requires `jq` and `uv` (the hook invokes the pinned Ruff version through
+`uvx ruff@0.16.0`).
 
 ### Step 2: Wire it into `~/.claude/settings.json`
 
@@ -58,7 +59,8 @@ completes. The hook:
 1. Extracts `.tool_input.file_path` and exits immediately unless it is an existing `*.py` file.
 2. Walks up from the file's directory looking for `ruff.toml`, `.ruff.toml`, or
    `[tool.ruff]` in `pyproject.toml`.
-3. On the first match, runs `uvx ruff format` then `uvx ruff check --fix` on the file.
+3. On the first match, runs `uvx ruff@0.16.0 format` then
+   `uvx ruff@0.16.0 check --fix` on the file.
 4. Stops the walk at the repository root (`.git` — checked with `-e`, so git worktrees
    where `.git` is a file also stop the walk) or filesystem root.
 
@@ -86,7 +88,7 @@ A `.py` file in a directory tree without Ruff config must pass through unchanged
 
 **Files aren't being formatted**
 - Check the project actually declares Ruff config — the hook is opt-in by design.
-- Check `uv` is on the PATH Claude Code hooks run with (`uvx ruff --version`).
+- Check `uv` is on the PATH Claude Code hooks run with (`uvx ruff@0.16.0 --version`).
 
 **Formatting you didn't want**
 - The nearest config wins. A `[tool.ruff]` table in a parent directory inside the same

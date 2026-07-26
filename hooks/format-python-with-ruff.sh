@@ -18,7 +18,8 @@ while [[ "$dir" != "/" ]]; do
   if [[ -f "$dir/ruff.toml" ]] \
     || [[ -f "$dir/.ruff.toml" ]] \
     || grep -qs '^\[tool\.ruff' "$dir/pyproject.toml"; then
-    uvx ruff format "$file_path" && uvx ruff check --fix "$file_path"
+    uvx ruff@0.16.0 format "$file_path" \
+      && uvx ruff@0.16.0 check --fix "$file_path"
     break
   fi
 
