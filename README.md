@@ -14,9 +14,13 @@ bolted on: screenshots paste as WSL paths, notifications land in Windows, browse
 links open in your normal browser, and long implementation loops can move to Codex
 without filling Claude's main conversation.
 
-Start with [`codex-delegate`](codex-delegate.md) if your main pain is context burn.
-Start with [`image-paste`](image-paste.md) and [`claude-notify`](claude-notify.md)
-if your main pain is day-to-day Windows/WSL friction.
+Where to start, depending on what hurts most:
+
+- **Context burn** → [`codex-delegate`](codex-delegate.md), then [`lsp-setup`](lsp-setup.md)
+  and [`truncate-bash-output`](truncate-bash-output.md).
+- **Windows/WSL friction** → [`image-paste`](image-paste.md) and [`claude-notify`](claude-notify.md).
+- **No visibility into what Claude did** → [`langsmith-tracing`](langsmith-tracing.md)
+  and [`statusline`](statusline.md).
 
 ## Delegate implementation without filling Claude's main context
 
@@ -37,30 +41,6 @@ parallel while the main Claude session still showed 8% context and 6% five-hour 
 </p>
 
 **[Set up Codex delegation →](codex-delegate.md)**
-
----
-
-## Featured fixes
-
-Start with these — they are the highest-leverage pieces in the repo:
-
-- **[Codex delegate](codex-delegate.md)** — routes large mechanical implementation to Codex
-  through an isolated low-effort Sonnet wrapper, keeping the premium Claude orchestrator context clean.
-- **[LSP setup](lsp-setup.md)** — lets Claude use real Go-to-Definition / reference
-  navigation instead of burning tokens on broad file search.
-- **[LangSmith tracing](langsmith-tracing.md)** — trace selected Claude Code projects
-  without enabling telemetry for every local session.
-- **[Image paste](image-paste.md)** — paste a Windows screenshot into Claude Code or Codex as
-  a usable WSL file path.
-- **[Distinct terminal titles](terminal-title.md)** — label zsh tabs by the current project
-  and active agent, such as `text2sql-agent · ✳ Claude` or `text2sql-agent · >_ Codex`.
-- **Notifications ([Claude Code](claude-notify.md) · [Codex](codex-notify.md))** — get a
-  Windows notification when either agent finishes, while suppressing alerts when Windows
-  Terminal is already focused.
-- **[Secrets hygiene hook](secrets-hygiene-hook.md)** — blocks credential-file reads before
-  secrets can land in the transcript.
-- **[Bash output truncation hook](truncate-bash-output.md)** — trims huge command output to
-  head+tail so one verbose test/build log does not bloat the rest of the context.
 
 ---
 
@@ -86,20 +66,6 @@ Start with these — they are the highest-leverage pieces in the repo:
   <em>Shell-managed titles keep Claude Code and Codex tabs distinguishable.</em>
 </p>
 
-## What it fixes
-
-- **Image paste** — copy a screenshot on Windows and paste the file path straight into Claude Code or Codex. A systemd user service keeps [wsl-screenshot-cli](https://github.com/Nailuu/wsl-screenshot-cli) running, saves new screenshots under `/tmp/.wsl-screenshot-cli/`, and restarts the clipboard monitor if it exits.
-- **Shift+Enter newline** — insert a newline without submitting, in both the VSCode integrated terminal and Windows Terminal.
-- **CapsLock → Escape** — remap CapsLock to Escape system-wide via SharpKeys (registry-level, works in WSL2, Vim, games, and elevated processes).
-- **"Needs your input" Windows notification** — fires on Claude Code `Notification` events when Claude finishes, asks for permission, or a background agent completes; suppressed automatically when Windows Terminal is already focused. WSL2 variant uses a balloon tip; the native PowerShell variant uses a modern Windows toast.
-- **Status line** — project directory, git branch, context-window fill bar, and 5-hour / 7-day usage, color-coded by severity.
-- **LangSmith tracing** — send selected Claude Code project turns, tool calls, subagent runs, and compaction events to project-specific LangSmith traces.
-- **Secrets hygiene hook** — blocks Claude from reading credential files into the transcript with `Read`, `Grep`, or content-printing shell commands.
-- **Bash output truncation hook** — cuts huge command output (test runs, build logs, JSON dumps) down to head+tail with an omission marker, so one verbose command doesn't eat the context window for the rest of the session.
-- **Ruff auto-format hook** — formats Python files after every Claude edit, but only in projects that declare Ruff configuration.
-- **Settings tweaks** — disable the `Co-authored-by: Claude` git attribution and pre-accept the project trust dialog.
-- **Windows browser** — open links and OAuth flows in your existing Windows browser instead of Chromium inside WSL2.
-
 ## Setup
 
 ```bash
@@ -124,10 +90,10 @@ then read the linked setup page for the feature you want.
 
 | File | Fix |
 |------|-----|
-| [`lsp-setup.md`](lsp-setup.md) | Official LSP plugins + language servers for TypeScript, Python, Go, Rust |
-| [`statusline.md`](statusline.md) | Project dir, git branch, context bar, 5h / 7d usage |
-| [`langsmith-tracing.md`](langsmith-tracing.md) | Project-level LangSmith traces for Claude Code turns, tools, subagents, and compaction |
-| [`settings.md`](settings.md) | Disable git attribution, skip trust dialog |
+| [`lsp-setup.md`](lsp-setup.md) | Official LSP plugins + language servers for TypeScript, Python, Go, and Rust, so Claude uses real Go-to-Definition / find-references instead of burning tokens on broad file search |
+| [`statusline.md`](statusline.md) | Project dir, git branch, context-window fill bar, and 5-hour / 7-day usage, color-coded by severity |
+| [`langsmith-tracing.md`](langsmith-tracing.md) | Project-level LangSmith traces for turns, tool calls, subagent runs, and compaction events — without enabling telemetry for every local session |
+| [`settings.md`](settings.md) | Disable the `Co-authored-by: Claude` git attribution and pre-accept the project trust dialog |
 
 ### Agent workflows
 
@@ -141,22 +107,22 @@ then read the linked setup page for the feature you want.
 
 | File | Fix |
 |------|-----|
-| [`secrets-hygiene-hook.md`](secrets-hygiene-hook.md) + [`hooks/block-secret-reads.sh`](hooks/block-secret-reads.sh) | PreToolUse hook — block credential-file reads before they hit the transcript |
-| [`truncate-bash-output.md`](truncate-bash-output.md) + [`hooks/truncate-bash-output.sh`](hooks/truncate-bash-output.sh) | PostToolUse hook — truncate huge Bash output to head+tail before it eats context |
-| [`format-python-with-ruff.md`](format-python-with-ruff.md) + [`hooks/format-python-with-ruff.sh`](hooks/format-python-with-ruff.sh) | PostToolUse hook — auto-format Python edits with Ruff, only in projects that declare Ruff config |
+| [`secrets-hygiene-hook.md`](secrets-hygiene-hook.md) + [`hooks/block-secret-reads.sh`](hooks/block-secret-reads.sh) | PreToolUse hook — blocks credential-file reads via `Read`, `Grep`, or content-printing shell commands before secrets reach the transcript |
+| [`truncate-bash-output.md`](truncate-bash-output.md) + [`hooks/truncate-bash-output.sh`](hooks/truncate-bash-output.sh) | PostToolUse hook — trims huge output (test runs, build logs, JSON dumps) to head+tail with an omission marker, so one verbose command doesn't eat the rest of the context window |
+| [`format-python-with-ruff.md`](format-python-with-ruff.md) + [`hooks/format-python-with-ruff.sh`](hooks/format-python-with-ruff.sh) | PostToolUse hook — auto-formats Python edits with Ruff, only in projects that declare Ruff config |
 
 ### WSL / Windows bridge
 
 | File | Fix |
 |------|-----|
-| [`image-paste.md`](image-paste.md) | Screenshot paste — supervised wsl-screenshot-cli service + optional Alt+V keybinding |
-| [`terminal-title.md`](terminal-title.md) | Distinct zsh tab titles for the current directory, Claude Code, and Codex |
-| [`claude-notify.md`](claude-notify.md) | Windows balloon tip for Claude Code `Notification` hooks |
-| [`bin/tmux-notify-run`](bin/tmux-notify-run) | Detached tmux jobs with logs, exit status, and Windows completion notification |
+| [`image-paste.md`](image-paste.md) | Copy a screenshot on Windows, paste the file path straight into Claude Code or Codex. A systemd user service keeps [wsl-screenshot-cli](https://github.com/Nailuu/wsl-screenshot-cli) running, saves shots under `/tmp/.wsl-screenshot-cli/`, and restarts the monitor if it exits. Optional Alt+V keybinding |
+| [`terminal-title.md`](terminal-title.md) | Distinct zsh tab titles for the current project and active agent, such as `text2sql-agent · ✳ Claude` or `text2sql-agent · >_ Codex` |
+| [`claude-notify.md`](claude-notify.md) | Windows balloon tip on Claude Code `Notification` events — Claude finished, needs permission, or a background agent completed — suppressed when Windows Terminal is already focused |
 | [`codex-notify.md`](codex-notify.md) | Reuse the same balloon script through Codex's top-level `notify` command |
-| [`shift-enter.md`](shift-enter.md) | Shift+Enter newline in VSCode terminal and Windows Terminal |
-| [`browser.md`](browser.md) | Open links in your Windows browser via `BROWSER` plus an XDG fallback for OAuth CLIs |
-| [`capslock-esc.md`](capslock-esc.md) | CapsLock → Escape registry remap via SharpKeys |
+| [`bin/tmux-notify-run`](bin/tmux-notify-run) | Detached tmux jobs with logs, exit status, and Windows completion notification |
+| [`shift-enter.md`](shift-enter.md) | Shift+Enter inserts a newline instead of submitting, in both the VSCode integrated terminal and Windows Terminal |
+| [`browser.md`](browser.md) | Open links and OAuth flows in your Windows browser via `BROWSER`, plus an XDG fallback for OAuth CLIs |
+| [`capslock-esc.md`](capslock-esc.md) | CapsLock → Escape via a SharpKeys registry remap — works in WSL2, Vim, games, and elevated processes |
 
 ## Custom agents and skills
 
@@ -167,9 +133,8 @@ then read the linked setup page for the feature you want.
 | [`hooks/`](hooks/) | `block-secret-reads.sh` PreToolUse hook; `truncate-bash-output.sh` and `format-python-with-ruff.sh` PostToolUse hooks |
 | [`scripts/`](scripts/) | `codex-run.sh` wrapper used by the `codex-delegate` Claude agent |
 
-Copy the matching files from [`agents/`](agents/), [`skills/`](skills/), [`hooks/`](hooks/),
-and [`scripts/`](scripts/) to `~/.claude/agents/`, `~/.claude/skills/`,
-`~/.claude/hooks/`, and `~/.claude/scripts/` for Claude Code.
+Copy the matching files to `~/.claude/agents/`, `~/.claude/skills/`, `~/.claude/hooks/`,
+and `~/.claude/scripts/`.
 
 After adding or updating a skill, run `/reload-skills` to make it available without
 restarting the session. Custom agents still require a restart.
