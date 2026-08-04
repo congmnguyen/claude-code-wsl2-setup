@@ -5,9 +5,14 @@ usage() {
   cat <<'EOF'
 Usage:
   tmux-notify-run SESSION [--title TITLE] [--log PATH] [--cwd DIR] -- COMMAND [ARG...]
+  tmux-notify-run --status [SESSION]
 
 Starts COMMAND in a detached tmux session and sends a Windows notification when
 it exits. Runtime state is stored under ~/.local/state/tmux-notify-run/SESSION/.
+
+--status reports unfinished jobs: "running" if the tmux session or the runner PID
+is still alive, "orphaned" if neither is (the runner died before recording an exit
+code). Orphaned jobs are recorded as such so the status stops claiming "running".
 EOF
 }
 
@@ -16,9 +21,79 @@ die() {
   exit 2
 }
 
+state_root=${XDG_STATE_HOME:-$HOME/.local/state}/tmux-notify-run
+
+meta_field() {
+  local file=$1 key=$2
+  [[ -f $file ]] || return 0
+  sed -n "s/^${key}=//p" "$file" | head -n 1
+}
+
+# Prints running | orphaned | unknown | exit=N for one job directory.
+job_state() {
+  local dir=$1 state pid
+  [[ -f $dir/status ]] || { printf 'unknown\n'; return 0; }
+  state=$(<"$dir/status")
+  [[ -n $state ]] || { printf 'unknown\n'; return 0; }
+  if [[ $state == orphaned ]]; then
+    printf 'orphaned\n'
+    return 0
+  fi
+  if [[ $state != running ]]; then
+    printf 'exit=%s\n' "$state"
+    return 0
+  fi
+  local session_name
+  session_name=$(meta_field "$dir/meta" session)
+  if [[ -n $session_name ]] && tmux has-session -t "=$session_name" 2>/dev/null; then
+    printf 'running\n'
+    return 0
+  fi
+  pid=$(meta_field "$dir/meta" pid)
+  # No PID recorded yet: the runner may be mid-startup, so make no claim.
+  [[ -n $pid ]] || { printf 'unknown\n'; return 0; }
+  if kill -0 "$pid" 2>/dev/null; then
+    printf 'running\n'
+  else
+    printf 'orphaned\n' >"$dir/status"
+    printf 'orphaned\n'
+  fi
+}
+
+show_status() {
+  local filter=${1:-} dir name state started hidden=0 shown=0
+  [[ -d $state_root ]] || die "no jobs recorded under $state_root"
+  for dir in "$state_root"/*/; do
+    [[ -d $dir ]] || continue
+    name=${dir%/}
+    name=${name##*/}
+    if [[ -n $filter && $name != "$filter" ]]; then
+      continue
+    fi
+    state=$(job_state "${dir%/}")
+    if [[ -z $filter && $state == exit=* ]]; then
+      hidden=$((hidden + 1))
+      continue
+    fi
+    started=$(meta_field "$dir/meta" started_at)
+    printf '%-10s %-25s %s\n' "$state" "${started:-unknown}" "$name"
+    shown=$((shown + 1))
+  done
+  if [[ -n $filter ]]; then
+    [[ $shown -gt 0 ]] || die "no such job: $filter"
+  else
+    printf '%d unfinished, %d finished job(s) not shown\n' "$shown" "$hidden"
+  fi
+}
+
 [[ $# -gt 0 ]] || { usage >&2; exit 2; }
 if [[ $1 == -h || $1 == --help ]]; then
   usage
+  exit 0
+fi
+if [[ $1 == --status ]]; then
+  command -v tmux >/dev/null || die "tmux is not installed"
+  show_status "${2:-}"
   exit 0
 fi
 
@@ -67,7 +142,6 @@ command -v setsid >/dev/null || die "setsid is not installed"
 [[ -d $cwd ]] || die "working directory does not exist: $cwd"
 tmux has-session -t "=$session" 2>/dev/null && die "tmux session already exists: $session"
 
-state_root=${XDG_STATE_HOME:-$HOME/.local/state}/tmux-notify-run
 job_dir=$state_root/$session
 mkdir -p "$job_dir"
 

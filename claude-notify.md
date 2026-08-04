@@ -47,6 +47,7 @@ Save to `~/bin/claude-notify`:
 #!/bin/bash
 title="${1:-Claude Code}"
 message="${2:-Notification}"
+# shellcheck disable=SC2016  # $false/$true are PowerShell literals, not shell vars
 case "${3:-}" in
     "") force_ps='$false' ;;
     --force) force_ps='$true' ;;
@@ -230,8 +231,23 @@ and the log, records the exit code under
 `~/.local/state/tmux-notify-run/<session>/status`, and sends a Windows notification on
 success or failure. It uses `claude-notify --force`, so long-running jobs still notify
 while Windows Terminal is in the foreground; normal Claude and Codex completion hooks keep
-their foreground suppression. `wsl --shutdown`, Windows shutdown, or a WSL
-auto-shutdown watcher still stops both the job and its tmux session.
+their foreground suppression.
+
+The runner re-execs the command with a filtered environment, so it does not reproduce an
+interactive shell's command resolution. Pass executables by absolute path or they exit 127.
+
+`wsl --shutdown` or a Windows shutdown stops both the job and its tmux session before the
+runner can record an exit code, leaving `status` stuck at `running`. Reconcile with:
+
+```bash
+tmux-notify-run --status          # unfinished jobs only; finished ones are counted
+tmux-notify-run --status SESSION  # one job, whatever its state
+```
+
+A job is reported `running` while its tmux session or runner PID is alive, `orphaned` once
+neither is, and `unknown` when `meta` has no PID yet (mid-startup — deliberately no claim).
+Detecting an orphan rewrites that job's `status` file, so the state stops lying after one
+check.
 
 ---
 
