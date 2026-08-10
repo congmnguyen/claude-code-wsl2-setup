@@ -10,7 +10,8 @@
 ## Non-obvious constraints
 
 - Run screenshot paste only through the systemd user service; do not add shell or Claude hooks that can race or stop the supervised `wsl-screenshot-cli` process. See `image-paste.md`.
-- Scripts in `hooks/` mirror their live copies in `~/.claude/hooks/`. Verify hook changes with synthetic JSON payloads, not file presence alone. The Bash post-tool hook must preserve the full `tool_response` object when replacing `.stdout`. See `secrets-hygiene-hook.md`, `truncate-bash-output.md`, and `format-python-with-ruff.md`.
+- Scripts in `hooks/` mirror their live copies in `~/.claude/hooks/`. Verify hook changes with synthetic JSON payloads, not file presence alone. See `secrets-hygiene-hook.md` and `format-python-with-ruff.md`.
+- Do not add a hook that rewrites Bash `tool_response`. Claude Code already persists oversized output to a file and shows a preview, which loses nothing; a truncating hook suppresses that and discards the middle irreversibly. See the `truncate-bash-output` entry under "Pruned notes" in `README.md`.
 - Browser automation is no longer documented here; `playwright-cli.md` and the Playwright section of `mcp-setup.md` were removed. `mcp-setup.md` now covers only the project-scoped Figma Desktop MCP. Recover the old pages from git history rather than rewriting them.
 - `~/.claude/keybindings.json` must be an object containing a `bindings` array; a bare array silently fails.
 - In `~/.claude/settings.json`, merge settings instead of replacing the file. Use `attribution`, not deprecated or invented attribution keys. See `settings.md`.

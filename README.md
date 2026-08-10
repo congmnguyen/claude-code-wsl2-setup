@@ -17,8 +17,7 @@ without filling Claude's main conversation.
 
 Where to start, depending on what hurts most:
 
-- **Context burn** → [`codex-delegate`](codex-delegate.md), then [`lsp-setup`](lsp-setup.md)
-  and [`truncate-bash-output`](truncate-bash-output.md).
+- **Context burn** → [`codex-delegate`](codex-delegate.md), then [`lsp-setup`](lsp-setup.md).
 - **Windows/WSL friction** → [`image-paste`](image-paste.md) and [`claude-notify`](claude-notify.md).
 - **No visibility into what Claude did** → [`statusline`](statusline.md), plus optional
   [`langsmith-tracing`](langsmith-tracing.md) when you want full turn-level traces.
@@ -108,7 +107,6 @@ then read the linked setup page for the feature you want.
 | File | Fix |
 |------|-----|
 | [`secrets-hygiene-hook.md`](secrets-hygiene-hook.md) + [`hooks/block-secret-reads.sh`](hooks/block-secret-reads.sh) | PreToolUse hook — blocks credential-file reads via `Read`, `Grep`, or content-printing/searching shell commands before secrets reach the transcript |
-| [`truncate-bash-output.md`](truncate-bash-output.md) + [`hooks/truncate-bash-output.sh`](hooks/truncate-bash-output.sh) | PostToolUse hook — trims huge output (test runs, build logs, JSON dumps) to head+tail with an omission marker, so one verbose command doesn't eat the rest of the context window |
 | [`format-python-with-ruff.md`](format-python-with-ruff.md) + [`hooks/format-python-with-ruff.sh`](hooks/format-python-with-ruff.sh) | PostToolUse hook — auto-formats Python edits with Ruff, only in projects that declare Ruff config |
 
 ### WSL / Windows bridge
@@ -130,7 +128,7 @@ then read the linked setup page for the feature you want.
 |------|----------|
 | [`agents/`](agents/) | `code-architect`, `codex-delegate` |
 | [`skills/`](skills/) | Skills to copy in as needed: `codex-delegate`, `commit-push-pr`, `deep-teach`, `pytorch-training`. My own `~/.claude/skills/` stays empty — I install per project instead of globally, so nothing competes for context on unrelated work |
-| [`hooks/`](hooks/) | `block-secret-reads.sh` PreToolUse hook (+ `test-block-secret-reads.sh` payload suite); `truncate-bash-output.sh` and `format-python-with-ruff.sh` PostToolUse hooks |
+| [`hooks/`](hooks/) | `block-secret-reads.sh` PreToolUse hook (+ `test-block-secret-reads.sh` payload suite); `format-python-with-ruff.sh` PostToolUse hook |
 | [`scripts/`](scripts/) | `codex-run.sh` wrapper used by the `codex-delegate` Claude agent |
 
 Copy the matching files to `~/.claude/agents/`, `~/.claude/skills/`, `~/.claude/hooks/`,
@@ -153,6 +151,14 @@ installation and loaded integrations.
 Native Windows PowerShell notifications, WSLg voice-mode audio, Playwright browser
 automation, and uninstalled Claude skills were removed from the main repo because they are
 not part of the active local setup. Git history keeps them if you want the old versions.
+
+`truncate-bash-output` was removed for a different reason: it was actively harmful. Claude
+Code already handles oversized command output by saving it to a file and showing a preview,
+so nothing is lost and the full text stays greppable. The hook truncated `.stdout` below
+that threshold, which suppressed the built-in behaviour and destroyed the middle of the
+output for good — exactly where test failures and stack traces live. It also used more
+context than the preview it replaced, and crashed on long lines (`jq: Argument list too
+long`), passing the entire untruncated output through.
 
 ## Recommended third-party skills
 
