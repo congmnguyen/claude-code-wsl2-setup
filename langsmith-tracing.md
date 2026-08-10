@@ -3,6 +3,10 @@
 Trace selected Claude Code projects to LangSmith without turning every local session into
 telemetry.
 
+> **Optional add-on.** I no longer run this plugin by default — it is kept here as a
+> working recipe for when trace review is worth the extra plugin. The steps below are
+> current; nothing else in this repo depends on it.
+
 <p align="center">
   <img src="assets/langsmith-tracing-claude-code.png" alt="LangSmith trace for a Claude Code turn showing input, output, latency, token count, and cost" width="760"><br>
   <em>A Claude Code turn traced into LangSmith with messages, timing, tokens, and cost.</em>

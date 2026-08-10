@@ -3,9 +3,10 @@
 My active Claude Code setup for WSL2 + Windows Terminal, built around one idea:
 keep Claude focused on orchestration and hand implementation churn to Codex.
 
-The repo only tracks the pieces I actually use: Codex delegation, LangSmith tracing,
-LSP navigation, screenshot paste, Windows notifications, statusline, and token/context
-hygiene hooks.
+The repo only tracks the pieces I actually use: Codex delegation, LSP navigation,
+screenshot paste, Windows notifications, statusline, and token/context hygiene hooks.
+Anything optional is marked as such — my own Claude Code config is deliberately minimal
+beyond the above: no custom skills, no MCP servers, no global `CLAUDE.md`.
 
 ## Who this is for
 
@@ -19,8 +20,8 @@ Where to start, depending on what hurts most:
 - **Context burn** → [`codex-delegate`](codex-delegate.md), then [`lsp-setup`](lsp-setup.md)
   and [`truncate-bash-output`](truncate-bash-output.md).
 - **Windows/WSL friction** → [`image-paste`](image-paste.md) and [`claude-notify`](claude-notify.md).
-- **No visibility into what Claude did** → [`langsmith-tracing`](langsmith-tracing.md)
-  and [`statusline`](statusline.md).
+- **No visibility into what Claude did** → [`statusline`](statusline.md), plus optional
+  [`langsmith-tracing`](langsmith-tracing.md) when you want full turn-level traces.
 
 ## Delegate implementation without filling Claude's main context
 
@@ -92,7 +93,7 @@ then read the linked setup page for the feature you want.
 |------|-----|
 | [`lsp-setup.md`](lsp-setup.md) | Official LSP plugins + language servers for TypeScript, Python, Go, and Rust, so Claude uses real Go-to-Definition / find-references instead of burning tokens on broad file search |
 | [`statusline.md`](statusline.md) | Project dir, git branch, context-window fill bar, and 5-hour / 7-day usage, color-coded by severity |
-| [`langsmith-tracing.md`](langsmith-tracing.md) | Project-level LangSmith traces for turns, tool calls, subagent runs, and compaction events — without enabling telemetry for every local session |
+| [`langsmith-tracing.md`](langsmith-tracing.md) | **Optional.** Project-level LangSmith traces for turns, tool calls, subagent runs, and compaction events — without enabling telemetry for every local session |
 | [`settings.md`](settings.md) | Disable the `Co-authored-by: Claude` git attribution and pre-accept the project trust dialog |
 
 ### Agent workflows
@@ -100,14 +101,13 @@ then read the linked setup page for the feature you want.
 | File | Fix |
 |------|-----|
 | [`codex-delegate.md`](codex-delegate.md) | Codex delegation with token isolation via a low-effort Sonnet wrapper instead of direct MCP/plugin foreground output |
-| [`mcp-setup.md`](mcp-setup.md) | DeepWiki MCP; Figma Desktop is project-specific |
-| [`playwright-cli.md`](playwright-cli.md) | Token-efficient browser automation; preferred over Playwright MCP for coding agents |
+| [`mcp-setup.md`](mcp-setup.md) | Optional project-specific Figma Desktop MCP |
 
 ### Safety and context hygiene
 
 | File | Fix |
 |------|-----|
-| [`secrets-hygiene-hook.md`](secrets-hygiene-hook.md) + [`hooks/block-secret-reads.sh`](hooks/block-secret-reads.sh) | PreToolUse hook — blocks credential-file reads via `Read`, `Grep`, or content-printing shell commands before secrets reach the transcript |
+| [`secrets-hygiene-hook.md`](secrets-hygiene-hook.md) + [`hooks/block-secret-reads.sh`](hooks/block-secret-reads.sh) | PreToolUse hook — blocks credential-file reads via `Read`, `Grep`, or content-printing/searching shell commands before secrets reach the transcript |
 | [`truncate-bash-output.md`](truncate-bash-output.md) + [`hooks/truncate-bash-output.sh`](hooks/truncate-bash-output.sh) | PostToolUse hook — trims huge output (test runs, build logs, JSON dumps) to head+tail with an omission marker, so one verbose command doesn't eat the rest of the context window |
 | [`format-python-with-ruff.md`](format-python-with-ruff.md) + [`hooks/format-python-with-ruff.sh`](hooks/format-python-with-ruff.sh) | PostToolUse hook — auto-formats Python edits with Ruff, only in projects that declare Ruff config |
 
@@ -129,8 +129,8 @@ then read the linked setup page for the feature you want.
 | Path | Contents |
 |------|----------|
 | [`agents/`](agents/) | `code-architect`, `codex-delegate` |
-| [`skills/`](skills/) | Active local skills: `codex-delegate`, `commit-push-pr`, `deep-teach`, `pytorch-training` |
-| [`hooks/`](hooks/) | `block-secret-reads.sh` PreToolUse hook; `truncate-bash-output.sh` and `format-python-with-ruff.sh` PostToolUse hooks |
+| [`skills/`](skills/) | Skills to copy in as needed: `codex-delegate`, `commit-push-pr`, `deep-teach`, `pytorch-training`. My own `~/.claude/skills/` stays empty — I install per project instead of globally, so nothing competes for context on unrelated work |
+| [`hooks/`](hooks/) | `block-secret-reads.sh` PreToolUse hook (+ `test-block-secret-reads.sh` payload suite); `truncate-bash-output.sh` and `format-python-with-ruff.sh` PostToolUse hooks |
 | [`scripts/`](scripts/) | `codex-run.sh` wrapper used by the `codex-delegate` Claude agent |
 
 Copy the matching files to `~/.claude/agents/`, `~/.claude/skills/`, `~/.claude/hooks/`,
@@ -150,8 +150,9 @@ installation and loaded integrations.
 
 ## Pruned notes
 
-Native Windows PowerShell notifications, WSLg voice-mode audio, and uninstalled Claude
-skills were removed from the main repo because they are not part of the active local setup.
+Native Windows PowerShell notifications, WSLg voice-mode audio, Playwright browser
+automation, and uninstalled Claude skills were removed from the main repo because they are
+not part of the active local setup. Git history keeps them if you want the old versions.
 
 ## Recommended third-party skills
 
