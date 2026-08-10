@@ -1,0 +1,8 @@
+Inspect this repository without modifying files. Identify the single highest-impact
+setup inconsistency or maintenance risk that is supported by live evidence. Give:
+
+1. the exact files or commands that support the finding;
+2. a concise proposed fix;
+3. the narrowest command that would verify the fix.
+
+Do not expose secret values. Do not implement the fix.
