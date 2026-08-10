@@ -81,8 +81,8 @@ Then prompt:
 Claude will read the docs and configure everything.
 
 For a manual install, copy the relevant files from [`agents/`](agents/), [`skills/`](skills/),
-[`hooks/`](hooks/), and [`scripts/`](scripts/) into the matching `~/.claude/` directories,
-then read the linked setup page for the feature you want.
+and [`scripts/`](scripts/) into the matching `~/.claude/` directories, then read the linked
+setup page for the feature you want.
 
 ## What's included
 
@@ -93,7 +93,7 @@ then read the linked setup page for the feature you want.
 | [`lsp-setup.md`](lsp-setup.md) | Official LSP plugins + language servers for TypeScript, Python, Go, and Rust, so Claude uses real Go-to-Definition / find-references instead of burning tokens on broad file search |
 | [`statusline.md`](statusline.md) | Project dir, git branch, context-window fill bar, and 5-hour / 7-day usage, color-coded by severity |
 | [`langsmith-tracing.md`](langsmith-tracing.md) | **Optional.** Project-level LangSmith traces for turns, tool calls, subagent runs, and compaction events — without enabling telemetry for every local session |
-| [`settings.md`](settings.md) | Disable the `Co-authored-by: Claude` git attribution and pre-accept the project trust dialog |
+| [`settings.md`](settings.md) | Exact-match `permissions.deny` rules for credential paths, disabling the `Co-authored-by: Claude` git attribution, and pre-accepting the project trust dialog |
 
 ### Agent workflows
 
@@ -101,13 +101,6 @@ then read the linked setup page for the feature you want.
 |------|-----|
 | [`codex-delegate.md`](codex-delegate.md) | Codex delegation with token isolation via a low-effort Sonnet wrapper instead of direct MCP/plugin foreground output |
 | [`mcp-setup.md`](mcp-setup.md) | Optional project-specific Figma Desktop MCP |
-
-### Safety and context hygiene
-
-| File | Fix |
-|------|-----|
-| [`secrets-hygiene-hook.md`](secrets-hygiene-hook.md) + [`hooks/block-secret-reads.sh`](hooks/block-secret-reads.sh) | PreToolUse hook — blocks credential-file reads via `Read`, `Grep`, or content-printing/searching shell commands before secrets reach the transcript |
-| [`format-python-with-ruff.md`](format-python-with-ruff.md) + [`hooks/format-python-with-ruff.sh`](hooks/format-python-with-ruff.sh) | PostToolUse hook — auto-formats Python edits with Ruff, only in projects that declare Ruff config |
 
 ### WSL / Windows bridge
 
@@ -128,11 +121,10 @@ then read the linked setup page for the feature you want.
 |------|----------|
 | [`agents/`](agents/) | `code-architect`, `codex-delegate` |
 | [`skills/`](skills/) | Skills to copy in as needed: `codex-delegate`, `commit-push-pr`, `deep-teach`, `pytorch-training`. My own `~/.claude/skills/` stays empty — I install per project instead of globally, so nothing competes for context on unrelated work |
-| [`hooks/`](hooks/) | `block-secret-reads.sh` PreToolUse hook (+ `test-block-secret-reads.sh` payload suite); `format-python-with-ruff.sh` PostToolUse hook |
 | [`scripts/`](scripts/) | `codex-run.sh` wrapper used by the `codex-delegate` Claude agent |
 
-Copy the matching files to `~/.claude/agents/`, `~/.claude/skills/`, `~/.claude/hooks/`,
-and `~/.claude/scripts/`.
+Copy the matching files to `~/.claude/agents/`, `~/.claude/skills/`, and
+`~/.claude/scripts/`.
 
 After adding or updating a skill, run `/reload-skills` to make it available without
 restarting the session. Custom agents still require a restart.
@@ -152,13 +144,27 @@ Native Windows PowerShell notifications, WSLg voice-mode audio, Playwright brows
 automation, and uninstalled Claude skills were removed from the main repo because they are
 not part of the active local setup. Git history keeps them if you want the old versions.
 
-`truncate-bash-output` was removed for a different reason: it was actively harmful. Claude
-Code already handles oversized command output by saving it to a file and showing a preview,
-so nothing is lost and the full text stays greppable. The hook truncated `.stdout` below
-that threshold, which suppressed the built-in behaviour and destroyed the middle of the
-output for good — exactly where test failures and stack traces live. It also used more
-context than the preview it replaced, and crashed on long lines (`jq: Argument list too
-long`), passing the entire untruncated output through.
+The three `PreToolUse` / `PostToolUse` hooks were removed for a different reason: each one
+judged tool input by pattern, and each was measurably wrong in both directions.
+
+- `truncate-bash-output` rewrote `.stdout` to head + tail. Claude Code already saves
+  oversized output to a file and shows a preview, losing nothing; truncating below that
+  threshold suppressed the built-in behaviour and destroyed the middle permanently — where
+  test failures and stack traces live. It also cost more context than the preview it
+  replaced, and died on long lines (`jq: Argument list too long`), passing the full
+  untruncated output through.
+- `block-secret-reads` blocked reads of credential files by regex. Probed with synthetic
+  payloads it caught 1 of 11 trivial rephrasings (`dd`, `od`, `nl`, `tac`, `rev`, `perl`,
+  `tee`, a `while read` loop, `tar | base64`, `python3 -c`) while rejecting all 5 ordinary
+  source files named like `token_manager.py` or `credentials_service.py`. Exact-match
+  `permissions.deny` rules do the same job without guessing.
+- `format-python-with-ruff` ran `ruff check --fix` after every Python edit, which deleted an
+  `import` out of a file the moment it was written — leaving what is on disk different from
+  what the agent believes it wrote. It could also spin forever on a relative path, since
+  `dirname .` never reaches `/`.
+
+`Notification` hooks stayed. They react to events rather than judging tool input, so there
+is no pattern to get wrong.
 
 ## Recommended third-party skills
 
