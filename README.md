@@ -1,12 +1,11 @@
 # Claude Code WSL2 Setup
 
-My active Claude Code setup for WSL2 + Windows Terminal, built around one idea:
-keep Claude focused on orchestration and hand implementation churn to Codex.
+My active Claude Code setup for WSL2 + Windows Terminal.
 
-The repo only tracks the pieces I actually use: Codex delegation, LSP navigation,
-screenshot paste, Windows notifications, statusline, and token/context hygiene hooks.
-Anything optional is marked as such — my own Claude Code config is deliberately minimal
-beyond the above: no custom skills, no MCP servers, no global `CLAUDE.md`.
+The repo only tracks the pieces I actually use: LSP navigation, screenshot paste, Windows
+notifications, statusline, and token/context hygiene hooks. Anything optional is marked as
+such — my own Claude Code config is deliberately minimal beyond the above: no custom
+skills, no MCP servers, no global `CLAUDE.md`.
 
 ## Who this is for
 
@@ -17,32 +16,10 @@ without filling Claude's main conversation.
 
 Where to start, depending on what hurts most:
 
-- **Context burn** → [`codex-delegate`](codex-delegate.md), then [`lsp-setup`](lsp-setup.md).
+- **Context burn** → [`lsp-setup`](lsp-setup.md).
 - **Windows/WSL friction** → [`image-paste`](image-paste.md) and [`claude-notify`](claude-notify.md).
 - **No visibility into what Claude did** → [`statusline`](statusline.md), plus optional
   [`langsmith-tracing`](langsmith-tracing.md) when you want full turn-level traces.
-
-## Delegate implementation without filling Claude's main context
-
-Large implementation tasks are expensive twice: Claude spends tokens doing the work, then
-keeps every file read, edit, test run, and retry in the main conversation. That history
-competes with the architecture and product context Claude needs to orchestrate well.
-
-[`codex-delegate`](codex-delegate.md) sends a well-specified implementation task to Codex
-through an isolated Claude subagent. Codex does the read/edit/test loop; the main session gets
-back a short result and keeps its context for planning, steering, and review.
-
-In the real run below, two Codex delegates handled tens of thousands of worker tokens in
-parallel while the main Claude session still showed 8% context and 6% five-hour usage.
-
-<p align="center">
-  <img src="assets/preview-codex-delegate.png" alt="Claude Code running two Codex delegate subagents while the main context and five-hour usage stay low" width="720"><br>
-  <em>Codex does the implementation; the main Claude context receives only a compact summary.</em>
-</p>
-
-**[Set up Codex delegation →](codex-delegate.md)**
-
----
 
 ## Preview
 
@@ -80,9 +57,9 @@ Then prompt:
 
 Claude will read the docs and configure everything.
 
-For a manual install, copy the relevant files from [`agents/`](agents/), [`skills/`](skills/),
-and [`scripts/`](scripts/) into the matching `~/.claude/` directories, then read the linked
-setup page for the feature you want.
+For a manual install, copy the relevant files from [`agents/`](agents/) and [`skills/`](skills/)
+into the matching `~/.claude/` directories, then read the linked setup page for the feature
+you want.
 
 ## What's included
 
@@ -99,7 +76,6 @@ setup page for the feature you want.
 
 | File | Fix |
 |------|-----|
-| [`codex-delegate.md`](codex-delegate.md) | Codex delegation with token isolation via a low-effort Sonnet wrapper instead of direct MCP/plugin foreground output |
 | [`mcp-setup.md`](mcp-setup.md) | Optional project-specific Figma Desktop MCP |
 
 ### WSL / Windows bridge
@@ -119,18 +95,15 @@ setup page for the feature you want.
 
 | Path | Contents |
 |------|----------|
-| [`agents/`](agents/) | `code-architect`, `codex-delegate` |
-| [`skills/`](skills/) | Skills to copy in as needed: `codex-delegate`, `commit-push-pr`, `deep-teach`, `pytorch-training`. My own `~/.claude/skills/` stays empty — I install per project instead of globally, so nothing competes for context on unrelated work |
-| [`scripts/`](scripts/) | `codex-run.sh` wrapper used by the `codex-delegate` Claude agent |
+| [`agents/`](agents/) | `code-architect` |
+| [`skills/`](skills/) | Skills to copy in as needed: `commit-push-pr`, `deep-teach`, `pytorch-training`. My own `~/.claude/skills/` stays empty — I install per project instead of globally, so nothing competes for context on unrelated work |
 
-Copy the matching files to `~/.claude/agents/`, `~/.claude/skills/`, and
-`~/.claude/scripts/`.
+Copy the matching files to `~/.claude/agents/` and `~/.claude/skills/`.
 
 After adding or updating a skill, run `/reload-skills` to make it available without
 restarting the session. Custom agents still require a restart.
 
-Codex skills and the rest of my Codex setup live in the companion repo
-[`congmnguyen/codex-wsl2-setup`](https://github.com/congmnguyen/codex-wsl2-setup).
+Dropped pieces (Codex delegation and its companion repo) live in [`archive/`](archive/).
 
 ## Troubleshooting
 
