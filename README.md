@@ -1,3 +1,5 @@
+
+
 # Claude Code WSL2 Setup
 
 My active Claude Code setup for WSL2 + Windows Terminal, built around one idea:
@@ -124,7 +126,8 @@ setup page for the feature you want.
 | [`scripts/`](scripts/) | `codex-run.sh` wrapper used by the `codex-delegate` Claude agent |
 
 Copy the matching files to `~/.claude/agents/`, `~/.claude/skills/`, and
-`~/.claude/scripts/`.
+`~/.claude/scripts/`, then run `chmod +x ~/.claude/scripts/codex-run.sh` if you
+copy it.
 
 After adding or updating a skill, run `/reload-skills` to make it available without
 restarting the session. Custom agents still require a restart.
