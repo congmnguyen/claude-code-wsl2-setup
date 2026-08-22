@@ -70,7 +70,7 @@ you want.
 | [`lsp-setup.md`](lsp-setup.md) | Official LSP plugins + language servers for TypeScript, Python, Go, and Rust, so Claude uses real Go-to-Definition / find-references instead of burning tokens on broad file search |
 | [`statusline.md`](statusline.md) | Project dir, git branch, context-window fill bar, and 5-hour / 7-day usage, color-coded by severity |
 | [`langsmith-tracing.md`](langsmith-tracing.md) | **Optional.** Project-level LangSmith traces for turns, tool calls, subagent runs, and compaction events — without enabling telemetry for every local session |
-| [`settings.md`](settings.md) | Exact-match `permissions.deny` rules for credential paths, disabling the `Co-authored-by: Claude` git attribution, and pre-accepting the project trust dialog |
+| [`settings.md`](settings.md) | Disabling the `Co-authored-by: Claude` git attribution and session links, and pre-accepting the project trust dialog |
 
 ### Agent workflows
 
