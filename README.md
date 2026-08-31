@@ -25,7 +25,7 @@ Where to start, depending on what hurts most:
 
 <p align="center">
   <img src="assets/preview-statusline.png" alt="Custom statusline showing project, context bar, 5h and weekly usage" width="720"><br>
-  <em>claude-code-wsl2-setup | main | [░░░░░░░░░░] 6% | 5h:10% | W:95%</em>
+  <em>claude-code-wsl2-setup | main | [··········] 6% | 5h:10% | W:95%</em>
 </p>
 
 <p align="center">

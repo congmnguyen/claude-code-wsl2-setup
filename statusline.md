@@ -5,12 +5,12 @@ A custom status line script that shows the current project directory, git branch
 ![Status line preview](assets/statusline.png)
 
 ```
-📁 claude-code-wsl2-setup | 🌿 main | [░░░░░░░░░░] 6% | 5h:10% | W:95%
+📁 claude-code-wsl2-setup | 🌿 main | [··········] 6% | 5h:10% | W:95%
 ```
 
 - **Project dir** — basename of `.workspace.current_dir` (fallback: `$PWD`), prefixed with `📁`
 - **Git branch** — current branch, prefixed with `🌿` (only shown inside git repos)
-- **Progress bar** — context window fill (green < 70%, yellow < 90%, red ≥ 90%)
+- **Progress bar** — context window fill (green < 70%, yellow < 90%, red ≥ 90%); unused cells are dim gray dots
 - **5h:X%** — 5-hour rolling usage
 - **W:X%** — 7-day rolling usage
 
@@ -24,7 +24,7 @@ A custom status line script that shows the current project directory, git branch
 cat > ~/.claude/statusline-command.sh << 'EOF'
 #!/usr/bin/env bash
 # Claude Code status line
-# Format: 📁 project | 🌿 main | [░░░░░░░░░░] 6% | 5h:10% | W:95%
+# Format: 📁 project | 🌿 main | [··········] 6% | 5h:10% | W:95%
 
 input=$(cat)
 
@@ -76,10 +76,11 @@ fi
 if pct=$(to_pct "$ctx_pct"); then
   [ "$pct" -gt 100 ] && pct=100
   filled=$(( pct * 10 / 100 ))
-  bar=""
-  for (( i = 0; i < filled; i++ )); do bar="${bar}█"; done
-  for (( i = filled; i < 10; i++ )); do bar="${bar}░"; done
-  parts+=("$(pct_color "$pct")[${bar}] ${pct}%$(printf '\033[0m')")
+  filled_bar=""
+  empty_bar=""
+  for (( i = 0; i < filled; i++ )); do filled_bar="${filled_bar}█"; done
+  for (( i = filled; i < 10; i++ )); do empty_bar="${empty_bar}·"; done
+  parts+=("$(pct_color "$pct")[${filled_bar}$(printf '\033[90m')${empty_bar}$(pct_color "$pct")] ${pct}%$(printf '\033[0m')")
 fi
 
 # ── 3. Rate limits ────────────────────────────────────────────────────────────
@@ -125,6 +126,8 @@ Claude Code pipes a JSON blob to the script's stdin on every refresh. The script
 The git branch is resolved by running `git symbolic-ref` against the working directory from the JSON — no `cd` needed, and `--no-optional-locks` avoids touching `.git/` lock files. On a detached HEAD (mid-rebase, mid-bisect) it falls back to a short SHA.
 
 Every percentage goes through `to_pct`, which rejects anything non-numeric before `printf '%.0f'` sees it. This matters because the fields are absent or `null` more often than you would expect: `rate_limits` only appears for Pro/Max subscribers and only after the first API response of the session, Claude Code drops each window once its `resets_at` passes, and `context_window.used_percentage` is `null` early in a session. Without the guard, `printf` errors and the whole status line renders as a shell error. The context percentage is also clamped to 100 — `spend_limit.used_percentage` can exceed 100 once you pass the limit, which would otherwise overflow the 10-character bar.
+
+The filled cells inherit the context severity color, while unused cells use dim gray `·` characters. This keeps a nearly empty bar from looking like a solid block in terminal themes where `░` renders too heavily.
 
 Output uses `printf '%s'`, not `%b`: a directory or branch name containing a backslash would otherwise be mangled by escape interpretation.
 
