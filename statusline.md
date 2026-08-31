@@ -24,7 +24,7 @@ A custom status line script that shows the current project directory, git branch
 cat > ~/.claude/statusline-command.sh << 'EOF'
 #!/usr/bin/env bash
 # Claude Code status line
-# Format: 📁 claude-code-wsl2-setup | 🌿 main | [░░░░░░░░░░] 6% | 5h:10% | W:95%
+# Format: 📁 project | 🌿 main | [░░░░░░░░░░] 6% | 5h:10% | W:95%
 
 input=$(cat)
 
@@ -39,60 +39,59 @@ IFS=$'\t' read -r cwd ctx_pct five_pct week_pct < <(
 
 parts=()
 
+# ── Helper: round a value, or return 1 if it is not a number ──────────────────
+to_pct() {
+  case $1 in
+    ''|*[!0-9.]*|*.*.*) return 1 ;;
+  esac
+  printf '%.0f' "$1"
+}
+
 # ── Helper: pick ANSI color based on percentage ───────────────────────────────
 pct_color() {
-  local pct=$1
-  if   [ "$pct" -lt 70 ]; then printf '\033[32m'
-  elif [ "$pct" -lt 90 ]; then printf '\033[33m'
-  else                          printf '\033[31m'
+  if   [ "$1" -lt 70 ]; then printf '\033[32m'
+  elif [ "$1" -lt 90 ]; then printf '\033[33m'
+  else                       printf '\033[31m'
   fi
 }
 
+# ── Helper: append "<label><pct>%" colored by severity ────────────────────────
+add_pct() {
+  local raw=$2 pct
+  pct=$(to_pct "$raw") || return 0
+  parts+=("$(pct_color "$pct")$1${pct}%$(printf '\033[0m')")
+}
+
 # ── 0. Project dir basename ───────────────────────────────────────────────────
-project_dir="${cwd:-$PWD}"
-project_name="$(basename "$project_dir")"
-parts+=("📁 $project_name")
+parts+=("📁 $(basename "${cwd:-$PWD}")")
 
 # ── 1. Git branch (only inside git repos) ─────────────────────────────────────
-if [ -n "$cwd" ]; then
-  branch=$(git -C "$cwd" --no-optional-locks symbolic-ref --short HEAD 2>/dev/null)
+if [ -d "$cwd" ]; then
+  branch=$(git -C "$cwd" --no-optional-locks symbolic-ref --short HEAD 2>/dev/null) \
+    || branch=$(git -C "$cwd" --no-optional-locks rev-parse --short HEAD 2>/dev/null)
   [ -n "$branch" ] && parts+=("🌿 $branch")
 fi
 
 # ── 2. Context window progress bar + percentage ───────────────────────────────
-if [ -n "$ctx_pct" ]; then
-  pct=$(printf '%.0f' "$ctx_pct")
-  color=$(pct_color "$pct")
+if pct=$(to_pct "$ctx_pct"); then
+  [ "$pct" -gt 100 ] && pct=100
   filled=$(( pct * 10 / 100 ))
-  [ "$filled" -gt 10 ] && filled=10
-  empty=$(( 10 - filled ))
   bar=""
-  for (( i=0; i<filled; i++ )); do bar="${bar}█"; done
-  for (( i=0; i<empty;  i++ )); do bar="${bar}░"; done
-  parts+=("$(printf "${color}[%s] %d%%\033[0m" "$bar" "$pct")")
+  for (( i = 0; i < filled; i++ )); do bar="${bar}█"; done
+  for (( i = filled; i < 10; i++ )); do bar="${bar}░"; done
+  parts+=("$(pct_color "$pct")[${bar}] ${pct}%$(printf '\033[0m')")
 fi
 
-# ── 3. 5-hour usage ───────────────────────────────────────────────────────────
-if [ -n "$five_pct" ]; then
-  pct=$(printf '%.0f' "$five_pct")
-  color=$(pct_color "$pct")
-  parts+=("$(printf "${color}5h:%d%%\033[0m" "$pct")")
-fi
-
-# ── 4. Weekly usage ───────────────────────────────────────────────────────────
-if [ -n "$week_pct" ]; then
-  pct=$(printf '%.0f' "$week_pct")
-  color=$(pct_color "$pct")
-  parts+=("$(printf "${color}W:%d%%\033[0m" "$pct")")
-fi
+# ── 3. Rate limits ────────────────────────────────────────────────────────────
+add_pct "5h:" "$five_pct"
+add_pct "W:"  "$week_pct"
 
 # ── Join with " | " and print ─────────────────────────────────────────────────
 out=""
 for part in "${parts[@]}"; do
   [ -z "$out" ] && out="$part" || out="${out} | ${part}"
 done
-
-printf '%b\n' "$out"
+printf '%s\n' "$out"
 EOF
 chmod +x ~/.claude/statusline-command.sh
 ```
@@ -123,7 +122,11 @@ Claude Code pipes a JSON blob to the script's stdin on every refresh. The script
 | 5-hour usage % | `.rate_limits.five_hour.used_percentage` |
 | 7-day usage % | `.rate_limits.seven_day.used_percentage` |
 
-The git branch is resolved by running `git symbolic-ref` against the working directory from the JSON — no `cd` needed, and `--no-optional-locks` avoids touching `.git/` lock files.
+The git branch is resolved by running `git symbolic-ref` against the working directory from the JSON — no `cd` needed, and `--no-optional-locks` avoids touching `.git/` lock files. On a detached HEAD (mid-rebase, mid-bisect) it falls back to a short SHA.
+
+Every percentage goes through `to_pct`, which rejects anything non-numeric before `printf '%.0f'` sees it. This matters because the fields are absent or `null` more often than you would expect: `rate_limits` only appears for Pro/Max subscribers and only after the first API response of the session, Claude Code drops each window once its `resets_at` passes, and `context_window.used_percentage` is `null` early in a session. Without the guard, `printf` errors and the whole status line renders as a shell error. The context percentage is also clamped to 100 — `spend_limit.used_percentage` can exceed 100 once you pass the limit, which would otherwise overflow the 10-character bar.
+
+Output uses `printf '%s'`, not `%b`: a directory or branch name containing a backslash would otherwise be mangled by escape interpretation.
 
 ---
 
