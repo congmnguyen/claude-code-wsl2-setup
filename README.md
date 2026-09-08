@@ -1,18 +1,20 @@
 # Claude Code WSL2 Setup
 
-My active Claude Code setup for WSL2 + Windows Terminal.
+The Claude Code setup I previously used with WSL2 + Windows Terminal: screenshot
+paste, Windows notifications, LSP navigation, and a custom statusline.
 
-The repo only tracks the pieces I actually use: LSP navigation, screenshot paste, Windows
-notifications, statusline, and token/context hygiene hooks. Anything optional is marked as
-such — my own Claude Code config is deliberately minimal beyond the above: no custom
-skills, no MCP servers, no global `CLAUDE.md`.
+**Maintenance status:** I now use Ubuntu + Ghostty and no longer test this setup
+daily on WSL2. These guides remain available for WSL2 users. Bug reports and fixes
+are welcome; please include your environment and reproduction steps.
+
+Read [why I moved from WSL2 to Ubuntu + Ghostty](ubuntu-ghostty.md) for the context
+behind the change. This repository continues to focus on WSL2.
 
 ## Who this is for
 
 Use this if you run Claude Code from WSL2 and want the Windows side to stop feeling
 bolted on: screenshots paste as WSL paths, notifications land in Windows, browser
-links open in your normal browser, and long implementation loops can move to Codex
-without filling Claude's main conversation.
+links open in your normal browser, and the statusline shows context and usage.
 
 Where to start, depending on what hurts most:
 
@@ -45,6 +47,9 @@ Where to start, depending on what hurts most:
 
 ## Setup
 
+These instructions target WSL2 + Windows Terminal. Start with the guide for the
+feature you need; optional agents, skills, and integrations are separate choices.
+
 ```bash
 git clone https://github.com/congmnguyen/claude-code-wsl2-setup.git
 cd claude-code-wsl2-setup
@@ -53,13 +58,15 @@ claude
 
 Then prompt:
 
-> Set this up
+> Help me set up this repository's WSL2 features. Check my environment, explain the
+> changes, and preserve my existing settings. Leave optional components alone.
 
-Claude will read the docs and configure everything.
+Claude can read the docs and help apply the configuration. Some steps require
+changes on the Windows side; see the individual guides.
 
-For a manual install, copy the relevant files from [`agents/`](agents/) and [`skills/`](skills/)
-into the matching `~/.claude/` directories, then read the linked setup page for the feature
-you want.
+For a manual install, follow the linked setup page for the feature you want.
+The [`agents/`](agents/) and [`skills/`](skills/) directories contain optional
+extras, not an installer for the core setup.
 
 ## What's included
 
@@ -91,12 +98,12 @@ you want.
 | [`browser.md`](browser.md) | Open links and OAuth flows in your Windows browser via `BROWSER`, plus an XDG fallback for OAuth CLIs |
 | [`capslock-esc.md`](capslock-esc.md) | CapsLock → Escape via a SharpKeys registry remap — works in WSL2, Vim, games, and elevated processes |
 
-## Custom agents and skills
+## Optional custom agents and skills
 
 | Path | Contents |
 |------|----------|
 | [`agents/`](agents/) | `code-architect` |
-| [`skills/`](skills/) | Skills to copy in as needed: `commit-push-pr`, `deep-teach`, `pytorch-training`. My own `~/.claude/skills/` stays empty — I install per project instead of globally, so nothing competes for context on unrelated work |
+| [`skills/`](skills/) | Skills to copy in as needed: `commit-push-pr`, `deep-teach`, `pytorch-training`. In my previous setup, I installed these per project rather than globally to keep unrelated work free of extra instructions |
 
 Copy the matching files to `~/.claude/agents/` and `~/.claude/skills/`.
 
@@ -115,7 +122,7 @@ installation and loaded integrations.
 
 Native Windows PowerShell notifications, WSLg voice-mode audio, Playwright browser
 automation, and uninstalled Claude skills were removed from the main repo because they are
-not part of the active local setup. Git history keeps them if you want the old versions.
+not part of the WSL2 setup I kept at the time. Git history keeps them if you want the old versions.
 
 The three `PreToolUse` / `PostToolUse` hooks were removed for a different reason: each one
 judged tool input by pattern, and each was measurably wrong in both directions.
