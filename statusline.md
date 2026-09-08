@@ -18,86 +18,28 @@ A custom status line script that shows the current project directory, git branch
 
 ## Install
 
-**1. Save the script**
+**1. Install the script**
+
+Requires Bash 4.4+, `jq`, and Git for the branch display. On Ubuntu inside WSL:
 
 ```bash
-cat > ~/.claude/statusline-command.sh << 'EOF'
-#!/usr/bin/env bash
-# Claude Code status line
-# Format: 📁 project | 🌿 main | [··········] 6% | 5h:10% | W:95%
-
-input=$(cat)
-
-IFS=$'\t' read -r cwd ctx_pct five_pct week_pct < <(
-  printf '%s' "$input" | jq -r '[
-    .workspace.current_dir // .cwd // "",
-    .context_window.used_percentage // "",
-    .rate_limits.five_hour.used_percentage // "",
-    .rate_limits.seven_day.used_percentage // ""
-  ] | @tsv'
-)
-
-parts=()
-
-# ── Helper: round a value, or return 1 if it is not a number ──────────────────
-to_pct() {
-  case $1 in
-    ''|*[!0-9.]*|*.*.*) return 1 ;;
-  esac
-  printf '%.0f' "$1"
-}
-
-# ── Helper: pick ANSI color based on percentage ───────────────────────────────
-pct_color() {
-  if   [ "$1" -lt 70 ]; then printf '\033[32m'
-  elif [ "$1" -lt 90 ]; then printf '\033[33m'
-  else                       printf '\033[31m'
-  fi
-}
-
-# ── Helper: append "<label><pct>%" colored by severity ────────────────────────
-add_pct() {
-  local raw=$2 pct
-  pct=$(to_pct "$raw") || return 0
-  parts+=("$(pct_color "$pct")$1${pct}%$(printf '\033[0m')")
-}
-
-# ── 0. Project dir basename ───────────────────────────────────────────────────
-parts+=("📁 $(basename "${cwd:-$PWD}")")
-
-# ── 1. Git branch (only inside git repos) ─────────────────────────────────────
-if [ -d "$cwd" ]; then
-  branch=$(git -C "$cwd" --no-optional-locks symbolic-ref --short HEAD 2>/dev/null) \
-    || branch=$(git -C "$cwd" --no-optional-locks rev-parse --short HEAD 2>/dev/null)
-  [ -n "$branch" ] && parts+=("🌿 $branch")
-fi
-
-# ── 2. Context window progress bar + percentage ───────────────────────────────
-if pct=$(to_pct "$ctx_pct"); then
-  [ "$pct" -gt 100 ] && pct=100
-  filled=$(( pct * 10 / 100 ))
-  filled_bar=""
-  empty_bar=""
-  for (( i = 0; i < filled; i++ )); do filled_bar="${filled_bar}█"; done
-  for (( i = filled; i < 10; i++ )); do empty_bar="${empty_bar}·"; done
-  parts+=("$(pct_color "$pct")[${filled_bar}$(printf '\033[90m')${empty_bar}$(pct_color "$pct")] ${pct}%$(printf '\033[0m')")
-fi
-
-# ── 3. Rate limits ────────────────────────────────────────────────────────────
-add_pct "5h:" "$five_pct"
-add_pct "W:"  "$week_pct"
-
-# ── Join with " | " and print ─────────────────────────────────────────────────
-out=""
-for part in "${parts[@]}"; do
-  [ -z "$out" ] && out="$part" || out="${out} | ${part}"
-done
-printf '%s\n' "$out"
-EOF
-chmod +x ~/.claude/statusline-command.sh
+sudo apt install jq git
 ```
 
-**2. Wire it into `~/.claude/settings.json`**
+From the cloned repository, install [the script](bin/statusline-command.sh).
+If the destination already exists, back it up before replacing it:
+
+```bash
+mkdir -p ~/.claude
+if [ -f ~/.claude/statusline-command.sh ]; then
+  cp --backup=numbered ~/.claude/statusline-command.sh ~/.claude/statusline-command.sh.bak
+fi
+install -m755 bin/statusline-command.sh ~/.claude/statusline-command.sh
+```
+
+**2. Merge the setting into `~/.claude/settings.json`**
+
+Keep the rest of your settings. Back up the file first; see [maintenance](maintenance.md).
 
 ```json
 {
@@ -114,7 +56,7 @@ Restart Claude Code. The status line appears at the bottom of the interface.
 
 ## How it works
 
-Claude Code pipes a JSON blob to the script's stdin on every refresh. The script extracts four fields in one `jq` call:
+Claude Code pipes a JSON blob to the script's stdin on every refresh. The script reads four fields using `jq`:
 
 | Field | JSON path |
 |-------|-----------|
@@ -125,7 +67,14 @@ Claude Code pipes a JSON blob to the script's stdin on every refresh. The script
 
 The git branch is resolved by running `git symbolic-ref` against the working directory from the JSON — no `cd` needed, and `--no-optional-locks` avoids touching `.git/` lock files. On a detached HEAD (mid-rebase, mid-bisect) it falls back to a short SHA.
 
-Every percentage goes through `to_pct`, which rejects anything non-numeric before `printf '%.0f'` sees it. This matters because the fields are absent or `null` more often than you would expect: `rate_limits` only appears for Pro/Max subscribers and only after the first API response of the session, Claude Code drops each window once its `resets_at` passes, and `context_window.used_percentage` is `null` early in a session. Without the guard, `printf` errors and the whole status line renders as a shell error. The context percentage is also clamped to 100 — `spend_limit.used_percentage` can exceed 100 once you pass the limit, which would otherwise overflow the 10-character bar.
+Missing or null percentages are omitted independently. The script preserves empty
+fields with NUL separators, so weekly usage cannot shift into the five-hour or
+context display. Invalid numeric text is omitted, and the context bar is capped
+at 100%. Malformed JSON exits with an error instead of rendering misleading data.
+
+The [Claude Code statusline reference](https://code.claude.com/docs/en/statusline)
+describes the input fields. Rate limits may be absent, including before the first
+API response or for accounts without the supported subscription data.
 
 The filled cells inherit the context severity color, while unused cells use dim gray `·` characters. This keeps a nearly empty bar from looking like a solid block in terminal themes where `░` renders too heavily.
 
@@ -133,39 +82,32 @@ Output uses `printf '%s'`, not `%b`: a directory or branch name containing a bac
 
 ---
 
-## Debugging
+## Verify
 
-Use a wrapper script to capture the live JSON without breaking the statusline:
-
-```bash
-cat > /tmp/debug-statusline.sh << 'EOF'
-#!/usr/bin/env bash
-input=$(cat)
-printf '%s' "$input" | jq '.' > /tmp/statusline-debug.json
-printf '%s' "$input" | bash ~/.claude/statusline-command.sh
-EOF
-chmod +x /tmp/debug-statusline.sh
-```
-
-Temporarily swap in `~/.claude/settings.json`:
-
-```json
-{
-  "statusLine": {
-    "type": "command",
-    "command": "bash /tmp/debug-statusline.sh"
-  }
-}
-```
-
-Restart Claude Code, then inspect:
+Run this sample without starting Claude Code:
 
 ```bash
-cat /tmp/statusline-debug.json | jq '{five_hour: .rate_limits.five_hour, seven_day: .rate_limits.seven_day}'
+printf '%s' '{"workspace":{"current_dir":"/tmp"},"context_window":{"used_percentage":null},"rate_limits":{"five_hour":{"used_percentage":34},"seven_day":{"used_percentage":56}}}' | bash ~/.claude/statusline-command.sh
 ```
 
-Test the script offline against a saved snapshot:
+Expect `5h:34%` and `W:56%`, with no context bar. Then open Claude Code and confirm
+that the statusline appears. Missing subscription data should leave only the
+available parts visible.
+
+For the repository's regression checks, run:
 
 ```bash
-cat /tmp/statusline-debug.json | bash ~/.claude/statusline-command.sh
+python3 -m unittest discover -s tests -v
 ```
+
+## Remove
+
+Remove only this `statusLine` entry from `~/.claude/settings.json`, or restore your
+previous statusline setting. Restart Claude Code, then remove the installed script
+if nothing else uses it:
+
+```bash
+rm -f ~/.claude/statusline-command.sh
+```
+
+If you replaced a script, restore your saved copy instead. Keep other settings intact.

@@ -2,9 +2,8 @@
 
 ## Problem
 
-Claude Code opens links (e.g. OAuth login, documentation) using Chromium inside WSL2
-by default. On a WSL2 setup you almost certainly want links to open in your existing
-Windows browser instead.
+If links from Claude Code or other CLI tools open in a browser inside WSL2,
+you can route them to your existing Windows browser instead.
 
 ---
 
@@ -54,7 +53,15 @@ xdg-settings get default-web-browser
 xdg-mime query default x-scheme-handler/https
 ```
 
-If it does, create `~/.local/share/applications/brave-windows.desktop`:
+Record the existing HTTP and HTTPS handlers so you can restore them later:
+
+```bash
+xdg-mime query default x-scheme-handler/http
+xdg-mime query default x-scheme-handler/https
+mkdir -p ~/.local/share/applications
+```
+
+Then create `~/.local/share/applications/brave-windows.desktop`:
 
 ```ini
 [Desktop Entry]
@@ -78,7 +85,8 @@ xdg-mime default brave-windows.desktop x-scheme-handler/https
 
 Replace `<YourUsername>` with the Windows username and adjust `Exec` when using a
 different browser. Desktop entries do not expand `$BROWSER`, so `Exec` must contain
-the real executable path.
+the real executable path. Put the executable path in double quotes in `Exec`
+if it contains spaces, as with Chrome under `Program Files`.
 
 ---
 
@@ -97,10 +105,24 @@ browser unless explicitly attached to an existing browser through CDP.
 
 **Browser doesn't open**
 - Confirm the `.exe` path is correct: `ls "/mnt/c/Users/<user>/AppData/..."`
-- Test manually: `$BROWSER "https://example.com"`
+- Test manually: `"$BROWSER" "https://example.com"`
 
 **Wrong browser still opens**
 - Make sure `source ~/.bashrc` was run in the current session after editing.
 - Check no other config is overriding `BROWSER`: `echo $BROWSER`
-- Check both XDG handlers: `xdg-mime query default x-scheme-handler/{http,https}`
+- Check both XDG handlers: `xdg-mime query default x-scheme-handler/http` and
+  `xdg-mime query default x-scheme-handler/https`
 - Confirm the desktop entry exists: `test -f ~/.local/share/applications/brave-windows.desktop`
+
+
+## Verify and undo
+
+Run `"$BROWSER" "https://example.com"` and `xdg-open "https://example.com"`
+separately. Both should reach the intended Windows browser.
+
+To undo, restore your previous `BROWSER` assignment (or remove the added export
+and run `unset BROWSER` if it was previously unset). Restore each recorded handler
+using `xdg-mime default <previous-handler.desktop> x-scheme-handler/http` and the
+corresponding HTTPS command. If there was no previous handler, remove only the
+association you added from your user `mimeapps.list`. Remove the desktop entry
+only after restoring associations. Open a fresh shell and test again.

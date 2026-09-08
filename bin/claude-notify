@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+title="${1:-Claude Code}"
+message="${2:-Notification}"
+# shellcheck disable=SC2016  # $false/$true are PowerShell literals, not shell vars
+case "${3:-}" in
+    "") force_ps='$false' ;;
+    --force) force_ps='$true' ;;
+    *) printf 'claude-notify: unknown option: %s\n' "$3" >&2; exit 2 ;;
+esac
+# Escape for PowerShell: text lands inside single-quoted PS strings, where the
+# only special character is the single quote itself (escaped by doubling).
+title=$(printf '%s' "$title" | sed "s/'/''/g")
+message=$(printf '%s' "$message" | sed "s/'/''/g")
+powershell_exe=${CLAUDE_NOTIFY_POWERSHELL:-/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe}
+if [[ ! -x $powershell_exe ]]; then
+    printf 'claude-notify: Windows PowerShell not found: %s\n' "$powershell_exe" >&2
+    exit 1
+fi
+"$powershell_exe" -NoProfile -Command "
+Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+public class Win32 {
+    [DllImport(\"user32.dll\")]
+    public static extern IntPtr GetForegroundWindow();
+    [DllImport(\"user32.dll\")]
+    public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+    [DllImport(\"user32.dll\")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool SetForegroundWindow(IntPtr hWnd);
+    [DllImport(\"user32.dll\")]
+    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    [DllImport(\"user32.dll\")]
+    public static extern bool IsIconic(IntPtr hWnd);
+}
+'@
+if (-not $force_ps) {
+    \$hwnd = [Win32]::GetForegroundWindow()
+    \$winPid = 0
+    [Win32]::GetWindowThreadProcessId(\$hwnd, [ref]\$winPid) | Out-Null
+    \$proc = Get-Process -Id \$winPid -ErrorAction SilentlyContinue
+    if (\$proc -and \$proc.Name -eq 'WindowsTerminal') { exit 0 }
+}
+
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
+\$notification = New-Object System.Windows.Forms.NotifyIcon
+\$notification.Icon = [System.Drawing.SystemIcons]::Information
+\$notification.BalloonTipTitle = '$title'
+\$notification.BalloonTipText = '$message'
+\$notification.Visible = \$true
+
+\$notification.add_BalloonTipClicked({
+    \$wt = Get-Process -Name 'WindowsTerminal' -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (\$wt -and \$wt.MainWindowHandle -ne [IntPtr]::Zero) {
+        # SW_RESTORE (9) would un-maximize a maximized window; only use it when
+        # the window is actually minimized, otherwise SW_SHOW (5) keeps its state.
+        \$show = if ([Win32]::IsIconic(\$wt.MainWindowHandle)) { 9 } else { 5 }
+        [Win32]::ShowWindow(\$wt.MainWindowHandle, \$show) | Out-Null
+        [Win32]::SetForegroundWindow(\$wt.MainWindowHandle) | Out-Null
+    }
+    [System.Windows.Forms.Application]::Exit()
+})
+\$notification.add_BalloonTipClosed({
+    [System.Windows.Forms.Application]::Exit()
+})
+
+\$notification.ShowBalloonTip(5000)
+[System.Windows.Forms.Application]::Run()
+\$notification.Dispose()
+"

@@ -4,7 +4,8 @@ Claude Code uses Language Server Protocol (LSP) to navigate code semantically �
 definitions, references, and types — instead of falling back to text search. This gives
 Claude more accurate context when reading and editing code.
 
-LSP has been built into Claude Code since v2.0.74. To fully enable it you need:
+For each language you use, you need:
+
 1. The language server binaries on your PATH (see sections below)
 2. The official LSP plugins installed in Claude Code
 3. The installed plugins enabled in `~/.claude/settings.json`
@@ -20,7 +21,8 @@ Inside Claude Code, run `/plugin` and install these official plugins:
 - `gopls-lsp`
 - `rust-analyzer-lsp`
 
-If they are already installed, you only need to enable them in settings.
+Install only the plugins for languages you use. If already installed, enable them
+in settings. The example below shows all four; merge only your selected entries.
 
 ---
 
@@ -68,47 +70,59 @@ Uses nvm? The binary lands in the active Node version's bin — no PATH changes 
 
 ## Python — pyright
 
-pyright is Microsoft's Python type checker (same engine as Pylance in VSCode). It's
-faster and more accurate than pylsp for type inference and go-to-definition.
+Pyright is Microsoft's Python type checker. With Node.js available (for example
+through nvm), install its npm package:
 
 ```bash
-python3 -m pip install pyright --break-system-packages
+npm install -g pyright
 ```
 
-`--break-system-packages` is required on Ubuntu 24.04+ due to PEP 668. The binary
-installs to `~/.local/bin/pyright`, which should already be on your PATH via
-`export PATH="$HOME/.local/bin:$PATH"` in `.bashrc`.
+This follows [Pyright's installation guide](https://github.com/microsoft/pyright/blob/main/docs/installation.md)
+and avoids changing Ubuntu's system Python packages. With nvm, the executable is
+in the active Node version's bin directory. The LSP plugin uses `pyright-langserver`;
+`pyright` is the companion command-line checker.
 
 ---
 
 ## Go — gopls
 
-`apt` only provides Go 1.22, but gopls requires Go 1.25+. Install a current Go release
-to `~/.local/go` (no sudo needed), then install gopls with it.
+Check the Go toolchain you already have:
 
 ```bash
-# Download Go 1.26.1 (check https://go.dev/dl/ for the latest)
-wget https://go.dev/dl/go1.26.1.linux-amd64.tar.gz -O /tmp/go.tar.gz
-mkdir -p ~/.local/go
-tar -xf /tmp/go.tar.gz -C ~/.local/go --strip-components=1
-
-# Install gopls
-~/.local/go/bin/go install golang.org/x/tools/gopls@latest
+go version
 ```
 
-gopls lands in `~/go/bin/` by default. Add both to PATH (see below).
+If you need to install or update Go, follow the [official installation guide](https://go.dev/doc/install)
+for your architecture. Distro package versions vary; do not unpack a new release
+on top of an existing Go tree. Check the [gopls requirements](https://go.dev/gopls/)
+when choosing a toolchain.
+
+```bash
+go install golang.org/x/tools/gopls@latest
+```
+
+The executable goes to `go env GOBIN` when that is set, or the `bin` directory
+under `go env GOPATH` otherwise (normally `~/go/bin`). Add that directory to PATH.
 
 ---
 
 ## Rust — rust-analyzer
 
-Install Rust via rustup; rust-analyzer comes bundled as a component.
+If Rust is not installed, install it with rustup:
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-rust-analyzer lands in `~/.cargo/bin/rust-analyzer`.
+Then load the Rust environment and explicitly install the language server:
+
+```bash
+. "$HOME/.cargo/env"
+rustup component add rust-analyzer
+```
+
+The executable is available through `~/.cargo/bin/rust-analyzer`. This is the
+[rust-analyzer installation procedure](https://rust-analyzer.github.io/book/rust_analyzer_binary.html).
 
 ---
 
@@ -116,12 +130,15 @@ rust-analyzer lands in `~/.cargo/bin/rust-analyzer`.
 
 ```bash
 # LSP tooling paths
-export PATH=$PATH:$HOME/.local/go/bin:$HOME/go/bin:$HOME/.cargo/bin
-source "$HOME/.cargo/env" 2>/dev/null || true
+export PATH="$HOME/go/bin:$HOME/.cargo/bin:$PATH"
+if [ -f "$HOME/.cargo/env" ]; then
+  . "$HOME/.cargo/env"
+fi
 ```
 
-The `2>/dev/null || true` guard prevents an error in non-interactive shells where
-`$HOME` may not be set when the file is first sourced.
+Keep only the paths for tools you installed. If you set a custom `GOBIN` or
+`GOPATH`, use its actual bin directory. The file check allows shells without a
+Rust installation to load normally.
 
 ---
 
@@ -129,29 +146,38 @@ The `2>/dev/null || true` guard prevents an error in non-interactive shells wher
 
 ```bash
 source ~/.bashrc
-which typescript-language-server   # ~/.nvm/.../bin/typescript-language-server
-which pyright                      # ~/.local/bin/pyright
-which gopls                        # ~/go/bin/gopls
-which rust-analyzer                # ~/.cargo/bin/rust-analyzer
+command -v typescript-language-server
+command -v pyright-langserver
+command -v gopls
+command -v rust-analyzer
+
+# Run for the tools you installed:
+typescript-language-server --version
+pyright --version
+gopls version
+rust-analyzer --version
 ```
 
 These commands target Ubuntu's default `bash`; if you use `zsh`, use `~/.zshrc`
 instead.
 
-Then restart Claude Code, run `/plugin`, and confirm all four plugins are installed and
-enabled. If the `LSP` tool is still missing from the tool list, add the
-`ENABLE_LSP_TOOL` workaround above and restart Claude Code again.
+Then restart Claude Code, run `/plugin`, and confirm the plugins you selected are
+installed and enabled. In a project using one of those languages, ask Claude to
+find a symbol definition and confirm the LSP tool is used. If the `LSP` tool is
+still missing, try the version-specific `ENABLE_LSP_TOOL` workaround above and
+restart Claude Code again.
 
 ---
 
 ## Troubleshooting
 
 **gopls: command not found**
-- Ensure both `~/.local/go/bin` and `~/go/bin` are in PATH.
-- Confirm the Go version: `~/.local/go/bin/go version` should print 1.25+.
+- Check `go env GOBIN GOPATH` and put the corresponding bin directory on PATH.
+- Check `go version` against the linked gopls requirements.
 
-**pip install fails with "externally-managed-environment"**
-- Add `--break-system-packages` to the pip command (Ubuntu 24.04+ / PEP 668).
+**An old pip-based install fails with "externally-managed-environment"**
+- Use the npm installation above; it does not modify system Python.
+- Check `command -v pyright-langserver` to ensure the plugin finds the intended copy.
 
 **rust-analyzer: command not found after rustup**
 - Run `rustup component add rust-analyzer` to install it explicitly.
@@ -160,3 +186,16 @@ enabled. If the `LSP` tool is still missing from the tool list, add the
 **typescript-language-server: command not found**
 - Confirm Node is active: `node --version`.
 - With nvm, run `nvm use` or set a default: `nvm alias default node`.
+
+## Remove
+
+Use `/plugin` to disable or uninstall only the LSP plugins you added. Remove their
+entries from `enabledPlugins` and the `ENABLE_LSP_TOOL` workaround if you added it.
+Keep other plugins and settings.
+
+Language servers may also be used by your editor. If no other tools need them,
+remove npm packages with `npm uninstall -g pyright` or
+`npm uninstall -g typescript-language-server typescript`, as appropriate. Remove
+only your installed `gopls` binary from the location reported above. To remove the
+Rust component, use `rustup component remove rust-analyzer`. Keep the Go/Rust
+toolchains and shared PATH entries if other projects use them.

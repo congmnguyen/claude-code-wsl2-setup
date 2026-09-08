@@ -4,7 +4,8 @@
 
 By default Claude Code appends `Co-authored-by: Claude` to commits and PR descriptions.
 Web and Remote Control sessions can also append a `Claude-Session` link to commits
-and PR descriptions. To remove both, update `~/.claude/settings.json`:
+and PR descriptions. To remove both, merge the following into `~/.claude/settings.json`.
+[Back up the file](maintenance.md) first and preserve unrelated settings:
 
 ```json
 {
@@ -20,22 +21,12 @@ Empty strings disable commit and PR attribution. `sessionUrl: false` disables th
 session link. The deprecated `includeCoAuthoredBy` key and the non-existent
 `gitAttribution` key do nothing — `attribution` is the correct field.
 
----
 
-## Skip the trust dialog for a project
+## Verify and undo
 
-Claude Code shows a trust prompt the first time you open a new directory.
-To pre-accept it, add `"hasTrustDialogAccepted": true` under the project path
-in `~/.claude.json`:
+Parse the edited file with `jq empty ~/.claude/settings.json`, then restart Claude
+Code. Check the next commit or PR you ask Claude to create; no extra commit is
+needed just to test this preference.
 
-```json
-{
-  "projects": {
-    "/home/you/your-project": {
-      "hasTrustDialogAccepted": true
-    }
-  }
-}
-```
-
-Claude Code merges new fields in on next launch, so existing project data is preserved.
+To undo, restore the previous values of the attribution fields you changed. If
+those fields did not exist before, remove only those fields to use the defaults.

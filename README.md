@@ -77,7 +77,7 @@ extras, not an installer for the core setup.
 | [`lsp-setup.md`](lsp-setup.md) | Official LSP plugins + language servers for TypeScript, Python, Go, and Rust, so Claude uses real Go-to-Definition / find-references instead of burning tokens on broad file search |
 | [`statusline.md`](statusline.md) | Project dir, git branch, context-window fill bar, and 5-hour / 7-day usage, color-coded by severity |
 | [`langsmith-tracing.md`](langsmith-tracing.md) | **Optional.** Project-level LangSmith traces for turns, tool calls, subagent runs, and compaction events — without enabling telemetry for every local session |
-| [`settings.md`](settings.md) | Disabling the `Co-authored-by: Claude` git attribution and session links, and pre-accepting the project trust dialog |
+| [`settings.md`](settings.md) | Disabling the `Co-authored-by: Claude` git attribution and session links |
 
 ### Agent workflows
 
@@ -98,19 +98,11 @@ extras, not an installer for the core setup.
 | [`browser.md`](browser.md) | Open links and OAuth flows in your Windows browser via `BROWSER`, plus an XDG fallback for OAuth CLIs |
 | [`capslock-esc.md`](capslock-esc.md) | CapsLock → Escape via a SharpKeys registry remap — works in WSL2, Vim, games, and elevated processes |
 
-## Optional custom agents and skills
+## Optional extras
 
-| Path | Contents |
-|------|----------|
-| [`agents/`](agents/) | `code-architect` |
-| [`skills/`](skills/) | Skills to copy in as needed: `commit-push-pr`, `deep-teach`, `pytorch-training`. In my previous setup, I installed these per project rather than globally to keep unrelated work free of extra instructions |
-
-Copy the matching files to `~/.claude/agents/` and `~/.claude/skills/`.
-
-After adding or updating a skill, run `/reload-skills` to make it available without
-restarting the session. Custom agents still require a restart.
-
-Dropped pieces (Codex delegation and its companion repo) live in [`archive/`](archive/).
+[Agents, project skills, and third-party tools](optional-extras.md) are available
+separately. They are not required for the WSL2 setup. Older delegation components
+remain in [archive](archive/).
 
 ## Troubleshooting
 
@@ -118,44 +110,15 @@ If a hook, plugin, or other customization breaks Claude Code, start a clean diag
 session with `claude --safe-mode`. Use `/doctor`, `/hooks`, and `/mcp` to inspect the
 installation and loaded integrations.
 
+## Maintenance and checks
+
+See [maintenance](maintenance.md) for backups, verification, removal, and the
+scope of automated checks. Windows behavior still needs testing on WSL2.
+
 ## Pruned notes
 
-Native Windows PowerShell notifications, WSLg voice-mode audio, Playwright browser
-automation, and uninstalled Claude skills were removed from the main repo because they are
-not part of the WSL2 setup I kept at the time. Git history keeps them if you want the old versions.
-
-The three `PreToolUse` / `PostToolUse` hooks were removed for a different reason: each one
-judged tool input by pattern, and each was measurably wrong in both directions.
-
-- `truncate-bash-output` rewrote `.stdout` to head + tail. Claude Code already saves
-  oversized output to a file and shows a preview, losing nothing; truncating below that
-  threshold suppressed the built-in behaviour and destroyed the middle permanently — where
-  test failures and stack traces live. It also cost more context than the preview it
-  replaced, and died on long lines (`jq: Argument list too long`), passing the full
-  untruncated output through.
-- `block-secret-reads` blocked reads of credential files by regex. Probed with synthetic
-  payloads it caught 1 of 11 trivial rephrasings (`dd`, `od`, `nl`, `tac`, `rev`, `perl`,
-  `tee`, a `while read` loop, `tar | base64`, `python3 -c`) while rejecting all 5 ordinary
-  source files named like `token_manager.py` or `credentials_service.py`. Exact-match
-  `permissions.deny` rules do the same job without guessing.
-- `format-python-with-ruff` ran `ruff check --fix` after every Python edit, which deleted an
-  `import` out of a file the moment it was written — leaving what is on disk different from
-  what the agent believes it wrote. It could also spin forever on a relative path, since
-  `dirname .` never reaches `/`.
-
-`Notification` hooks stayed. They react to events rather than judging tool input, so there
-is no pattern to get wrong.
-
-## Recommended third-party skills
-
-Skills not authored here but worth installing alongside the setup:
-
-- **[liteparse](https://github.com/run-llama/liteparse)** (LlamaIndex, MIT) — parse PDF, DOCX, PPTX, XLSX, and images locally with no cloud calls. Useful for feeding unstructured documents into Claude or Codex without uploading them. Try it in the browser first: [simonw.github.io/liteparse](https://simonw.github.io/liteparse/). Then install the npm package globally and copy the upstream `SKILL.md` into `~/.claude/skills/liteparse/`:
-
-  ```bash
-  npm i -g @llamaindex/liteparse
-  sudo apt-get install -y libreoffice   # required for DOCX/PPTX/XLSX
-  ```
+I removed hooks that truncated useful output, misclassified file reads, or changed
+code unexpectedly. [Read the failure notes](pruned-notes.md) for the details.
 
 ## License
 

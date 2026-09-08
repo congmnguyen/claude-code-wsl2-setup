@@ -39,146 +39,86 @@ fire while agent view is open. If your Claude Code version is older, keep only
 
 ## Setup
 
-### Step 1: Create the script
+### Step 1: Install the script
 
-Save to `~/bin/claude-notify`:
-
-```bash
-#!/bin/bash
-title="${1:-Claude Code}"
-message="${2:-Notification}"
-# shellcheck disable=SC2016  # $false/$true are PowerShell literals, not shell vars
-case "${3:-}" in
-    "") force_ps='$false' ;;
-    --force) force_ps='$true' ;;
-    *) printf 'claude-notify: unknown option: %s\n' "$3" >&2; exit 2 ;;
-esac
-# Escape for PowerShell: text lands inside single-quoted PS strings, where the
-# only special character is the single quote itself (escaped by doubling).
-title=$(printf '%s' "$title" | sed "s/'/''/g")
-message=$(printf '%s' "$message" | sed "s/'/''/g")
-/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command "
-Add-Type -TypeDefinition @'
-using System;
-using System.Runtime.InteropServices;
-public class Win32 {
-    [DllImport(\"user32.dll\")]
-    public static extern IntPtr GetForegroundWindow();
-    [DllImport(\"user32.dll\")]
-    public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
-    [DllImport(\"user32.dll\")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern bool SetForegroundWindow(IntPtr hWnd);
-    [DllImport(\"user32.dll\")]
-    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-    [DllImport(\"user32.dll\")]
-    public static extern bool IsIconic(IntPtr hWnd);
-}
-'@
-if (-not $force_ps) {
-    \$hwnd = [Win32]::GetForegroundWindow()
-    \$winPid = 0
-    [Win32]::GetWindowThreadProcessId(\$hwnd, [ref]\$winPid) | Out-Null
-    \$proc = Get-Process -Id \$winPid -ErrorAction SilentlyContinue
-    if (\$proc -and \$proc.Name -eq 'WindowsTerminal') { exit 0 }
-}
-
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
-\$notification = New-Object System.Windows.Forms.NotifyIcon
-\$notification.Icon = [System.Drawing.SystemIcons]::Information
-\$notification.BalloonTipTitle = '$title'
-\$notification.BalloonTipText = '$message'
-\$notification.Visible = \$true
-
-\$notification.add_BalloonTipClicked({
-    \$wt = Get-Process -Name 'WindowsTerminal' -ErrorAction SilentlyContinue | Select-Object -First 1
-    if (\$wt -and \$wt.MainWindowHandle -ne [IntPtr]::Zero) {
-        # SW_RESTORE (9) would un-maximize a maximized window; only use it when
-        # the window is actually minimized, otherwise SW_SHOW (5) keeps its state.
-        \$show = if ([Win32]::IsIconic(\$wt.MainWindowHandle)) { 9 } else { 5 }
-        [Win32]::ShowWindow(\$wt.MainWindowHandle, \$show) | Out-Null
-        [Win32]::SetForegroundWindow(\$wt.MainWindowHandle) | Out-Null
-    }
-    [System.Windows.Forms.Application]::Exit()
-})
-\$notification.add_BalloonTipClosed({
-    [System.Windows.Forms.Application]::Exit()
-})
-
-\$notification.ShowBalloonTip(5000)
-[System.Windows.Forms.Application]::Run()
-\$notification.Dispose()
-"
-```
-
-Make it executable:
+Requires WSL2 with Windows interoperability, Windows PowerShell, and Windows
+Terminal. From the cloned repository, install [the script](bin/claude-notify):
 
 ```bash
-chmod +x ~/bin/claude-notify
+mkdir -p ~/bin
+if [ -f ~/bin/claude-notify ]; then
+  cp --backup=numbered ~/bin/claude-notify ~/bin/claude-notify.bak
+fi
+install -m755 bin/claude-notify ~/bin/claude-notify
 ```
+
+The default PowerShell path assumes Windows is mounted at `/mnt/c`. For a custom
+mount, set `CLAUDE_NOTIFY_POWERSHELL` to the full `powershell.exe` path in the
+environment used to launch Claude Code.
 
 ### Step 2: Add the hooks
 
-In `~/.claude/settings.json`, add these entries inside the `"hooks"` object:
+Back up `~/.claude/settings.json` first; see [maintenance](maintenance.md). Merge
+these entries into its existing `hooks.Notification` array, preserving other hooks.
+The example below is a complete JSON object, not a replacement for your settings:
 
 ```json
-"Notification": [
-  {
-    "matcher": "idle_prompt",
-    "hooks": [
+{
+  "hooks": {
+    "Notification": [
       {
-        "type": "command",
-        "command": "/home/cong/bin/claude-notify",
-        "args": ["Claude Code", "Done!"],
-        "async": true,
-        "timeout": 15
-      }
-    ]
-  },
-  {
-    "matcher": "permission_prompt",
-    "hooks": [
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/bin/claude-notify\" \"Claude Code\" \"Done!\"",
+            "async": true,
+            "timeout": 15
+          }
+        ]
+      },
       {
-        "type": "command",
-        "command": "/home/cong/bin/claude-notify",
-        "args": ["Claude Code", "Needs your input!"],
-        "async": true,
-        "timeout": 15
-      }
-    ]
-  },
-  {
-    "matcher": "agent_completed",
-    "hooks": [
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/bin/claude-notify\" \"Claude Code\" \"Needs your input!\"",
+            "async": true,
+            "timeout": 15
+          }
+        ]
+      },
       {
-        "type": "command",
-        "command": "/home/cong/bin/claude-notify",
-        "args": ["Claude Code", "Background agent completed"],
-        "async": true,
-        "timeout": 15
-      }
-    ]
-  },
-  {
-    "matcher": "agent_needs_input",
-    "hooks": [
+        "matcher": "agent_completed",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/bin/claude-notify\" \"Claude Code\" \"Background agent completed\"",
+            "async": true,
+            "timeout": 15
+          }
+        ]
+      },
       {
-        "type": "command",
-        "command": "/home/cong/bin/claude-notify",
-        "args": ["Claude Code", "Background agent needs input!"],
-        "async": true,
-        "timeout": 15
+        "matcher": "agent_needs_input",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/bin/claude-notify\" \"Claude Code\" \"Background agent needs input!\"",
+            "async": true,
+            "timeout": 15
+          }
+        ]
       }
     ]
   }
-]
+}
 ```
 
 `idle_prompt` fires when Claude is done and waiting. `permission_prompt` fires when Claude
 is blocked on a tool-approval prompt. The agent matchers are useful for background
-subagents such as `codex-delegate`. All commands exit silently if Windows Terminal is the
-foreground window, so notifications only appear when you're working in another window.
+subagents supported by your Claude Code version. All commands exit silently if
+Windows Terminal is the foreground window, so notifications only appear when you're working in another window.
 
 > **Why `async: true`?**
 >
@@ -187,8 +127,9 @@ foreground window, so notifications only appear when you're working in another w
 > (~6 s). If the hook ran synchronously, Claude Code would block for that entire
 > time — the UI appears frozen and input is unresponsive. Native async hooks let
 > Claude Code continue immediately while it manages the notification process in
-> the background. Exec-form `args` also pass spaces, apostrophes, and other special
-> characters without shell quoting.
+> the background. The quoted `$HOME` path works for different usernames and
+> home directories containing spaces. These are shell-form commands, as described
+> in the [hook reference](https://code.claude.com/docs/en/hooks).
 
 Run `/hooks` and select `Notification` to confirm the hook is registered. If Claude Code
 doesn't pick up the settings change within a few seconds, restart the session.
@@ -234,7 +175,8 @@ while Windows Terminal is in the foreground; normal Claude and Codex completion 
 their foreground suppression.
 
 The runner re-execs the command with a filtered environment, so it does not reproduce an
-interactive shell's command resolution. Pass executables by absolute path or they exit 127.
+interactive shell's command resolution. Use an executable on the caller's `PATH`, an absolute path, or a path relative to
+the job's working directory. Shell aliases and functions are not carried over.
 
 `wsl --shutdown` or a Windows shutdown stops both the job and its tmux session before the
 runner can record an exit code, leaving `status` stuck at `running`. Reconcile with:
@@ -276,3 +218,27 @@ check.
   The balloon-click event fires in the context of the notification click, which satisfies the
   restriction in most cases. If it still doesn't work, try clicking the taskbar button instead.
 - Make sure Windows Terminal is running (not just WSL in another host).
+
+## Verify and remove
+
+Test the installed script, including while Windows Terminal is focused:
+
+```bash
+~/bin/claude-notify "Test" "Notification setup works" --force
+```
+
+Then test without `--force`: it should stay silent when Windows Terminal is focused.
+Use `/hooks` to confirm the entries are loaded and trigger a matching event to
+check the full integration. A manual balloon test alone does not verify the hook.
+
+To remove, delete only the handlers calling `claude-notify` from
+`hooks.Notification` and restart Claude Code. Keep unrelated handlers. Keep the
+script if Codex or `tmux-notify-run` still uses it; otherwise remove it or restore
+your previous copy:
+
+```bash
+rm -f ~/bin/claude-notify
+```
+
+For the tmux helper, let jobs finish before removing `~/bin/tmux-notify-run`.
+Keep its state directory and logs until you no longer need the results.
