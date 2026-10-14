@@ -40,7 +40,7 @@ claude plugin install langsmith-tracing@langsmith-claude-code-plugins --scope us
 Verify:
 
 ```bash
-claude plugin list | rg langsmith-tracing
+claude plugin list | grep langsmith-tracing
 ```
 
 The plugin can stay global. The trace environment should not.
@@ -54,18 +54,13 @@ Create or edit `.claude/settings.local.json` inside the project you want to trac
   "env": {
     "TRACE_TO_LANGSMITH": "true",
     "CC_LANGSMITH_API_KEY": "<LangSmith API key>",
-    "CC_LANGSMITH_PROJECT": "text2sql-agent"
+    "CC_LANGSMITH_PROJECT": "my-app"
   }
 }
 ```
 
-Use a project name that matches the repo, for example:
-
-| Repo | `CC_LANGSMITH_PROJECT` |
-|------|-------------------------|
-| `/home/cong/code/text2sql-agent` | `text2sql-agent` |
-| `/home/cong/code/claude-code-wsl2-setup` | `claude-code-wsl2-setup` |
-| `/home/cong/code/airace` | `airace` |
+Use a project name that matches the repository, such as `my-app` for `~/code/my-app`,
+so traces from different repositories stay separate.
 
 Restart Claude Code or run `/reload-plugins`.
 
@@ -94,7 +89,7 @@ create a new one. Treat transcripts as permanent exposure.
 
 ```bash
 jq empty .claude/settings.local.json
-claude plugin list | rg langsmith-tracing
+claude plugin list | grep langsmith-tracing
 ```
 
 After a Claude Code response completes, open LangSmith and check the matching project. If

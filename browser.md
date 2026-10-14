@@ -96,9 +96,6 @@ Claude Code and tools that respect `BROWSER` open URLs directly in the selected
 Windows browser. Tools that use `xdg-open`, including some OAuth CLIs, use the XDG
 fallback and reach the same browser profile.
 
-Playwright CLI is intentionally unaffected: it launches an isolated automation
-browser unless explicitly attached to an existing browser through CDP.
-
 ---
 
 ## Troubleshooting

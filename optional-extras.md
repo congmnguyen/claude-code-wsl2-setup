@@ -7,6 +7,13 @@
 
 Copy the matching files to `~/.claude/agents/` and `~/.claude/skills/`.
 
+`code-architect` is the agent from the official `feature-dev` plugin with `CLAUDE.md`
+changed to `AGENTS.md`. `commit-push-pr` is the command from the official
+`commit-commands` plugin, with its branch permission corrected to `git checkout -b`
+(upstream allows `git checkout --branch`, which git rejects). Both plugins live in
+[anthropics/claude-code](https://github.com/anthropics/claude-code/tree/main/plugins);
+install them instead if you want the upstream versions and their updates.
+
 After adding or updating a skill, run `/reload-skills` to make it available without
 restarting the session. Custom agents still require a restart.
 

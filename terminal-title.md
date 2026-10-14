@@ -98,9 +98,8 @@ If Codex is installed, set an empty terminal title list in `~/.codex/config.toml
 terminal_title = []
 ```
 
-Merge this into an existing `[tui]` table rather than creating a duplicate table. The rest
-of the Codex setup belongs in the companion
-[`codex-wsl2-setup`](https://github.com/congmnguyen/codex-wsl2-setup) repository.
+Merge this into an existing `[tui]` table rather than creating a duplicate table. For
+Codex completion balloons, see [codex-notify](codex-notify.md).
 
 ## Verify
 

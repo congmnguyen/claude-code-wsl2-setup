@@ -14,7 +14,7 @@ before any user logs in.
 
 ### Install
 
-```
+```powershell
 winget install RandyRants.SharpKeys
 ```
 
@@ -41,8 +41,9 @@ normal mode in `vim`.
   and applies to all users and all applications system-wide.
 - SharpKeys does not need to run in the background — it only writes to the registry.
 - To reverse: open SharpKeys, delete the entry, click **Write to Registry**, then log off.
-- If you use the actual CapsLock occasionally, consider swapping it to `Shift+Escape` in
-  SharpKeys (`To key`: `Special: Caps Lock (00_3A)`, add a second entry mapping a spare key).
+- If you still need Caps Lock occasionally, add a second entry that maps a spare key,
+  such as Scroll Lock (`00_46`), to `Special: Caps Lock (00_3A)`. A scancode map remaps
+  one key to another; it cannot produce a combination such as Shift+Escape.
 
 ## Why Not AutoHotkey?
 

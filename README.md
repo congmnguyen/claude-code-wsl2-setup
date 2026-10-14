@@ -5,7 +5,10 @@ paste, Windows notifications, LSP navigation, and a custom statusline.
 
 **Maintenance status:** I now use Ubuntu + Ghostty and no longer test this setup
 daily on WSL2. These guides remain available for WSL2 users. Bug reports and fixes
-are welcome; please include your environment and reproduction steps.
+are welcome: use the [WSL2 issue form](https://github.com/congmnguyen/claude-code-wsl2-setup/issues/new?template=wsl2-bug.yml)
+and include the output of `bash scripts/doctor.sh`. The
+[verification status](maintenance.md#wsl2-verification-status) lists changes that
+still need a WSL2 run.
 
 Read [why I moved from WSL2 to Ubuntu + Ghostty](ubuntu-ghostty.md) for the context
 behind the change. This repository continues to focus on WSL2.
@@ -79,12 +82,6 @@ extras, not an installer for the core setup.
 | [`langsmith-tracing.md`](langsmith-tracing.md) | **Optional.** Project-level LangSmith traces for turns, tool calls, subagent runs, and compaction events — without enabling telemetry for every local session |
 | [`settings.md`](settings.md) | Disabling the `Co-authored-by: Claude` git attribution and session links |
 
-### Agent workflows
-
-| File | Fix |
-|------|-----|
-| [`mcp-setup.md`](mcp-setup.md) | Optional project-specific Figma Desktop MCP |
-
 ### WSL / Windows bridge
 
 | File | Fix |
@@ -101,14 +98,19 @@ extras, not an installer for the core setup.
 ## Optional extras
 
 [Agents, project skills, and third-party tools](optional-extras.md) are available
-separately. They are not required for the WSL2 setup. Older delegation components
-remain in [archive](archive/).
+separately. They are not required for the WSL2 setup. The project-specific
+[Figma Desktop MCP](mcp-setup.md) is optional too; on WSL2 it needs mirrored
+networking. Older delegation components remain in [archive](archive/).
 
 ## Troubleshooting
 
 If a hook, plugin, or other customization breaks Claude Code, start a clean diagnostic
 session with `claude --safe-mode`. Use `/doctor`, `/hooks`, and `/mcp` to inspect the
 installation and loaded integrations.
+
+From the cloned repository, `bash scripts/doctor.sh` prints a read-only report of the
+installed scripts, settings, and WSL2 prerequisites. It also flags known conflicts,
+such as shell startup files or Claude hooks that start a second screenshot monitor.
 
 ## Maintenance and checks
 

@@ -31,7 +31,7 @@ in settings. The example below shows all four; merge only your selected entries.
 Merge these keys into your existing `~/.claude/settings.json` file. Do not replace the
 whole file if you already have hooks, attribution, or other settings:
 
-```jsonc
+```json
 {
   "enabledPlugins": {
     "pyright-lsp@claude-plugins-official": true,
@@ -45,7 +45,7 @@ whole file if you already have hooks, attribution, or other settings:
 If your current Claude Code build still does not expose the `LSP` tool after the plugins
 are installed and enabled, try this workaround by merging it into the same settings file:
 
-```jsonc
+```json
 {
   "env": {
     "ENABLE_LSP_TOOL": "1"

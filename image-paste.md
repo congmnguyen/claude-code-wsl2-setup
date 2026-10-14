@@ -13,15 +13,35 @@
 
 ## Install
 
+Install a pinned release after checking its checksum. Use `arch=arm64` on ARM:
+
 ```bash
-curl -fsSL https://nailu.dev/wscli/install.sh | bash
+version=1.3.2
+arch=amd64
+archive="wsl-screenshot-cli_${version}_linux_${arch}.tar.gz"
+base="https://github.com/Nailuu/wsl-screenshot-cli/releases/download/v${version}"
+tmp=$(mktemp -d)
+curl -fsSLo "$tmp/$archive" "$base/$archive"
+curl -fsSLo "$tmp/checksums.txt" "$base/checksums.txt"
+(cd "$tmp" && grep " $archive\$" checksums.txt | sha256sum -c -) &&
+  tar -xzf "$tmp/$archive" -C "$tmp" wsl-screenshot-cli &&
+  install -Dm755 "$tmp/wsl-screenshot-cli" ~/.local/bin/wsl-screenshot-cli
+rm -rf "$tmp"
 ```
 
-Installs binary to `~/.local/bin/`. No Go toolchain needed.
+Check the [releases page](https://github.com/Nailuu/wsl-screenshot-cli/releases) for a
+newer version. This installs only the binary; no Go toolchain is needed and no startup
+file changes.
+
+The upstream one-line installer (`curl -fsSL https://nailu.dev/wscli/install.sh | bash`)
+also works, but on a fresh install it offers to start the monitor from `~/.bashrc`, from
+Claude Code `SessionStart`/`SessionEnd` hooks, or both. Choose **Skip**: either would race
+with the systemd service below, and the `SessionEnd` hook stops the monitor. The
+installer may also append a `~/.local/bin` PATH entry to `~/.bashrc`.
 
 ---
 
-## Manage the monitor with systemd
+## Run the monitor with systemd
 
 Use the service below as the only process owner. Do not run `start --daemon`
 alongside it or put start/stop commands in shell startup files or Claude hooks.
@@ -29,9 +49,7 @@ If migrating from a manually started daemon, stop that old daemon once with
 `wsl-screenshot-cli stop` before enabling the service. If a service already owns
 the monitor, use `systemctl --user stop wsl-screenshot-cli.service` instead.
 
-## Auto-start with systemd
-
-Requires a WSL distribution with systemd enabled. Confirm
+This requires a WSL distribution with systemd enabled. Confirm
 `systemctl --user is-system-running` can reach the user manager before continuing.
 A `degraded` result means some units failed; inspect them with
 `systemctl --user --failed`.
@@ -122,8 +140,11 @@ Take a screenshot on Windows and paste into your terminal with Ctrl+Shift+V.
 Expect a path under `/tmp/.wsl-screenshot-cli/`; confirm that the file exists and
 Claude Code can open it. After restarting WSL, repeat the test to check autostart.
 
-For an update, stop the service, run `wsl-screenshot-cli update`, then start the
-service again and repeat the paste test.
+For an update, stop the service, run `wsl-screenshot-cli update` (or rerun the install
+block with a new `version`), then start the service again and repeat the paste test.
+
+`bash scripts/doctor.sh` from the cloned repository also checks the service and flags
+shell startup files or Claude hooks that start a second monitor.
 
 ## Remove
 
