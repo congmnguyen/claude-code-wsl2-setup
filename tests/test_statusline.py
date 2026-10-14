@@ -14,7 +14,7 @@ ANSI = re.compile(r'\x1b\[[0-9;]*m')
 class StatuslineTests(unittest.TestCase):
     def render(self, payload, cwd=None):
         result = subprocess.run(['bash', str(SCRIPT)], input=json.dumps(payload),
-                                text=True, capture_output=True, cwd=cwd)
+                                text=True, capture_output=True, cwd=cwd, timeout=10)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stderr, '')
         return ANSI.sub('', result.stdout).rstrip('\n')
@@ -65,10 +65,19 @@ class StatuslineTests(unittest.TestCase):
                 self.assertNotIn('] ', output)
                 self.assertIn('W:56%', output)
 
+    def test_oversized_percentages_are_omitted(self):
+        # Values past Bash's integer range once made the bar loop run forever.
+        output = self.render({'cwd': '/tmp', 'context_window': {'used_percentage': 10**20},
+                              'rate_limits': {'five_hour': {'used_percentage': 10**20},
+                                              'seven_day': {'used_percentage': 56}}})
+        self.assertNotIn('] ', output)
+        self.assertNotIn('5h:', output)
+        self.assertIn('W:56%', output)
+
     def test_invalid_json_fails_without_display(self):
         for raw in ['{broken', 'null', '[]', '']:
             result = subprocess.run(['bash', str(SCRIPT)], input=raw,
-                                    text=True, capture_output=True)
+                                    text=True, capture_output=True, timeout=10)
             self.assertNotEqual(result.returncode, 0)
             self.assertEqual(result.stdout, '')
 

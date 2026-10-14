@@ -4,7 +4,7 @@ A custom status line script that shows the current project directory, git branch
 
 ![Status line preview](assets/statusline.png)
 
-```
+```text
 📁 claude-code-wsl2-setup | 🌿 main | [··········] 6% | 5h:10% | W:95%
 ```
 
@@ -69,8 +69,8 @@ The git branch is resolved by running `git symbolic-ref` against the working dir
 
 Missing or null percentages are omitted independently. The script preserves empty
 fields with NUL separators, so weekly usage cannot shift into the five-hour or
-context display. Invalid numeric text is omitted, and the context bar is capped
-at 100%. Malformed JSON exits with an error instead of rendering misleading data.
+context display. Invalid numeric text and implausibly large values (more than six
+integer digits) are omitted, and the context bar is capped at 100%. Malformed JSON exits with an error instead of rendering misleading data.
 
 The [Claude Code statusline reference](https://code.claude.com/docs/en/statusline)
 describes the input fields. Rate limits may be absent, including before the first
@@ -94,10 +94,10 @@ Expect `5h:34%` and `W:56%`, with no context bar. Then open Claude Code and conf
 that the statusline appears. Missing subscription data should leave only the
 available parts visible.
 
-For the repository's regression checks, run:
+For the repository's regression checks, run this from the cloned repository:
 
 ```bash
-python3 -m unittest discover -s tests -v
+bash scripts/check.sh
 ```
 
 ## Remove

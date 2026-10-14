@@ -23,9 +23,10 @@ week_pct=${fields[3]:-}
 
 parts=()
 
-# ── Helper: round a value, or return 1 if it is not a number ──────────────────
+# ── Helper: round a value, or return 1 if it is not a plausible number ────────
+# Six integer digits at most: larger values overflow Bash integer comparisons.
 to_pct() {
-  [[ $1 =~ ^[0-9]+([.][0-9]+)?$ ]] || return 1
+  [[ $1 =~ ^[0-9]{1,6}([.][0-9]+)?$ ]] || return 1
   printf '%.0f' "$1"
 }
 
