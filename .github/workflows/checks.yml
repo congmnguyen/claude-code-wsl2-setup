@@ -3,6 +3,7 @@ name: Repository checks
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -11,8 +12,11 @@ jobs:
   linux-checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Install check dependencies
-        run: sudo apt-get update && sudo apt-get install -y jq
+      - uses: actions/checkout@v7
+      # jq, shellcheck, and PowerShell 7 (pwsh) come with the runner image.
+      - name: Install test tools
+        run: sudo apt-get update && sudo apt-get install -y tmux zsh
       - name: Check docs and scripts
+        env:
+          CHECKS_REQUIRE_ALL: '1'
         run: bash scripts/check.sh
