@@ -1,0 +1,59 @@
+name: WSL2 setup problem
+description: Report a problem with one of the WSL2 guides or scripts.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The maintainer no longer runs this setup on WSL2 daily, so a report needs enough detail to reproduce it elsewhere.
+        From your clone, run `bash scripts/doctor.sh` and paste its output below. It is read-only and abbreviates home paths and Windows user names.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Screenshot paste (image-paste.md)
+        - Claude Code notifications (claude-notify.md)
+        - Codex notifications (codex-notify.md)
+        - tmux helper (tmux-notify-run)
+        - Statusline (statusline.md)
+        - LSP (lsp-setup.md)
+        - Browser routing (browser.md)
+        - Terminal titles (terminal-title.md)
+        - Shift+Enter (shift-enter.md)
+        - CapsLock remap (capslock-esc.md)
+        - Figma Desktop MCP (mcp-setup.md)
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: versions
+    attributes:
+      label: Versions
+      description: Run `wsl.exe --version` and `claude --version` inside WSL, and add your distro and terminal.
+      placeholder: |
+        WSL version: 2.x
+        Windows version: 10.0.x
+        Distro: Ubuntu 24.04
+        Terminal: Windows Terminal 1.x
+        Claude Code: 2.x
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual behavior
+      description: Include exact error messages.
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Output of bash scripts/doctor.sh
+      render: text
