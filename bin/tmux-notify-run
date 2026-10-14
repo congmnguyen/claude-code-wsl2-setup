@@ -210,8 +210,10 @@ while IFS= read -r -d '' entry; do
   fi
 done < <(env -0)
 
-env -i "${job_env[@]}" "${command[@]}" > >(tee -a "$log") 2>&1
-rc=$?
+# A pipeline (not a process substitution) waits for tee, so the log is complete
+# before the status file says the job finished.
+env -i "${job_env[@]}" "${command[@]}" 2>&1 | tee -a "$log"
+rc=${PIPESTATUS[0]}
 
 printf '%s\n' "$rc" >"$status_file"
 {
