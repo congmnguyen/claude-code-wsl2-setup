@@ -28,9 +28,12 @@ fire while agent view is open. If your Claude Code version is older, keep only
 1. Claude Code fires the `Notification` hook for a matched notification type.
 2. The hook runs `~/bin/claude-notify`, a bash script that calls Windows PowerShell
    directly from WSL via `/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe`.
+   The title and message travel base64-encoded, so no quote in them can change the
+   script. That includes the typographic `’`, which PowerShell also treats as a quote.
 3. PowerShell checks the foreground window — if Windows Terminal is active, it exits silently.
 4. Otherwise, it creates a `NotifyIcon` (system tray icon) and shows a balloon tip for 5 s.
-5. A WinForms message loop keeps the process alive until the balloon is dismissed or clicked.
+5. A WinForms message loop keeps the process alive until the balloon is dismissed or
+   clicked, or for at most 12 s if Windows never reports it closed.
 6. **Clicking the balloon** restores the Windows Terminal window (if minimised) and brings
    it to the foreground via `ShowWindow` + `SetForegroundWindow`.
 7. On dismiss or click, the message loop exits, the icon is disposed, and the process ends.
@@ -124,7 +127,8 @@ Windows Terminal is the foreground window, so notifications only appear when you
 >
 > The PowerShell process stays alive in its WinForms message loop
 > (`[Application]::Run()`) until the balloon is clicked, dismissed, or times out
-> (~6 s). If the hook ran synchronously, Claude Code would block for that entire
+> (about 5 s; the script exits after 12 s at most, below the 15 s hook timeout).
+> If the hook ran synchronously, Claude Code would block for that entire
 > time — the UI appears frozen and input is unresponsive. Native async hooks let
 > Claude Code continue immediately while it manages the notification process in
 > the background. The quoted `$HOME` path works for different usernames and
@@ -136,7 +140,7 @@ doesn't pick up the settings change within a few seconds, restart the session.
 
 > **Running Codex too?** The same `~/bin/claude-notify` script is reused for Codex CLI,
 > but it's wired up through Codex's top-level `notify` key (not Claude hooks) and shows
-> Codex's actual last reply in the balloon. See `codex-notify.md`.
+> Codex's actual last reply in the balloon. See [codex-notify](codex-notify.md).
 
 ---
 
@@ -196,6 +200,8 @@ check.
 ## Troubleshooting
 
 **No balloon appears**
+- Run `bash scripts/doctor.sh` from the cloned repository. It flags an outdated or
+  non-executable script, a missing PowerShell path, and hooks without `async`.
 - Confirm `~/bin/claude-notify` exists and is executable: `ls -l ~/bin/claude-notify`
 - Test manually: `~/bin/claude-notify "Test" "Hello"`
 - Run `/hooks` and confirm `Notification` has entries for `idle_prompt` and
@@ -206,7 +212,7 @@ check.
 **UI freezes for several seconds when Claude finishes a task**
 - The hook is running synchronously (missing `"async": true`).
 - Ensure each notification command hook has `"async": true` and a timeout longer than
-  the balloon lifetime.
+  the script's 12 s limit.
 
 **Balloon tip flashes and disappears instantly**
 - The WinForms message loop (`Application.Run()`) keeps the PowerShell process alive until

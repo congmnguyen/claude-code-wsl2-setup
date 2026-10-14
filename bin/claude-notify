@@ -7,10 +7,11 @@ case "${3:-}" in
     --force) force_ps='$true' ;;
     *) printf 'claude-notify: unknown option: %s\n' "$3" >&2; exit 2 ;;
 esac
-# Escape for PowerShell: text lands inside single-quoted PS strings, where the
-# only special character is the single quote itself (escaped by doubling).
-title=$(printf '%s' "$title" | sed "s/'/''/g")
-message=$(printf '%s' "$message" | sed "s/'/''/g")
+# Pass the text base64-encoded so it can never end a PowerShell string literal.
+# Doubling ' is not enough: PowerShell also treats ‘ ’ ‚ ‛ as single quotes, so
+# a Codex reply containing ’ could otherwise break or inject into the script.
+title_b64=$(printf '%s' "$title" | base64 -w0)
+message_b64=$(printf '%s' "$message" | base64 -w0)
 powershell_exe=${CLAUDE_NOTIFY_POWERSHELL:-/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe}
 if [[ ! -x $powershell_exe ]]; then
     printf 'claude-notify: Windows PowerShell not found: %s\n' "$powershell_exe" >&2
@@ -42,12 +43,16 @@ if (-not $force_ps) {
     if (\$proc -and \$proc.Name -eq 'WindowsTerminal') { exit 0 }
 }
 
+function Decode([string]\$text) {
+    [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String(\$text))
+}
+
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 \$notification = New-Object System.Windows.Forms.NotifyIcon
 \$notification.Icon = [System.Drawing.SystemIcons]::Information
-\$notification.BalloonTipTitle = '$title'
-\$notification.BalloonTipText = '$message'
+\$notification.BalloonTipTitle = Decode '$title_b64'
+\$notification.BalloonTipText = Decode '$message_b64'
 \$notification.Visible = \$true
 
 \$notification.add_BalloonTipClicked({
@@ -65,7 +70,16 @@ Add-Type -AssemblyName System.Drawing
     [System.Windows.Forms.Application]::Exit()
 })
 
+# Exit even if Windows never reports the balloon closed. Codex and tmux start
+# this script without a timeout, and Claude's 15 s hook timeout would kill it
+# before Dispose, stranding a tray icon.
+\$timer = New-Object System.Windows.Forms.Timer
+\$timer.Interval = 12000
+\$timer.add_Tick({ [System.Windows.Forms.Application]::Exit() })
+\$timer.Start()
+
 \$notification.ShowBalloonTip(5000)
 [System.Windows.Forms.Application]::Run()
+\$timer.Dispose()
 \$notification.Dispose()
 "

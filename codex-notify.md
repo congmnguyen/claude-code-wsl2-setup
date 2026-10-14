@@ -8,7 +8,7 @@ When Codex CLI finishes a turn on WSL2, the terminal gives no visual signal that
 done — you only notice if you switch back to the terminal yourself.
 
 This is the **Codex variant** of the notification fix. It reuses the same
-`~/bin/claude-notify` script as the Claude Code WSL2 setup (see `claude-notify.md`), but
+`~/bin/claude-notify` script as the Claude Code WSL2 setup (see [claude-notify](claude-notify.md)), but
 wires it up through Codex's `notify` config instead of Claude hooks.
 
 > **Trap:** `[tui].notifications = true` is *not* this. That setting only controls the
@@ -29,7 +29,9 @@ wires it up through Codex's `notify` config instead of Claude hooks.
    `head -c`, which cuts bytes and can shred a multibyte UTF-8 char into mojibake),
    falling back to `"Done!"` if parsing fails.
 4. `~/bin/claude-notify "Codex" "<msg>"` runs with a trailing `&` so it detaches
-   immediately — Codex never blocks while the balloon is up.
+   immediately — Codex never blocks while the balloon is up. The reply is model
+   output, so the script hands it to PowerShell base64-encoded: quotes in the reply
+   cannot end a PowerShell string or run commands.
 5. The script's `GetForegroundWindow()` check still applies: the balloon is suppressed when
    Windows Terminal is the active window, so it only appears when you've stepped away.
 
@@ -39,7 +41,7 @@ wires it up through Codex's `notify` config instead of Claude hooks.
 
 ### Prerequisite: the notify script and `jq`
 
-This reuses `~/bin/claude-notify` from `claude-notify.md` — install that first if you
+This reuses `~/bin/claude-notify` from [claude-notify](claude-notify.md) — install that first if you
 haven't. Also install `jq`:
 
 ```bash
@@ -78,11 +80,13 @@ are already looking at the terminal.
 - Confirm `jq` is installed: `command -v jq`.
 - Restart Codex — it only reads `config.toml` at startup.
 
-**Balloon appears for short replies but not for others**
-- An old `~/bin/claude-notify` that doesn't escape single quotes dies with a PowerShell
-  parse error on any reply containing an apostrophe ("I've…", "don't…"). Reinstall the
-  script from `claude-notify.md` — it must double single quotes (`sed "s/'/''/g"`), since
-  the text lands inside single-quoted PowerShell strings.
+**Balloon appears for some replies but not for others**
+- Older copies of `~/bin/claude-notify` put the reply inside a single-quoted PowerShell
+  string. An apostrophe could end that string: `'` in the oldest copies, and the
+  typographic `’` (which PowerShell also treats as a quote) in later ones. A crafted
+  reply could also run PowerShell commands. Reinstall the script from
+  [claude-notify](claude-notify.md#step-1-install-the-script); the current version
+  passes text base64-encoded. `bash scripts/doctor.sh` flags an older copy.
 
 **Balloon shows raw JSON instead of the reply**
 - The `jq` filter failed (older Codex payload, or `jq` missing). The script falls back to
@@ -92,3 +96,11 @@ are already looking at the terminal.
 **`[tui].notifications = true` is set but nothing happens**
 - That setting is unrelated — it only does in-terminal notifications. Add the top-level
   `notify` key as shown above.
+
+## Verify and remove
+
+Switch away from Windows Terminal and let Codex finish a turn. The balloon should show
+the start of the reply; a reply containing `’` also confirms an up-to-date script.
+
+To remove, delete only the top-level `notify` entry you added and restart Codex. Keep
+`~/bin/claude-notify` while Claude Code hooks or `tmux-notify-run` still use it.
