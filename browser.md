@@ -26,14 +26,24 @@ Add to `~/.bashrc`:
 export BROWSER="/mnt/c/Users/<YourUsername>/AppData/Local/BraveSoftware/Brave-Browser/Application/brave.exe"
 ```
 
-Replace the path with your browser of choice. Common paths:
+Replace the path with your browser of choice. Common paths from WSL:
 
 | Browser | Path |
 |---------|------|
-| Brave | `C:\Users\<user>\AppData\Local\BraveSoftware\Brave-Browser\Application\brave.exe` |
-| Chrome | `C:\Program Files\Google\Chrome\Application\chrome.exe` |
-| Edge | `C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe` |
-| Firefox | `C:\Program Files\Mozilla Firefox\firefox.exe` |
+| Brave | `/mnt/c/Users/<YourUsername>/AppData/Local/BraveSoftware/Brave-Browser/Application/brave.exe` |
+| Chrome | `/mnt/c/Program Files/Google/Chrome/Application/chrome.exe` |
+| Edge | `/mnt/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe` |
+| Firefox | `/mnt/c/Program Files/Mozilla Firefox/firefox.exe` |
+
+Some tools, including older `xdg-open`, split `BROWSER` on spaces, so a path under
+`Program Files` breaks them. Link the executable to a path without spaces:
+
+```bash
+mkdir -p ~/.local/bin
+ln -s "/mnt/c/Program Files/Google/Chrome/Application/chrome.exe" ~/.local/bin/chrome.exe
+```
+
+Then set `export BROWSER="$HOME/.local/bin/chrome.exe"` instead.
 
 Then reload your shell:
 
@@ -46,7 +56,16 @@ instead.
 
 ### XDG fallback for OAuth and CLI tools
 
-First check whether WSL still points to another browser:
+Newer `xdg-open` detects WSL and opens links in the Windows default browser,
+ignoring `BROWSER` and the desktop entry below. Check your copy:
+
+```bash
+grep -q open_wsl "$(command -v xdg-open)" && echo 'built-in WSL support'
+```
+
+If it prints `built-in WSL support`, choose the default browser in Windows Settings
+and skip the rest of this section. Otherwise, check whether WSL still points to
+another browser:
 
 ```bash
 xdg-settings get default-web-browser
@@ -78,7 +97,6 @@ StartupNotify=false
 Register it as the URL handler:
 
 ```bash
-mkdir -p ~/.local/share/applications
 xdg-mime default brave-windows.desktop x-scheme-handler/http
 xdg-mime default brave-windows.desktop x-scheme-handler/https
 ```

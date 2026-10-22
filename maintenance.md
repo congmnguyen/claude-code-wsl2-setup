@@ -90,6 +90,7 @@ WSL2:
 | [Codex notification](codex-notify.md) | Uses the notification script above | A completed turn whose reply contains `’` |
 | [tmux helper](claude-notify.md#long-running-tmux-jobs) | Log finished before the status is written (2026-10-15) | One job's completion balloon |
 | [Screenshot paste](image-paste.md) | Pinned, checksum-verified install (2026-10-15) | Paste, then paste again after `wsl --shutdown` |
+| [Browser routing](browser.md) | WSL-form paths, a symlink for paths with spaces, and a check for `xdg-open`'s built-in WSL support (2026-10-23) | `"$BROWSER"` and `xdg-open` with a symlinked `Program Files` browser |
 | [Figma Desktop MCP](mcp-setup.md) | Mirrored networking requirement (2026-10-15) | `/mcp` connects with mirrored networking |
 
 After testing a guide on WSL2, add a line below with the date, the guides, and the

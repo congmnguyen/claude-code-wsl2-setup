@@ -42,20 +42,6 @@ whole file if you already have hooks, attribution, or other settings:
 }
 ```
 
-If your current Claude Code build still does not expose the `LSP` tool after the plugins
-are installed and enabled, try this workaround by merging it into the same settings file:
-
-```json
-{
-  "env": {
-    "ENABLE_LSP_TOOL": "1"
-  }
-}
-```
-
-`ENABLE_LSP_TOOL` is not officially documented (discovered via GitHub Issue #15619). Use
-it as a version-specific workaround, not as the baseline requirement.
-
 ---
 
 ## TypeScript / JavaScript
@@ -163,9 +149,7 @@ instead.
 
 Then restart Claude Code, run `/plugin`, and confirm the plugins you selected are
 installed and enabled. In a project using one of those languages, ask Claude to
-find a symbol definition and confirm the LSP tool is used. If the `LSP` tool is
-still missing, try the version-specific `ENABLE_LSP_TOOL` workaround above and
-restart Claude Code again.
+find a symbol definition and confirm the LSP tool is used.
 
 ---
 
@@ -190,8 +174,7 @@ restart Claude Code again.
 ## Remove
 
 Use `/plugin` to disable or uninstall only the LSP plugins you added. Remove their
-entries from `enabledPlugins` and the `ENABLE_LSP_TOOL` workaround if you added it.
-Keep other plugins and settings.
+entries from `enabledPlugins`. Keep other plugins and settings.
 
 Language servers may also be used by your editor. If no other tools need them,
 remove npm packages with `npm uninstall -g pyright` or

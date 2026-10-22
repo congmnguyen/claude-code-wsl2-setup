@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   linux-checks:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       # jq, shellcheck, and PowerShell 7 (pwsh) come with the runner image.
