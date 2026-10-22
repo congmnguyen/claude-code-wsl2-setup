@@ -66,10 +66,6 @@ that job's state/log, so use a dedicated name for this check.
 
 ## Optional integrations
 
-- [Agents and skills](optional-extras.md): install one at a time. Confirm it is
-  available in a fresh Claude session; remove only the file or directory you
-  copied, or restore its previous version. Check both project and user scope if
-  you installed copies in more than one place.
 - [Figma Desktop MCP](mcp-setup.md): use `/mcp` in the intended project and request
   a small selection from Figma. To remove it, use `/mcp` to identify its scope,
   then `claude mcp remove figma-desktop --scope <scope>` for that scope. Keep
@@ -80,9 +76,6 @@ that job's state/log, so use a dedicated name for this check.
   Terminal is unfocused. To undo, restore or remove only the top-level `notify`
   entry you added, then restart Codex. Keep the shared notification script if
   Claude or tmux still uses it.
-- Third-party tools such as liteparse: follow their upstream verification and
-  uninstall guidance. Remove copied skills separately; retain shared dependencies
-  such as LibreOffice if other applications need them.
 
 ## WSL2 verification status
 

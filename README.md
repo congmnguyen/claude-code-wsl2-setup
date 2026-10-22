@@ -50,7 +50,7 @@ Where to start, depending on what hurts most:
 ## Setup
 
 These instructions target WSL2 + Windows Terminal. Start with the guide for the
-feature you need; optional agents, skills, and integrations are separate choices.
+feature you need; optional integrations are separate choices.
 
 ```bash
 git clone https://github.com/congmnguyen/claude-code-wsl2-setup.git
@@ -67,8 +67,6 @@ Claude can read the docs and help apply the configuration. Some steps require
 changes on the Windows side; see the individual guides.
 
 For a manual install, follow the linked setup page for the feature you want.
-The [`agents/`](agents/) and [`skills/`](skills/) directories contain optional
-extras, not an installer for the core setup.
 
 ## What's included
 
@@ -91,14 +89,8 @@ extras, not an installer for the core setup.
 | [`bin/tmux-notify-run`](bin/tmux-notify-run) | Detached tmux jobs with logs, exit status, and Windows completion notification |
 | [`shift-enter.md`](shift-enter.md) | Shift+Enter inserts a newline instead of submitting, in both the VSCode integrated terminal and Windows Terminal |
 | [`browser.md`](browser.md) | Open links and OAuth flows in your Windows browser via `BROWSER`, plus an XDG fallback for OAuth CLIs |
+| [`mcp-setup.md`](mcp-setup.md) | **Optional.** Project-scoped Figma Desktop MCP, reached from WSL2 through mirrored networking |
 | [`capslock-esc.md`](capslock-esc.md) | CapsLock → Escape via a SharpKeys registry remap — works in WSL2, Vim, games, and elevated processes |
-
-## Optional extras
-
-[Agents, project skills, and third-party tools](optional-extras.md) are available
-separately. They are not required for the WSL2 setup. The project-specific
-[Figma Desktop MCP](mcp-setup.md) is optional too; on WSL2 it needs mirrored
-networking.
 
 ## Troubleshooting
 

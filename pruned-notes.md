@@ -1,8 +1,10 @@
 # Hooks and components I removed
 
 Codex delegation, native Windows PowerShell notifications, WSLg voice-mode audio,
-Playwright browser automation, and uninstalled Claude skills were removed from the main
-repo because they are not part of the WSL2 setup I kept at the time. Git history keeps them if you want the old versions.
+Playwright browser automation, LangSmith tracing, and unused agents and skills
+(including copies of official plugins) were removed from the main repo because they
+are not part of the WSL2 setup I kept at the time. Git history keeps them if you want
+the old versions.
 
 The three `PreToolUse` / `PostToolUse` hooks were removed for a different reason: each one
 judged tool input by pattern, and the failures below were observed in my previous setup.
