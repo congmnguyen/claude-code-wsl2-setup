@@ -76,11 +76,6 @@ that job's state/log, so use a dedicated name for this check.
   unrelated servers. Turn off Figma's local server only if nothing else needs it.
   If you enabled mirrored networking only for Figma, restore your previous
   `.wslconfig` and run `wsl --shutdown`.
-- [LangSmith tracing](langsmith-tracing.md): check that a turn appears in the
-  intended project. To stop tracing, remove only the added trace environment
-  entries from that project's local settings and restart Claude. Remove the
-  plugin through `/plugin` if no other project uses it. Existing remote traces
-  are not deleted by disabling the integration.
 - [Codex notification](codex-notify.md#verify-and-remove): check a completed turn while Windows
   Terminal is unfocused. To undo, restore or remove only the top-level `notify`
   entry you added, then restart Codex. Keep the shared notification script if

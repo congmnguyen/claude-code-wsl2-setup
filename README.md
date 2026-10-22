@@ -23,8 +23,7 @@ Where to start, depending on what hurts most:
 
 - **Context burn** → [`lsp-setup`](lsp-setup.md).
 - **Windows/WSL friction** → [`image-paste`](image-paste.md) and [`claude-notify`](claude-notify.md).
-- **No visibility into what Claude did** → [`statusline`](statusline.md), plus optional
-  [`langsmith-tracing`](langsmith-tracing.md) when you want full turn-level traces.
+- **No visibility into context and usage** → [`statusline`](statusline.md).
 
 ## Preview
 
@@ -79,7 +78,6 @@ extras, not an installer for the core setup.
 |------|-----|
 | [`lsp-setup.md`](lsp-setup.md) | Official LSP plugins + language servers for TypeScript, Python, Go, and Rust, so Claude uses real Go-to-Definition / find-references instead of burning tokens on broad file search |
 | [`statusline.md`](statusline.md) | Project dir, git branch, context-window fill bar, and 5-hour / 7-day usage, color-coded by severity |
-| [`langsmith-tracing.md`](langsmith-tracing.md) | **Optional.** Project-level LangSmith traces for turns, tool calls, subagent runs, and compaction events — without enabling telemetry for every local session |
 | [`settings.md`](settings.md) | Disabling the `Co-authored-by: Claude` git attribution and session links |
 
 ### WSL / Windows bridge
