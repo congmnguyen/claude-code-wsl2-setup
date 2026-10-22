@@ -100,7 +100,7 @@ extras, not an installer for the core setup.
 [Agents, project skills, and third-party tools](optional-extras.md) are available
 separately. They are not required for the WSL2 setup. The project-specific
 [Figma Desktop MCP](mcp-setup.md) is optional too; on WSL2 it needs mirrored
-networking. Older delegation components remain in [archive](archive/).
+networking.
 
 ## Troubleshooting
 

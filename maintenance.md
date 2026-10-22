@@ -123,7 +123,7 @@ bash scripts/check.sh
 The same command runs in [GitHub Actions](.github/workflows/checks.yml), which
 provides every optional tool and sets `CHECKS_REQUIRE_ALL=1` so nothing is skipped:
 
-- Bash syntax and `shellcheck` for scripts in `bin/`, `scripts/`, and `archive/scripts/`.
+- Bash syntax and `shellcheck` for scripts in `bin/` and `scripts/`.
 - Local inline Markdown links, heading anchors, and HTML image paths. External
   links and reference-style links are not checked.
 - Documentation snippets: JSON and TOML parse, Bash and zsh blocks pass syntax

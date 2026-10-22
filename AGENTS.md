@@ -5,7 +5,7 @@
 - This repository preserves the maintainer's previous Claude Code setup for WSL2 + Windows Terminal. The maintainer now uses Ubuntu + Ghostty and no longer tests WSL2 daily. It has no build system or package manager; lightweight checks live in `tests/` and `scripts/`; deliverables are Markdown docs, shell scripts, and config snippets.
 - The current machine's `~/.claude/` is not the source of truth for the preserved WSL2 setup. Do not synchronize it with this repository or install WSL2 components on Ubuntu as part of documentation maintenance.
 - Root `*.md` files document setup components; `agents/` and `skills/` contain optional installable artifacts. Keep optional and legacy components clearly labeled. Do not present the repository as a tested Ubuntu setup.
-- The separate `codex-wsl2-setup` repository no longer exists. The Codex notification and terminal-title notes stay here because they reuse this repository's scripts; Codex delegation lives only in `archive/`. Do not restore a Codex backup tree here.
+- The separate `codex-wsl2-setup` repository no longer exists. The Codex notification and terminal-title notes stay here because they reuse this repository's scripts; Codex delegation was removed; recover it from git history if needed. Do not restore a Codex backup tree here.
 
 ## Non-obvious constraints
 

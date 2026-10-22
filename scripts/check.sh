@@ -7,7 +7,7 @@ scripts=()
 while IFS= read -r -d '' file; do
   bash -n "$file"
   scripts+=("$file")
-done < <(find bin scripts archive/scripts -type f \( -name '*.sh' -o -path 'bin/*' \) -print0)
+done < <(find bin scripts -type f \( -name '*.sh' -o -path 'bin/*' \) -print0)
 
 # CI sets CHECKS_REQUIRE_ALL so optional tools cannot be skipped silently there.
 if command -v shellcheck >/dev/null; then

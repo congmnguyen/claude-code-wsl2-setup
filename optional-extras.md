@@ -3,7 +3,7 @@
 | Path | Contents |
 |------|----------|
 | [`agents/`](agents/) | `code-architect` |
-| [`skills/`](skills/) | Skills to copy in as needed: `commit-push-pr`, `deep-teach`, `pytorch-training`. In my previous setup, I installed these per project rather than globally to keep unrelated work free of extra instructions |
+| [`skills/`](skills/) | `commit-push-pr`. In my previous setup, I installed skills per project rather than globally to keep unrelated work free of extra instructions |
 
 Copy the matching files to `~/.claude/agents/` and `~/.claude/skills/`.
 
@@ -16,8 +16,6 @@ install them instead if you want the upstream versions and their updates.
 
 After adding or updating a skill, run `/reload-skills` to make it available without
 restarting the session. Custom agents still require a restart.
-
-Dropped pieces (Codex delegation and its companion repo) live in [`archive/`](archive/).
 
 ## Recommended third-party skills
 

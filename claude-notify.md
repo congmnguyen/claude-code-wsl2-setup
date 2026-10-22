@@ -1,6 +1,6 @@
 # Claude Code WSL2 — "Needs Your Input" Windows Notification
 
-![Windows balloon tip — Claude Code Done!](assets/notification.png)
+![Windows balloon tip — Claude Code Done!](assets/preview-notification.png)
 
 ## Problem
 

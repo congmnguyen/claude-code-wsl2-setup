@@ -1,6 +1,6 @@
 # Codex CLI WSL2 — "Done" Windows Notification
 
-![Windows balloon tip showing Codex's last reply](assets/codex-notification.png)
+![Windows balloon tip showing Codex's last reply](assets/preview-codex-notification.png)
 
 ## Problem
 
