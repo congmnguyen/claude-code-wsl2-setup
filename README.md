@@ -1,17 +1,22 @@
-# Claude Code WSL2 Setup
+# Claude Code on WSL (WSL2): Setup and Fixes
 
-The Claude Code setup I previously used with WSL2 + Windows Terminal: screenshot
-paste, Windows notifications, LSP navigation, and a custom statusline.
+Fixes for running Claude Code on WSL / WSL2 with Windows Terminal: paste Windows
+screenshots into Claude Code, get Windows notifications when it finishes or needs
+permission, make Shift+Enter insert a newline, open login links in your Windows
+browser, use LSP navigation, and add a statusline for context and usage.
 
-**Maintenance status:** I now use Ubuntu + Ghostty and no longer test this setup
-daily on WSL2. These guides remain available for WSL2 users. Bug reports and fixes
-are welcome: use the [WSL2 issue form](https://github.com/congmnguyen/claude-code-wsl2-setup/issues/new?template=wsl2-bug.yml)
-and include the output of `bash scripts/doctor.sh`. The
-[verification status](maintenance.md#wsl2-verification-status) lists changes that
-still need a WSL2 run.
+> **Maintenance status:** I now use Ubuntu + Ghostty and no longer test this setup
+> daily on WSL2 ([why I moved](ubuntu-ghostty.md)). The guides stay focused on WSL2.
+> Bug reports and fixes are welcome: use the [WSL2 issue form](https://github.com/congmnguyen/claude-code-wsl2-setup/issues/new?template=wsl2-bug.yml)
+> and include the output of `bash scripts/doctor.sh`. The
+> [verification status](maintenance.md#wsl2-verification-status) lists changes that
+> still need a WSL2 run.
 
-Read [why I moved from WSL2 to Ubuntu + Ghostty](ubuntu-ghostty.md) for the context
-behind the change. This repository continues to focus on WSL2.
+## Install Claude Code on WSL first
+
+This repository starts after installation. To install Claude Code inside WSL, follow
+the official [Install in WSL](https://code.claude.com/docs/en/setup#install-in-wsl)
+instructions, then come back for the fixes below.
 
 ## Who this is for
 
