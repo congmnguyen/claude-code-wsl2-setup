@@ -1,0 +1,10 @@
+# GitHub Pages site: https://congmnguyen.github.io/claude-code-wsl2-setup/
+title: Claude Code on WSL
+description: >-
+  Fixes for Claude Code on WSL / WSL2 with Windows Terminal: screenshot paste,
+  Windows notifications, Shift+Enter, browser login links, LSP, and a statusline.
+exclude:
+  - AGENTS.md
+  - tests/
+  - scripts/
+  - .github/
