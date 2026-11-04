@@ -1,15 +1,16 @@
 # Claude Code Status Line
 
-A custom status line script that shows the current project directory, git branch, context window usage, and rate limits — color-coded by severity.
+A custom status line script that shows the current project directory, git branch, session name, context window usage, and rate limits — color-coded by severity.
 
 ![Status line preview](assets/statusline.png)
 
 ```text
-📁 claude-code-wsl2-setup | 🌿 main | [··········] 6% | 5h:10% | W:95%
+📁 claude-code-wsl2-setup | 🌿 main | 💬 statusline-session | [··········] 6% | 5h:10% | W:95%
 ```
 
 - **Project dir** — basename of `.workspace.current_dir` (fallback: `$PWD`), prefixed with `📁`
 - **Git branch** — current branch, prefixed with `🌿` (only shown inside git repos)
+- **Session** — `.session_name` (set with `claude -n`, `/rename`, or the AI-generated title), falling back to `.session_id` for unnamed sessions, prefixed with `💬`. Either value can be passed to `claude --resume`; a name resolves within the current repository and its worktrees, an id from any directory
 - **Progress bar** — context window fill (green < 70%, yellow < 90%, red ≥ 90%); unused cells are dim gray dots
 - **5h:X%** — 5-hour rolling usage
 - **W:X%** — 7-day rolling usage
@@ -56,11 +57,12 @@ Restart Claude Code. The status line appears at the bottom of the interface.
 
 ## How it works
 
-Claude Code pipes a JSON blob to the script's stdin on every refresh. The script reads four fields using `jq`:
+Claude Code pipes a JSON blob to the script's stdin on every refresh. The script reads these fields using `jq`:
 
 | Field | JSON path |
 |-------|-----------|
 | Working dir | `.workspace.current_dir` |
+| Session | `.session_name`, falling back to `.session_id` |
 | Context % | `.context_window.used_percentage` |
 | 5-hour usage % | `.rate_limits.five_hour.used_percentage` |
 | 7-day usage % | `.rate_limits.seven_day.used_percentage` |
@@ -77,6 +79,8 @@ describes the input fields. Rate limits may be absent, including before the firs
 API response or for accounts without the supported subscription data.
 
 The filled cells inherit the context severity color, while unused cells use dim gray `·` characters. This keeps a nearly empty bar from looking like a solid block in terminal themes where `░` renders too heavily.
+
+Control characters in the session name are replaced with spaces, so a title cannot break the line or inject terminal escapes.
 
 Output uses `printf '%s'`, not `%b`: a directory or branch name containing a backslash would otherwise be mangled by escape interpretation.
 

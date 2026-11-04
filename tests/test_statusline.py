@@ -81,6 +81,19 @@ class StatuslineTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertEqual(result.stdout, '')
 
+    def test_session_name_falls_back_to_id(self):
+        named = self.render({'cwd': '/tmp', 'session_name': 'fix login',
+                             'session_id': 'abc-123',
+                             'context_window': {'used_percentage': 6}})
+        self.assertEqual(named, '📁 tmp | 💬 fix login | [··········] 6%')
+        self.assertEqual(self.render({'cwd': '/tmp', 'session_id': 'abc-123'}),
+                         '📁 tmp | 💬 abc-123')
+        self.assertEqual(self.render({'cwd': '/tmp', 'session_name': None}), '📁 tmp')
+
+    def test_session_control_characters_are_replaced(self):
+        output = self.render({'cwd': '/tmp', 'session_name': 'a\nb\x1b[31mc\x07'})
+        self.assertEqual(output, '📁 tmp | 💬 a b [31mc ')
+
     def test_git_branch_and_detached_head(self):
         with tempfile.TemporaryDirectory() as directory:
             def git(*args):

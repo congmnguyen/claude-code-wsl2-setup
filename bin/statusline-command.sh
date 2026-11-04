@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Claude Code status line
-# Format: 📁 project | 🌿 main | [··········] 6% | 5h:10% | W:95%
+# Format: 📁 project | 🌿 main | 💬 session | [··········] 6% | 5h:10% | W:95%
 
 # Keep decimal parsing independent of the user's locale.
 export LC_ALL=C
@@ -10,6 +10,7 @@ export LC_ALL=C
 fields_json=$(jq -ce '
   if type != "object" then error("expected a statusline object") else
     [ .workspace.current_dir // .cwd // "",
+      (.session_name // .session_id // "" | tostring | gsub("[[:cntrl:]]"; " ")),
       .context_window.used_percentage // "",
       .rate_limits.five_hour.used_percentage // "",
       .rate_limits.seven_day.used_percentage // "" ]
@@ -17,9 +18,10 @@ fields_json=$(jq -ce '
 ') || exit 1
 mapfile -d '' -t fields < <(printf '%s' "$fields_json" | jq -j '.[] | tostring, "\u0000"')
 cwd=${fields[0]:-$PWD}
-ctx_pct=${fields[1]:-}
-five_pct=${fields[2]:-}
-week_pct=${fields[3]:-}
+sess=${fields[1]:-}
+ctx_pct=${fields[2]:-}
+five_pct=${fields[3]:-}
+week_pct=${fields[4]:-}
 
 parts=()
 
@@ -55,7 +57,10 @@ if [ -d "$cwd" ]; then
   [ -n "$branch" ] && parts+=("🌿 $branch")
 fi
 
-# ── 2. Context window progress bar + percentage ───────────────────────────────
+# ── 2. Session name, or id when unnamed (both work with claude --resume) ─────
+[ -n "$sess" ] && parts+=("💬 $sess")
+
+# ── 3. Context window progress bar + percentage ───────────────────────────────
 if pct=$(to_pct "$ctx_pct"); then
   [ "$pct" -gt 100 ] && pct=100
   filled=$(( pct * 10 / 100 ))
@@ -66,7 +71,7 @@ if pct=$(to_pct "$ctx_pct"); then
   parts+=("$(pct_color "$pct")[${filled_bar}$(printf '\033[90m')${empty_bar}$(pct_color "$pct")] ${pct}%$(printf '\033[0m')")
 fi
 
-# ── 3. Rate limits ────────────────────────────────────────────────────────────
+# ── 4. Rate limits ────────────────────────────────────────────────────────────
 add_pct "5h:" "$five_pct"
 add_pct "W:"  "$week_pct"
 
