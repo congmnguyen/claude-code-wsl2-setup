@@ -81,7 +81,7 @@ For a manual install, follow the linked setup page for the feature you want.
 |------|-----|
 | [`lsp-setup.md`](lsp-setup.md) | Official LSP plugins + language servers for TypeScript, Python, Go, and Rust, so Claude uses real Go-to-Definition / find-references instead of burning tokens on broad file search |
 | [`statusline.md`](statusline.md) | Project dir, git branch, session name, context-window fill bar, and 5-hour / 7-day usage, color-coded by severity |
-| [`settings.md`](settings.md) | Disabling the `Co-authored-by: Claude` git attribution and session links |
+| [`settings.md`](settings.md) | Disabling the `Co-authored-by: Claude` git attribution and session links, plus **optional** experimental Code Mode and what it costs |
 
 ### WSL / Windows bridge
 

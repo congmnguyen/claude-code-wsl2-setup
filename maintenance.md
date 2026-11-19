@@ -47,6 +47,7 @@ plain `jq`. Restart the relevant application and confirm it loads the change.
 | [Shift+Enter](shift-enter.md) | Type two lines in Claude Code; Shift+Enter should insert a newline | Remove only the added binding in Windows Terminal or VSCode, or restore the binding you replaced; reopen the terminal |
 | [CapsLock remap](capslock-esc.md) | Check that CapsLock acts as Escape after signing in again | Delete only that mapping in SharpKeys, write to the registry, then sign out and back in |
 | [Attribution preference](settings.md#verify-and-undo) | Check the next commit/PR you request from Claude | Restore the previous values, or remove the added fields to use defaults |
+| [Code Mode](settings.md#optional-code-mode-experimental) (optional) | Start a new session and look for the `Code Mode (experimental) is on` line | Remove the variable or set it to `0`; sessions started in Code Mode then stop resuming |
 | [tmux helper](claude-notify.md#long-running-tmux-jobs) | Run the disposable job below and inspect its exit status and log | Let jobs finish; remove the helper if unused, retaining logs/state until no longer needed |
 
 For a tmux smoke check, choose a session name not already in use. From the cloned
@@ -92,6 +93,7 @@ WSL2:
 | [Screenshot paste](image-paste.md) | Pinned, checksum-verified install (2026-10-15) | Paste, then paste again after `wsl --shutdown` |
 | [Browser routing](browser.md) | WSL-form paths, a symlink for paths with spaces, and a check for `xdg-open`'s built-in WSL support (2026-10-23) | `"$BROWSER"` and `xdg-open` with a symlinked `Program Files` browser |
 | [Figma Desktop MCP](mcp-setup.md) | Mirrored networking requirement (2026-10-15) | `/mcp` connects with mirrored networking |
+| [Code Mode](settings.md#optional-code-mode-experimental) | Section added from the official documentation (2026-11-19) | The session starts in Code Mode with the LSP plugins enabled, and a `Notification` balloon still fires |
 
 After testing a guide on WSL2, add a line below with the date, the guides, and the
 Windows, WSL, distro, terminal, and Claude Code versions. `bash scripts/doctor.sh`
